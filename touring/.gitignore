@@ -1,0 +1,27 @@
+# Godot 4+
+.godot/
+*.tmp
+*.import
+export_presets.cfg
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Android
+*.apk
+*.aab
+*.keystore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build
+builds/
+
+# Debug output
+godot_stderr.txt
+godot_stdout.txt

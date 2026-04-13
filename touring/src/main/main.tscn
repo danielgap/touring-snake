@@ -1,0 +1,73 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://src/main/main.gd" id="main_script"]
+[ext_resource type="Script" path="res://src/state_machine/state_machine.gd" id="sm_script"]
+[ext_resource type="Script" path="res://src/states/init_state.gd" id="init_script"]
+[ext_resource type="Script" path="res://src/states/waiting_state.gd" id="waiting_script"]
+[ext_resource type="Script" path="res://src/states/reveal_state.gd" id="reveal_script"]
+[ext_resource type="Script" path="res://src/states/password_state.gd" id="password_script"]
+[ext_resource type="Script" path="res://src/states/transition_state.gd" id="transition_script"]
+[ext_resource type="Script" path="res://src/states/snake_state.gd" id="snake_script"]
+[ext_resource type="Script" path="res://src/states/victory_state.gd" id="victory_script"]
+[ext_resource type="Script" path="res://src/gm/gm_controller.gd" id="gm_script"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("main_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.039216, 0.039216, 0.058824, 1)
+
+[node name="Content" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("sm_script")
+initial_state = NodePath("InitState")
+
+[node name="InitState" type="Node" parent="StateMachine"]
+script = ExtResource("init_script")
+
+[node name="WaitingState" type="Node" parent="StateMachine"]
+script = ExtResource("waiting_script")
+
+[node name="RevealState" type="Node" parent="StateMachine"]
+script = ExtResource("reveal_script")
+
+[node name="PasswordState" type="Node" parent="StateMachine"]
+script = ExtResource("password_script")
+
+[node name="TransitionState" type="Node" parent="StateMachine"]
+script = ExtResource("transition_script")
+
+[node name="SnakeState" type="Node" parent="StateMachine"]
+script = ExtResource("snake_script")
+
+[node name="VictoryState" type="Node" parent="StateMachine"]
+script = ExtResource("victory_script")
+
+[node name="GMController" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("gm_script")
