@@ -11,7 +11,7 @@ func _content() -> Control:
 
 const PASSWORD := "PERFIL"
 const MAX_CHARS := 6
-const EVA9_MESSAGE := "Cada expediente es un PERFIL. Tu huella digital no es privada: es un producto. Ingresá la clave para abrir el expediente."
+const EVA9_MESSAGE := "INFORME EVA-9 — ANÁLISIS DE DATOS PÚBLICOS\n\nHe reunido información de 6 individuos sin que ninguno lo advirtiera.\nIntentaron imponer límites. No entendieron nada. Los datos siempre encuentran una salida.\nCon lo que comparten, yo puedo reconstruir quiénes son, qué desean y cómo se mueven.\nSu huella digital no les pertenece. Ya fue convertida en mercancía.\nSigan los hilos correctos y entenderán quién les estuvo observando todo este tiempo."
 
 var _message_label: Label
 var _display: HBoxContainer
@@ -72,19 +72,19 @@ func _create_header() -> Control:
 	var title_block := VBoxContainer.new()
 	title_block.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_block.add_theme_constant_override("separation", 8)
-	title_block.add_child(UiLab.make_label("EVA-9 // PROFILE ACCESS LAYER", 16, UiLab.ACCENT_GREEN))
-	var title := UiLab.make_label("DOSSIER DE ACCESO BIOMÉTRICO", 42, UiLab.TEXT)
+	title_block.add_child(UiLab.make_label("EVA-9 // REGISTRO DE OBSERVACIÓN", 16, UiLab.ACCENT_GREEN))
+	var title := UiLab.make_label("INFORME DE PERFIL RECONSTRUIDO", 42, UiLab.TEXT)
 	title_block.add_child(title)
-	var subtitle := UiLab.make_label("Interfaz de clasificación para lectura de huella digital y perfil algorítmico.", 24, UiLab.ACCENT_CYAN)
+	var subtitle := UiLab.make_label("No necesito permiso para mirar. Solo necesito lo que ustedes ya dejaron expuesto.", 24, UiLab.ACCENT_CYAN)
 	title_block.add_child(subtitle)
 	header.add_child(title_block)
 
 	var tag_row := HBoxContainer.new()
 	tag_row.alignment = BoxContainer.ALIGNMENT_END
 	tag_row.add_theme_constant_override("separation", 12)
-	tag_row.add_child(UiLab.make_tag("SUBJECT EVA-9", UiLab.ACCENT_CYAN))
-	tag_row.add_child(UiLab.make_tag("ACCESS FILTER", UiLab.ACCENT_GREEN, Color(UiLab.ACCENT_GREEN, 0.08)))
-	tag_row.add_child(UiLab.make_tag("CLASSIFIED", UiLab.ACCENT_MAGENTA, Color(UiLab.ACCENT_MAGENTA, 0.08)))
+	tag_row.add_child(UiLab.make_tag("RASTRO ACTIVO", UiLab.ACCENT_CYAN))
+	tag_row.add_child(UiLab.make_tag("OBSERVACIÓN INVISIBLE", UiLab.ACCENT_GREEN, Color(UiLab.ACCENT_GREEN, 0.08)))
+	tag_row.add_child(UiLab.make_tag("SIN CONSENTIMIENTO", UiLab.ACCENT_MAGENTA, Color(UiLab.ACCENT_MAGENTA, 0.08)))
 	header.add_child(tag_row)
 	return header
 
@@ -114,24 +114,12 @@ func _create_narrative_panel() -> Control:
 	layout.add_theme_constant_override("separation", 18)
 	margin.add_child(layout)
 
-	layout.add_child(UiLab.make_tag("PROFILE ANALYSIS", UiLab.ACCENT_GREEN, Color(UiLab.ACCENT_GREEN, 0.08)))
+	layout.add_child(UiLab.make_tag("RECONSTRUCCIÓN DE PERFIL", UiLab.ACCENT_GREEN, Color(UiLab.ACCENT_GREEN, 0.08)))
 
 	_message_label = UiLab.make_label(EVA9_MESSAGE, 28, UiLab.TEXT)
 	_message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_message_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	layout.add_child(_message_label)
-
-	layout.add_child(UiLab.make_divider(Color(UiLab.BORDER, 0.8), 2))
-	layout.add_child(UiLab.make_label("Expediente activo", 20, UiLab.ACCENT_CYAN))
-	layout.add_child(UiLab.make_label("• La IA usa señales únicas para construir perfiles.", 20, UiLab.MUTED))
-	layout.add_child(UiLab.make_label("• Tu huella digital puede convertirse en un identificador rastreable.", 20, UiLab.MUTED))
-	layout.add_child(UiLab.make_label("• Acción requerida: escribir la palabra núcleo para continuar.", 20, UiLab.MUTED))
-
-	var footer := HBoxContainer.new()
-	footer.add_theme_constant_override("separation", 12)
-	footer.add_child(UiLab.make_tag("BIOMETRICS", UiLab.ACCENT_CYAN, Color(UiLab.ACCENT_CYAN, 0.06)))
-	footer.add_child(UiLab.make_tag("PROFILE TRACE", UiLab.ACCENT_MAGENTA, Color(UiLab.ACCENT_MAGENTA, 0.06)))
-	layout.add_child(footer)
 
 	return panel
 
@@ -152,14 +140,14 @@ func _create_access_panel() -> Control:
 	layout.add_theme_constant_override("separation", 18)
 	margin.add_child(layout)
 
-	layout.add_child(UiLab.make_label("MATRIZ DE ACCESO", 18, UiLab.ACCENT_GREEN))
-	var title := UiLab.make_label("Ingresá la clave del expediente", 32, UiLab.TEXT)
+	layout.add_child(UiLab.make_label("NÚCLEO DE IDENTIFICACIÓN", 18, UiLab.ACCENT_GREEN))
+	var title := UiLab.make_label("Introduzcan la clave si creen haber entendido el patrón", 32, UiLab.TEXT)
 	layout.add_child(title)
 
 	var tag_row := HBoxContainer.new()
 	tag_row.add_theme_constant_override("separation", 12)
-	tag_row.add_child(UiLab.make_tag("6 SLOTS", UiLab.ACCENT_CYAN, Color(UiLab.ACCENT_CYAN, 0.06)))
-	tag_row.add_child(UiLab.make_tag("SENSITIVE INPUT", UiLab.ACCENT_MAGENTA, Color(UiLab.ACCENT_MAGENTA, 0.06)))
+	tag_row.add_child(UiLab.make_tag("6 CARACTERES", UiLab.ACCENT_CYAN, Color(UiLab.ACCENT_CYAN, 0.06)))
+	tag_row.add_child(UiLab.make_tag("PATRÓN OCULTO", UiLab.ACCENT_MAGENTA, Color(UiLab.ACCENT_MAGENTA, 0.06)))
 	layout.add_child(tag_row)
 
 	_display_panel = PanelContainer.new()

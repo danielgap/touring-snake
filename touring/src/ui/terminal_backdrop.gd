@@ -7,6 +7,7 @@ var grid_color: Color = Color(UiLab.ACCENT_CYAN, 0.08)
 var scanline_color: Color = Color(1, 1, 1, 0.02)
 var frame_color: Color = Color(UiLab.BORDER, 0.9)
 var highlight_color: Color = Color(UiLab.ACCENT_GREEN, 0.55)
+var _time: float = 0.0
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -15,6 +16,10 @@ func _ready() -> void:
 	offset_top = 0
 	offset_right = 0
 	offset_bottom = 0
+
+func _process(delta: float) -> void:
+	_time += delta
+	queue_redraw()
 
 func _draw() -> void:
 	var rect := Rect2(Vector2.ZERO, size)
@@ -32,8 +37,10 @@ func _draw_grid(rect: Rect2) -> void:
 		draw_line(Vector2(0, y), Vector2(rect.size.x, y), grid_color, 1.0)
 
 func _draw_scanlines(rect: Rect2) -> void:
-	for y in range(0, int(rect.size.y), 6):
-		draw_line(Vector2(0, y), Vector2(rect.size.x, y), scanline_color, 1.0)
+	var offset := fmod(_time * 30.0, 6.0)
+	for y in range(-6, int(rect.size.y) + 6, 6):
+		var sy := float(y) + offset
+		draw_line(Vector2(0, sy), Vector2(rect.size.x, sy), scanline_color, 1.0)
 
 func _draw_frames(rect: Rect2) -> void:
 	var outer := rect.grow(-26)
@@ -57,6 +64,11 @@ func _draw_data_points(rect: Rect2) -> void:
 		Vector2(rect.size.x * 0.24, rect.size.y * 0.72),
 		Vector2(rect.size.x * 0.84, rect.size.y * 0.78)
 	]
-	for point in points:
-		draw_circle(point, 4.0, Color(UiLab.ACCENT_MAGENTA, 0.9))
-		draw_circle(point, 10.0, Color(UiLab.ACCENT_MAGENTA, 0.12))
+	for idx in range(points.size()):
+		var point: Vector2 = points[idx]
+		var blink := sin(_time * (1.5 + idx * 0.7) + idx * 1.3) > 0.2
+		var core_alpha := 0.9 if blink else 0.25
+		var glow_alpha := 0.12 if blink else 0.04
+		var glow_radius := 10.0 if blink else 7.0
+		draw_circle(point, 4.0, Color(UiLab.ACCENT_MAGENTA, core_alpha))
+		draw_circle(point, glow_radius, Color(UiLab.ACCENT_MAGENTA, glow_alpha))

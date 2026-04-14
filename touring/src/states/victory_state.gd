@@ -10,9 +10,14 @@ var state_machine: Node = null
 var _grid = null
 var _player = null
 var _renderer = null
+var _message_glow_label: RichTextLabel
 var _message_label: RichTextLabel
 
-const DRA_TORRES_MSG := "[i]La letra U es porque tu huella digital es ÚNICA. No hay dos iguales en el mundo. Pero en internet, esa unicidad se convierte en un rastro que otros pueden seguir. ¿Sabés dónde dejás la tuya?[/i]"
+const HINT_TEXT := "la letra que necesitas es..."
+const CONTINUE_TEXT := "Busca la báscula para continuar"
+const MESSAGE_TOP_BASE := 980
+const MESSAGE_BOTTOM_BASE := -20
+const MESSAGE_FLOAT_OFFSET := 8
 
 var _u_positions: Array[Vector2i] = [
 	Vector2i(6, 2), Vector2i(6, 4), Vector2i(6, 6), Vector2i(6, 8), Vector2i(6, 10),
@@ -36,22 +41,14 @@ func enter(_msg: Dictionary = {}) -> void:
 
 	Sfx.play("victory_fanfare")
 
-	# ── Centered title ──
-	var title := UiLab.make_label("HUELLA ÚNICA", 56, UiLab.TEXT, HORIZONTAL_ALIGNMENT_CENTER)
-	title.set_anchors_preset(Control.PRESET_FULL_RECT)
-	title.offset_left = 0
-	title.offset_top = 50
-	title.offset_right = 0
-	title.offset_bottom = 120
-	content.add_child(title)
-
-	var subtitle := UiLab.make_label("Tu huella digital reconstruida como firma biometrica", 24, UiLab.ACCENT_CYAN, HORIZONTAL_ALIGNMENT_CENTER)
-	subtitle.set_anchors_preset(Control.PRESET_FULL_RECT)
-	subtitle.offset_left = 0
-	subtitle.offset_top = 120
-	subtitle.offset_right = 0
-	subtitle.offset_bottom = 155
-	content.add_child(subtitle)
+	# ── Top hint: "la letra que necesitas es..." ──
+	var hint := UiLab.make_label(HINT_TEXT, 40, UiLab.MUTED, HORIZONTAL_ALIGNMENT_CENTER)
+	hint.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hint.offset_left = 0
+	hint.offset_top = 80
+	hint.offset_right = 0
+	hint.offset_bottom = 140
+	content.add_child(hint)
 
 	# ── Grid for position calculations (hidden — no drawing) ──
 	_grid = SnakeGridScene.new()
@@ -74,20 +71,37 @@ func enter(_msg: Dictionary = {}) -> void:
 	content.add_child(_renderer)
 	_renderer.setup(_player, _grid)
 
-	# ── Message at bottom ──
+	# ── Bottom message: "Busca la báscula para continuar" ──
+	_message_glow_label = RichTextLabel.new()
+	_message_glow_label.bbcode_enabled = true
+	_message_glow_label.fit_content = true
+	_message_glow_label.scroll_active = false
+	_message_glow_label.text = CONTINUE_TEXT
+	content.add_child(_message_glow_label)
+	_message_glow_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_message_glow_label.offset_left = 220
+	_message_glow_label.offset_top = MESSAGE_TOP_BASE
+	_message_glow_label.offset_right = -220
+	_message_glow_label.offset_bottom = MESSAGE_BOTTOM_BASE
+	_message_glow_label.add_theme_font_size_override("normal_font_size", 54)
+	_message_glow_label.add_theme_color_override("default_color", Color(UiLab.ACCENT_CYAN, 0.22))
+	_message_glow_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_message_glow_label.modulate = Color.TRANSPARENT
+
 	_message_label = RichTextLabel.new()
 	_message_label.bbcode_enabled = true
 	_message_label.fit_content = true
 	_message_label.scroll_active = false
-	_message_label.text = DRA_TORRES_MSG
+	_message_label.text = CONTINUE_TEXT
 	content.add_child(_message_label)
 	_message_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_message_label.offset_left = 280
-	_message_label.offset_top = 920
-	_message_label.offset_right = -280
-	_message_label.offset_bottom = -40
-	_message_label.add_theme_font_size_override("normal_font_size", 30)
-	_message_label.add_theme_color_override("default_color", UiLab.MUTED)
+	_message_label.offset_left = 220
+	_message_label.offset_top = MESSAGE_TOP_BASE
+	_message_label.offset_right = -220
+	_message_label.offset_bottom = MESSAGE_BOTTOM_BASE
+	_message_label.add_theme_font_size_override("normal_font_size", 46)
+	_message_label.add_theme_color_override("default_color", UiLab.ACCENT_CYAN)
+	_message_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_message_label.modulate = Color.TRANSPARENT
 
 	# ── Animate snake to U ──
@@ -112,8 +126,52 @@ func _animate_to_u() -> void:
 		)
 		tween.tween_interval(0.05)
 	tween.tween_interval(0.8)
+	tween.tween_callback(_on_u_complete)
+	tween.tween_interval(0.3)
 	tween.tween_callback(_show_message)
+
+func _on_u_complete() -> void:
+	# Start the glow pulse on the U
+	if _renderer:
+		_renderer.start_pulse()
+	# Subtle screen flash
+	var content := _content()
+	var flash := ColorRect.new()
+	flash.color = Color(1, 1, 1, 1)
+	flash.modulate = Color(1, 1, 1, 0.0)
+	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(flash)
+	var ft := flash.create_tween()
+	ft.tween_property(flash, "modulate:a", 0.1, 0.08)
+	ft.tween_property(flash, "modulate:a", 0.0, 0.5)
+	ft.tween_callback(flash.queue_free)
 
 func _show_message() -> void:
 	var tween := _message_label.create_tween()
-	tween.tween_property(_message_label, "modulate", Color.WHITE, 0.9)
+	tween.parallel().tween_property(_message_glow_label, "modulate", Color.WHITE, 0.9)
+	tween.parallel().tween_property(_message_label, "modulate", Color.WHITE, 0.9)
+	tween.tween_callback(_start_message_pulse)
+	tween.tween_callback(_start_message_float)
+
+func _start_message_pulse() -> void:
+	if not _message_glow_label:
+		return
+	var tween := _message_glow_label.create_tween().set_loops()
+	tween.tween_property(_message_glow_label, "modulate:a", 0.28, 1.4)
+	tween.tween_property(_message_glow_label, "modulate:a", 0.12, 1.4)
+
+func _start_message_float() -> void:
+	if not _message_label or not _message_glow_label:
+		return
+	var tween := _message_label.create_tween().set_loops()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.parallel().tween_property(_message_label, "offset_top", MESSAGE_TOP_BASE - MESSAGE_FLOAT_OFFSET, 1.8)
+	tween.parallel().tween_property(_message_label, "offset_bottom", MESSAGE_BOTTOM_BASE - MESSAGE_FLOAT_OFFSET, 1.8)
+	tween.parallel().tween_property(_message_glow_label, "offset_top", MESSAGE_TOP_BASE - MESSAGE_FLOAT_OFFSET, 1.8)
+	tween.parallel().tween_property(_message_glow_label, "offset_bottom", MESSAGE_BOTTOM_BASE - MESSAGE_FLOAT_OFFSET, 1.8)
+	tween.parallel().tween_property(_message_label, "offset_top", MESSAGE_TOP_BASE, 1.8)
+	tween.parallel().tween_property(_message_label, "offset_bottom", MESSAGE_BOTTOM_BASE, 1.8)
+	tween.parallel().tween_property(_message_glow_label, "offset_top", MESSAGE_TOP_BASE, 1.8)
+	tween.parallel().tween_property(_message_glow_label, "offset_bottom", MESSAGE_BOTTOM_BASE, 1.8)

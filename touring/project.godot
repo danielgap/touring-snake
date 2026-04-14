@@ -10,8 +10,8 @@ config_version=5
 
 [application]
 
-config/name="Touring App1 - EVA9 Snake"
-config/description="Escape Room Educativo - Sala 2 - Password EVA-9 + Mini-juego Snake"
+config/name="Touring App1 - EVA-9"
+config/description="Escape Room Educativo - Sala 2 - Expediente Biométrico EVA-9"
 run/main_scene="res://src/main/main.tscn"
 config/features=PackedStringArray("4.3", "Mobile")
 

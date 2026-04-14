@@ -11,6 +11,8 @@ var _player = null
 var _grid = null
 var _flash_timer: float = 0.0
 var _is_dead: bool = false
+var pulse_mode: bool = false
+var _pulse_time: float = 0.0
 
 func setup(player, grid) -> void:
 	_player = player
@@ -33,7 +35,16 @@ func _process(delta: float) -> void:
 		queue_redraw()
 		if _flash_timer > 0.6:
 			_is_dead = false
-			set_process(false)
+			if not pulse_mode:
+				set_process(false)
+	elif pulse_mode:
+		_pulse_time += delta
+		queue_redraw()
+
+func start_pulse() -> void:
+	pulse_mode = true
+	_pulse_time = 0.0
+	set_process(true)
 
 func _draw() -> void:
 	if not _player or not _grid:
@@ -55,3 +66,12 @@ func _draw() -> void:
 		draw_rect(rect, color)
 		if not _is_dead:
 			draw_rect(rect.grow(-6.0), Color(1, 1, 1, 0.08))
+
+	# ── Victory pulse glow overlay ──
+	if pulse_mode:
+		var glow_alpha := 0.12 + 0.12 * sin(_pulse_time * 2.5)
+		for i: int in body.size():
+			var pos: Vector2 = _grid.grid_to_screen(body[i].x, body[i].y)
+			var glow_size := segment_size + 10.0
+			var glow_rect := Rect2(pos.x - glow_size / 2.0, pos.y - glow_size / 2.0, glow_size, glow_size)
+			draw_rect(glow_rect, Color(HEAD_COLOR, glow_alpha))

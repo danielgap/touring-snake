@@ -7,6 +7,7 @@ const SnakePlayerScene = preload("res://src/snake/snake_player.gd")
 const SnakeItemScene = preload("res://src/snake/snake_item.gd")
 const SnakeInputScene = preload("res://src/snake/snake_input.gd")
 const SnakeRendererScene = preload("res://src/snake/snake_renderer.gd")
+const EatBurstScene = preload("res://src/effects/eat_burst.gd")
 
 var state_machine: Node = null
 
@@ -32,6 +33,8 @@ var _overlay_panel: PanelContainer
 var _retry_button: Button
 var _score: int = 0
 var _is_game_over: bool = false
+var _frame: PanelContainer = null
+var _frame_origin: Vector2 = Vector2.ZERO
 
 func _content() -> Control:
 	var main := get_tree().root.find_child("Main", true, false)
@@ -170,6 +173,8 @@ func _build_shell(content: Control) -> void:
 	frame.position = Vector2(frame_x, frame_y)
 	frame.custom_minimum_size = Vector2(frame_w, frame_h)
 	content.add_child(frame)
+	_frame = frame
+	_frame_origin = Vector2(frame_x, frame_y)
 
 	var f_margin := MarginContainer.new()
 	f_margin.add_theme_constant_override("margin_left", GRID_PAD)
@@ -209,12 +214,14 @@ func _on_tick() -> void:
 	for seg in _player.body:
 		_grid.set_cell(seg.x, seg.y, SnakeGridScene.CellType.SNAKE)
 	if _player.get_head() == _item.grid_position:
+		var eat_pos: Vector2 = _grid.grid_to_screen(_item.grid_position.x, _item.grid_position.y)
 		_item.consume()
 		_score += 1
 		_player.grow()
 		Sfx.play("eat_item")
 		EventBus.snake_ate_item.emit()
 		_update_score_display()
+		_spawn_eat_burst(eat_pos)
 		_set_status("Nodo recuperado · rastro extendido", UiLab.ACCENT_GREEN)
 		if _score >= TARGET_ITEMS:
 			_tick_timer.stop()
@@ -229,7 +236,30 @@ func _on_game_over() -> void:
 	Sfx.play("game_over")
 	EventBus.snake_died.emit()
 	_set_status("Sistema colapsado · autocruce detectado", UiLab.DANGER)
+
+	# ── Red flash overlay ──
 	var content := _content()
+	var flash := ColorRect.new()
+	flash.color = UiLab.DANGER
+	flash.modulate = Color(1, 1, 1, 0.0)
+	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(flash)
+	var ft := flash.create_tween()
+	ft.tween_property(flash, "modulate:a", 0.2, 0.05)
+	ft.tween_property(flash, "modulate:a", 0.0, 0.4)
+	ft.tween_callback(flash.queue_free)
+
+	# ── Frame shake ──
+	if _frame:
+		var origin := _frame_origin
+		var shake := _frame.create_tween()
+		for _i in 8:
+			var ox := origin.x + randf_range(-8.0, 8.0)
+			var oy := origin.y + randf_range(-5.0, 5.0)
+			shake.tween_property(_frame, "position", Vector2(ox, oy), 0.02)
+		shake.tween_property(_frame, "position", origin, 0.04)
+
 	_overlay_panel = PanelContainer.new()
 	UiLab.apply_panel(_overlay_panel, Color(UiLab.SURFACE, 0.96), UiLab.DANGER, 22, 2)
 	_overlay_panel.position = Vector2(610, 420)
@@ -287,6 +317,15 @@ func _on_gm_skip() -> void:
 func _update_score_display() -> void:
 	if _score_label:
 		_score_label.text = "DATOS %02d / %02d" % [_score, TARGET_ITEMS]
+		_score_label.pivot_offset = _score_label.size / 2.0
+		var tween := _score_label.create_tween()
+		tween.tween_property(_score_label, "scale", Vector2(1.2, 1.2), 0.08).set_ease(Tween.EASE_OUT)
+		tween.tween_property(_score_label, "scale", Vector2.ONE, 0.15).set_ease(Tween.EASE_IN_OUT)
+
+func _spawn_eat_burst(pos: Vector2) -> void:
+	var burst := EatBurstScene.new()
+	_content().add_child(burst)
+	burst.setup(pos)
 
 func _set_status(text: String, color: Color) -> void:
 	if _status_label:
