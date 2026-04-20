@@ -1038,7 +1038,8 @@ func _sync_minigame_selector(force_category: String = "") -> void:
 		var summary: String = mg.nombre.strip_edges()
 		if summary.length() > 60:
 			summary = "%s…" % summary.substr(0, 60)
-		mg_selector.add_item("MG%d — %s" % [mg.id, summary])
+		var usage_prefix: String = "[Usado]" if GameService.is_minigame_used(mg.id) else "[Nuevo]"
+		mg_selector.add_item("%s MG%d — %s" % [usage_prefix, mg.id, summary])
 
 	# Select the current selected minigame if it's in the list
 	var current_mg_id: int = GameService.get_selected_minigame_id()

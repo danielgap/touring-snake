@@ -19,6 +19,7 @@ var _selected_round_name: String = ""
 var _selected_question_id: int = 0
 var _selected_minigame_id: int = 0
 var _used_question_ids: Dictionary = {}
+var _used_minigame_ids: Dictionary = {}
 var _random: RandomNumberGenerator = RandomNumberGenerator.new()
 var _can_persist_presenter_session: bool = false
 var _pending_presenter_snapshot_publish: bool = false
@@ -178,6 +179,7 @@ func clear_persisted_presenter_session() -> void:
 	if AppState.selected_role != Enums.AppRole.PRESENTER:
 		return
 	_used_question_ids.clear()
+	_used_minigame_ids.clear()
 	_current_question_index = -1
 	_update_presenter_selector("", 0)
 	_ensure_presenter_selection()
@@ -364,6 +366,7 @@ func load_selected_minigame() -> void:
 	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
 	state.correction_applied = false
 	state.status_text = "Minijuego activo: %s" % mg.nombre
+	_used_minigame_ids[mg.id] = true
 	AppState.apply_game_state(state)
 	_save_presenter_session()
 	_publish_state(state)
@@ -376,8 +379,13 @@ func load_random_minigame() -> void:
 	if all_minigames.is_empty():
 		_publish_empty_presenter_state("No hay minijuegos cargados.")
 		return
-	var random_index: int = _random.randi_range(0, all_minigames.size() - 1)
-	var mg: MiniGame = all_minigames[random_index]
+	var unused_minigames: Array[MiniGame] = []
+	for mg_candidate: MiniGame in all_minigames:
+		if not _used_minigame_ids.has(mg_candidate.id):
+			unused_minigames.append(mg_candidate)
+	var candidates: Array[MiniGame] = unused_minigames if not unused_minigames.is_empty() else all_minigames
+	var random_index: int = _random.randi_range(0, candidates.size() - 1)
+	var mg: MiniGame = candidates[random_index]
 	_selected_minigame_id = mg.id
 	emit_signal("presenter_minigame_selector_changed", _selected_minigame_id)
 	var state: GameState = AppState.current_state.duplicate_state()
@@ -392,9 +400,14 @@ func load_random_minigame() -> void:
 	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
 	state.correction_applied = false
 	state.status_text = "Minijuego aleatorio: %s" % mg.nombre
+	_used_minigame_ids[mg.id] = true
 	AppState.apply_game_state(state)
 	_save_presenter_session()
 	_publish_state(state)
+
+
+func is_minigame_used(mg_id: int) -> bool:
+	return mg_id > 0 and _used_minigame_ids.has(mg_id)
 
 
 func end_current_minigame() -> void:
@@ -616,6 +629,7 @@ func _restore_presenter_session() -> void:
 	_selected_question_id = 0
 	_selected_minigame_id = 0
 	_used_question_ids.clear()
+	_used_minigame_ids.clear()
 
 	if FileAccess.file_exists(PRESENTER_SESSION_SAVE_PATH):
 		var file: FileAccess = FileAccess.open(PRESENTER_SESSION_SAVE_PATH, FileAccess.READ)
@@ -630,6 +644,10 @@ func _restore_presenter_session() -> void:
 					var normalized_id: int = int(question_id)
 					if normalized_id > 0:
 						_used_question_ids[normalized_id] = true
+				for mg_id in payload.get("used_minigame_ids", []):
+					var normalized_mg_id: int = int(mg_id)
+					if normalized_mg_id > 0:
+						_used_minigame_ids[normalized_mg_id] = true
 				restored_state = GameState.from_dict(Dictionary(payload.get("game_state", {})))
 				did_restore = true
 
@@ -667,6 +685,7 @@ func _presenter_session_to_dict() -> Dictionary:
 		"selected_question_id": _selected_question_id,
 		"selected_minigame_id": _selected_minigame_id,
 		"used_question_ids": _used_question_ids.keys(),
+		"used_minigame_ids": _used_minigame_ids.keys(),
 		"game_state": AppState.current_state.to_dict(),
 	}
 
