@@ -13,7 +13,6 @@ var revealed_correct_option: String = ""
 var last_selected_option: String = ""
 var answer_feedback_status: int = Enums.AnswerFeedbackStatus.NONE
 var correction_applied: bool = false
-var current_minigame: MiniGame = MiniGame.new()
 var status_text: String = "Esperando inicialización"
 
 
@@ -31,7 +30,6 @@ func to_dict() -> Dictionary:
 		"last_selected_option": last_selected_option,
 		"answer_feedback_status": answer_feedback_status,
 		"correction_applied": correction_applied,
-		"current_minigame": current_minigame.to_dict(),
 		"status_text": status_text,
 	}
 
@@ -50,7 +48,6 @@ static func from_dict(data: Dictionary) -> GameState:
 	state.last_selected_option = String(data.get("last_selected_option", ""))
 	state.answer_feedback_status = int(data.get("answer_feedback_status", Enums.AnswerFeedbackStatus.NONE))
 	state.correction_applied = bool(data.get("correction_applied", false))
-	state.current_minigame = MiniGame.from_dict(Dictionary(data.get("current_minigame", {})))
 	state.status_text = String(data.get("status_text", "Esperando inicialización"))
 	return state
 
