@@ -13,6 +13,7 @@ const MG_IMPORT_DEST: String = "user://minijuegos_imported.json"
 
 @onready var overlay: ColorRect = %Overlay
 @onready var settings_panel: PanelContainer = %SettingsPanel
+@onready var tab_container: TabContainer = %TabContainer
 @onready var show_name_edit: LineEdit = %ShowNameEdit
 @onready var subtitle_edit: LineEdit = %SubtitleEdit
 @onready var team_count_spin: SpinBox = %TeamCountSpin
@@ -251,6 +252,8 @@ func _apply_styles() -> void:
 	panel_style.set_corner_radius_all(CORNER_RADIUS)
 	settings_panel.add_theme_stylebox_override("panel", panel_style)
 
+	_style_tab_container()
+
 	for le: LineEdit in [show_name_edit, subtitle_edit, mqtt_host_edit]:
 		le.add_theme_color_override("font_color", TEXT_COLOR)
 		le.add_theme_color_override("font_placeholder_color", MUTED_TEXT)
@@ -269,6 +272,53 @@ func _apply_styles() -> void:
 	_apply_action_button(reset_btn, ACCENT_AMBER)
 	_apply_action_button(import_btn, ACCENT_BLUE)
 	_apply_action_button(mg_import_btn, ACCENT_AMBER)
+
+
+func _style_tab_container() -> void:
+	var panel_bg: StyleBoxFlat = StyleBoxFlat.new()
+	panel_bg.bg_color = Color("#0b1019")
+	panel_bg.border_color = BORDER_COLOR
+	panel_bg.set_border_width_all(1)
+	panel_bg.set_corner_radius_all(CORNER_RADIUS)
+	tab_container.add_theme_stylebox_override("panel", panel_bg)
+
+	var tab_selected: StyleBoxFlat = StyleBoxFlat.new()
+	tab_selected.bg_color = Color("#1e293b")
+	tab_selected.border_color = BORDER_COLOR
+	tab_selected.set_border_width_all(1)
+	tab_selected.set_corner_radius_all(8)
+	tab_selected.content_margin_left = 20.0
+	tab_selected.content_margin_right = 20.0
+	tab_selected.content_margin_top = 10.0
+	tab_selected.content_margin_bottom = 10.0
+	tab_container.add_theme_stylebox_override("tab_selected", tab_selected)
+
+	var tab_unselected: StyleBoxFlat = StyleBoxFlat.new()
+	tab_unselected.bg_color = Color("#0b1019")
+	tab_unselected.border_color = Color("#0f1623")
+	tab_unselected.set_border_width_all(1)
+	tab_unselected.set_corner_radius_all(8)
+	tab_unselected.content_margin_left = 20.0
+	tab_unselected.content_margin_right = 20.0
+	tab_unselected.content_margin_top = 10.0
+	tab_unselected.content_margin_bottom = 10.0
+	tab_container.add_theme_stylebox_override("tab_unselected", tab_unselected)
+
+	var tab_hovered: StyleBoxFlat = StyleBoxFlat.new()
+	tab_hovered.bg_color = Color("#152238")
+	tab_hovered.border_color = ACCENT_BLUE
+	tab_hovered.set_border_width_all(1)
+	tab_hovered.set_corner_radius_all(8)
+	tab_hovered.content_margin_left = 20.0
+	tab_hovered.content_margin_right = 20.0
+	tab_hovered.content_margin_top = 10.0
+	tab_hovered.content_margin_bottom = 10.0
+	tab_container.add_theme_stylebox_override("tab_hovered", tab_hovered)
+
+	tab_container.add_theme_color_override("font_selected_color", TEXT_COLOR)
+	tab_container.add_theme_color_override("font_unselected_color", MUTED_TEXT)
+	tab_container.add_theme_color_override("font_hovered_color", TEXT_COLOR)
+	tab_container.add_theme_font_size_override("font_size", 20)
 
 
 func _apply_line_edit_bg(le: LineEdit) -> void:

@@ -52,15 +52,14 @@ text = "CONFIGURACIÓN"
 horizontal_alignment = 1
 
 [node name="TabContainer" type="TabContainer" parent="SettingsPanel/Margin/MainVBox"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
-theme_override_colors/font_disabled_color = Color(0.392, 0.455, 0.545, 1)
 
 [node name="Show" type="VBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
-	metadata/_tab_name = "Show"
+metadata/_tab_name = "📺 Show"
 
 [node name="ShowNameLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show"]
 layout_mode = 2
@@ -86,10 +85,66 @@ layout_mode = 2
 custom_minimum_size = Vector2(0, 48)
 placeholder_text = "Subtítulo opcional"
 
+[node name="PointsCorrectLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "Puntos por respuesta correcta"
+
+[node name="PointsCorrectSpin" type="SpinBox" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+min_value = 0.0
+max_value = 10000.0
+step = 50.0
+value = 100.0
+
+[node name="PointsIncorrectLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "Puntos por respuesta incorrecta"
+
+[node name="PointsIncorrectSpin" type="SpinBox" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+min_value = 0.0
+max_value = 10000.0
+step = 50.0
+value = 0.0
+
+[node name="MqttLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "Host MQTT / Puerto"
+
+[node name="MqttRow" type="HBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MqttHostEdit" type="LineEdit" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show/MqttRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 48)
+placeholder_text = "127.0.0.1"
+
+[node name="MqttPortSpin" type="SpinBox" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show/MqttRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(120, 48)
+min_value = 1.0
+max_value = 65535.0
+step = 1.0
+value = 1883.0
+
 [node name="Equipos" type="VBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
-	metadata/_tab_name = "Equipos"
+metadata/_tab_name = "👥 Equipos"
 
 [node name="TeamCountLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Equipos"]
 layout_mode = 2
@@ -117,22 +172,22 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Preguntas" type="VBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer"]
+[node name="Contenido" type="VBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
-	metadata/_tab_name = "Preguntas"
+metadata/_tab_name = "📦 Contenido"
 
-[node name="PathLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Preguntas"]
+[node name="QuestionsHeader" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
-text = "Archivo de preguntas"
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.055, 0.647, 0.914, 1)
+text = "📋 Preguntas"
 
-[node name="PathRow" type="HBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer/Preguntas"]
+[node name="PathRow" type="HBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="QuestionsPathLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Preguntas/PathRow"]
+[node name="QuestionsPathLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido/PathRow"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -141,71 +196,34 @@ theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
 text = "res://data/preguntas.json"
 autowrap_mode = 2
 
-[node name="ImportBtn" type="Button" parent="SettingsPanel/Margin/MainVBox/TabContainer/Preguntas/PathRow"]
+[node name="ImportBtn" type="Button" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido/PathRow"]
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 48)
 theme_override_font_sizes/font_size = 18
 text = "Importar"
 
-[node name="QuestionCountLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Preguntas"]
+[node name="QuestionCountLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
 text = "0 preguntas cargadas"
 
-[node name="PointsCorrectLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Preguntas"]
+[node name="Separator" type="HSeparator" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
-text = "Puntos por respuesta correcta"
 
-[node name="PointsCorrectSpin" type="SpinBox" parent="SettingsPanel/Margin/MainVBox/TabContainer/Preguntas"]
-unique_name_in_owner = true
+[node name="MgHeader" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 48)
-min_value = 0.0
-max_value = 10000.0
-step = 50.0
-value = 100.0
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.961, 0.62, 0.043, 1)
+text = "🎮 Minijuegos"
 
-[node name="PointsIncorrectLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Preguntas"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
-text = "Puntos por respuesta incorrecta"
-
-[node name="PointsIncorrectSpin" type="SpinBox" parent="SettingsPanel/Margin/MainVBox/TabContainer/Preguntas"]
-unique_name_in_owner = true
-layout_mode = 2
-custom_minimum_size = Vector2(0, 48)
-min_value = 0.0
-max_value = 10000.0
-step = 50.0
-value = 0.0
-
-[node name="Red" type="VBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer"]
-layout_mode = 2
-theme_override_constants/separation = 12
-	metadata/_tab_name = "Red"
-
-[node name="Minijuegos" type="VBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer"]
-layout_mode = 2
-theme_override_constants/separation = 12
-	metadata/_tab_name = "Minijuegos"
-
-[node name="MgPathLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Minijuegos"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
-text = "Archivo de minijuegos"
-
-[node name="MgPathRow" type="HBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer/Minijuegos"]
+[node name="MgPathRow" type="HBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="MgPathLabel2" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Minijuegos/MgPathRow"]
+[node name="MgPathLabel2" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido/MgPathRow"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -214,46 +232,19 @@ theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
 text = "res://data/minijuegos.json"
 autowrap_mode = 2
 
-[node name="MgImportBtn" type="Button" parent="SettingsPanel/Margin/MainVBox/TabContainer/Minijuegos/MgPathRow"]
+[node name="MgImportBtn" type="Button" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido/MgPathRow"]
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 48)
 theme_override_font_sizes/font_size = 18
 text = "Importar"
 
-[node name="MgCountLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Minijuegos"]
+[node name="MgCountLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
 text = "0 minijuegos cargados"
-
-[node name="MqttHostLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Red"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
-text = "Host MQTT"
-
-[node name="MqttHostEdit" type="LineEdit" parent="SettingsPanel/Margin/MainVBox/TabContainer/Red"]
-unique_name_in_owner = true
-layout_mode = 2
-custom_minimum_size = Vector2(0, 48)
-placeholder_text = "127.0.0.1"
-
-[node name="MqttPortLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Red"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
-text = "Puerto"
-
-[node name="MqttPortSpin" type="SpinBox" parent="SettingsPanel/Margin/MainVBox/TabContainer/Red"]
-unique_name_in_owner = true
-layout_mode = 2
-custom_minimum_size = Vector2(0, 48)
-min_value = 1.0
-max_value = 65535.0
-step = 1.0
-value = 1883.0
 
 [node name="BottomBar" type="HBoxContainer" parent="SettingsPanel/Margin/MainVBox"]
 layout_mode = 2
