@@ -1,5 +1,5 @@
 ; Engine configuration file.
-; It's best edited using the editor and not directly,
+; It's best edited using the editor UI and not directly,
 ; since the parameters that go here are not all obvious.
 ;
 ; Format:
@@ -9,21 +9,23 @@
 config_version=5
 
 [application]
+
 config/name="Quiz Offline"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.6")
 
 [autoload]
+
 AppState="*res://autoload/app_state.gd"
+ShowConfig="*res://autoload/show_config.gd"
 ContentRepo="*res://autoload/content_repo.gd"
 GameService="*res://autoload/game_service.gd"
 MqttBus="*res://autoload/mqtt_bus.tscn"
 
 [display]
-window/size/viewport_width=1280
-window/size/viewport_height=720
+
+window/size/viewport_width=1920
+window/size/viewport_height=1200
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-
-[rendering]
-renderer/rendering_method="forward_plus"
+window/handheld/orientation=5
