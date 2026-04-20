@@ -9,6 +9,7 @@ const ACCENT_BLUE: Color = Color("#0ea5e9")
 const ACCENT_GREEN: Color = Color("#22c55e")
 const ACCENT_AMBER: Color = Color("#f59e0b")
 const IMPORT_DEST: String = "user://questions_imported.json"
+const MG_IMPORT_DEST: String = "user://minijuegos_imported.json"
 
 @onready var overlay: ColorRect = %Overlay
 @onready var settings_panel: PanelContainer = %SettingsPanel
@@ -19,6 +20,9 @@ const IMPORT_DEST: String = "user://questions_imported.json"
 @onready var questions_path_label: Label = %QuestionsPathLabel
 @onready var import_btn: Button = %ImportBtn
 @onready var question_count_label: Label = %QuestionCountLabel
+@onready var mg_path_label: Label = %MgPathLabel2
+@onready var mg_import_btn: Button = %MgImportBtn
+@onready var mg_count_label: Label = %MgCountLabel
 @onready var points_correct_spin: SpinBox = %PointsCorrectSpin
 @onready var points_incorrect_spin: SpinBox = %PointsIncorrectSpin
 @onready var mqtt_host_edit: LineEdit = %MqttHostEdit
@@ -27,6 +31,7 @@ const IMPORT_DEST: String = "user://questions_imported.json"
 @onready var cancel_btn: Button = %CancelBtn
 @onready var reset_btn: Button = %ResetBtn
 @onready var file_dialog: FileDialog = %FileDialog
+@onready var mg_file_dialog: FileDialog = %MgFileDialog
 
 
 func _ready() -> void:
@@ -61,6 +66,10 @@ func _load_config_to_ui() -> void:
 
 	questions_path_label.text = ShowConfig.get_questions_file()
 	question_count_label.text = "%d preguntas cargadas" % ContentRepo.get_question_count()
+
+	mg_path_label.text = ShowConfig.get_minigames_file()
+	mg_count_label.text = "%d minijuegos cargados" % ContentRepo.get_minigame_count()
+
 	points_correct_spin.value = float(ShowConfig.get_points_correct())
 	points_incorrect_spin.value = float(ShowConfig.get_points_incorrect())
 
@@ -129,6 +138,40 @@ func _on_file_selected(path: String) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════
+#  Minigames import
+# ═══════════════════════════════════════════════════════════════════
+
+func _on_import_minigames() -> void:
+	mg_file_dialog.popup_centered()
+
+
+func _on_mg_file_selected(path: String) -> void:
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		push_error("SettingsController: No se pudo abrir %s" % path)
+		return
+
+	var raw_text: String = file.get_as_text()
+	var parsed: Variant = JSON.parse_string(raw_text)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		push_error("SettingsController: El archivo de minijuegos no es un JSON válido")
+		return
+
+	var dest: FileAccess = FileAccess.open(MG_IMPORT_DEST, FileAccess.WRITE)
+	if dest == null:
+		push_error("SettingsController: No se pudo escribir en %s" % MG_IMPORT_DEST)
+		return
+	dest.store_string(raw_text)
+
+	ShowConfig.set_minigames_file(MG_IMPORT_DEST)
+	ShowConfig.save_config()
+	ContentRepo.load_minigames()
+
+	mg_path_label.text = MG_IMPORT_DEST
+	mg_count_label.text = "%d minijuegos cargados" % ContentRepo.get_minigame_count()
+
+
+# ═══════════════════════════════════════════════════════════════════
 #  Teams UI
 # ═══════════════════════════════════════════════════════════════════
 
@@ -188,6 +231,8 @@ func _on_reset_pressed() -> void:
 func _connect_signals() -> void:
 	import_btn.pressed.connect(_on_import_questions)
 	file_dialog.file_selected.connect(_on_file_selected)
+	mg_import_btn.pressed.connect(_on_import_minigames)
+	mg_file_dialog.file_selected.connect(_on_mg_file_selected)
 	save_btn.pressed.connect(_save_and_close)
 	cancel_btn.pressed.connect(hide_settings)
 	reset_btn.pressed.connect(_on_reset_pressed)
@@ -223,6 +268,7 @@ func _apply_styles() -> void:
 	_apply_action_button(cancel_btn, MUTED_TEXT)
 	_apply_action_button(reset_btn, ACCENT_AMBER)
 	_apply_action_button(import_btn, ACCENT_BLUE)
+	_apply_action_button(mg_import_btn, ACCENT_AMBER)
 
 
 func _apply_line_edit_bg(le: LineEdit) -> void:

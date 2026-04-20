@@ -190,6 +190,44 @@ layout_mode = 2
 theme_override_constants/separation = 12
 	metadata/_tab_name = "Red"
 
+[node name="Minijuegos" type="VBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+	metadata/_tab_name = "Minijuegos"
+
+[node name="MgPathLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Minijuegos"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "Archivo de minijuegos"
+
+[node name="MgPathRow" type="HBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer/Minijuegos"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MgPathLabel2" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Minijuegos/MgPathRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.945, 0.961, 0.976, 1)
+text = "res://data/minijuegos.json"
+autowrap_mode = 2
+
+[node name="MgImportBtn" type="Button" parent="SettingsPanel/Margin/MainVBox/TabContainer/Minijuegos/MgPathRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+theme_override_font_sizes/font_size = 18
+text = "Importar"
+
+[node name="MgCountLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Minijuegos"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "0 minijuegos cargados"
+
 [node name="MqttHostLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Red"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
@@ -252,3 +290,10 @@ file_mode = 0
 access = 2
 filters = PackedStringArray("*.json ; JSON Files")
 title = "Importar Preguntas"
+
+[node name="MgFileDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.json ; JSON Files")
+title = "Importar Minijuegos"
