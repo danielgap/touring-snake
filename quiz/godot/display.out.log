@@ -1,0 +1,30 @@
+Godot Engine v4.6.stable.official.89cea1439 - https://godotengine.org
+
+E2E bootstrap role=display team=1
+Connecting to 127.0.0.1:1883
+CONNACK ret=00
+SUBSCRIBE[1] topic=concurso/estado
+SUBSCRIBE[2] topic=concurso/respuesta
+SUBSCRIBE[3] topic=concurso/puntos
+SUBSCRIBE[4] topic=concurso/tablet/lock
+E2E mqtt connected role=display
+PINGREQ
+SUBACK[1] ret=01
+received topic=concurso/estado msg={"answers_enabled":false,"current_question":{"category":"historia","correct":"B","dato_curioso":"Egipto es un pa s transcontinental, pero la mayor parte de su territorio est  en  frica.","difficulty":"facil","id":1,"options":["Asia"," frica","Europa","Ocean a"],"round":"Ronda Veloz","text":" En qu  continente se encuentra Egipto?","timeout":10},"last_selected_option":"A","locked_team_id":1,"phase":2,"revealed_correct_option":"B","scores":{"1":100,"2":0,"3":0},"status_text":"Respuesta revelada"}
+E2E state role=display phase=Revelación locked_team=1 enabled=false revealed=B status=Respuesta revelada score1=100
+SUBACK[2] ret=01
+SUBACK[3] ret=01
+SUBACK[4] ret=01
+PINGRESP
+received topic=concurso/estado msg={"answers_enabled":true,"current_question":{"category":"historia","correct":"B","dato_curioso":"Egipto es un país transcontinental, pero la mayor parte de su territorio está en África.","difficulty":"facil","id":1,"options":["Asia","África","Europa","Oceanía"],"round":"Ronda Veloz","text":"¿En qué continente se encuentra Egipto?","timeout":10},"last_selected_option":"","locked_team_id":0,"phase":1,"revealed_correct_option":"","scores":{"1":0,"2":0,"3":0},"status_text":"Pregunta activa"}
+E2E state role=display phase=Pregunta locked_team=0 enabled=true revealed= status=Pregunta activa score1=0
+received topic=concurso/respuesta msg={"equipo":1,"opcion":"A"}
+received topic=concurso/estado msg={"answers_enabled":false,"current_question":{"category":"historia","correct":"B","dato_curioso":"Egipto es un país transcontinental, pero la mayor parte de su territorio está en África.","difficulty":"facil","id":1,"options":["Asia","África","Europa","Oceanía"],"round":"Ronda Veloz","text":"¿En qué continente se encuentra Egipto?","timeout":10},"last_selected_option":"A","locked_team_id":1,"phase":1,"revealed_correct_option":"","scores":{"1":0,"2":0,"3":0},"status_text":"Equipo 1 respondió"}
+E2E state role=display phase=Pregunta locked_team=1 enabled=false revealed= status=Equipo 1 respondió score1=0
+received topic=concurso/estado msg={"answers_enabled":false,"current_question":{"category":"historia","correct":"B","dato_curioso":"Egipto es un país transcontinental, pero la mayor parte de su territorio está en África.","difficulty":"facil","id":1,"options":["Asia","África","Europa","Oceanía"],"round":"Ronda Veloz","text":"¿En qué continente se encuentra Egipto?","timeout":10},"last_selected_option":"A","locked_team_id":1,"phase":2,"revealed_correct_option":"B","scores":{"1":0,"2":0,"3":0},"status_text":"Respuesta revelada"}
+E2E state role=display phase=Revelación locked_team=1 enabled=false revealed=B status=Respuesta revelada score1=0
+received topic=concurso/puntos msg={"equipo":1,"total":100}
+E2E state role=display phase=Revelación locked_team=1 enabled=false revealed=B status=Respuesta revelada score1=100
+received topic=concurso/estado msg={"answers_enabled":false,"current_question":{"category":"historia","correct":"B","dato_curioso":"Egipto es un país transcontinental, pero la mayor parte de su territorio está en África.","difficulty":"facil","id":1,"options":["Asia","África","Europa","Oceanía"],"round":"Ronda Veloz","text":"¿En qué continente se encuentra Egipto?","timeout":10},"last_selected_option":"A","locked_team_id":1,"phase":2,"revealed_correct_option":"B","scores":{"1":100,"2":0,"3":0},"status_text":"Respuesta revelada"}
+E2E state role=display phase=Revelación locked_team=1 enabled=false revealed=B status=Respuesta revelada score1=100
+E2E exiting role=display

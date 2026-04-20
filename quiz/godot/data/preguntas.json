@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "ronda": "Ronda Veloz",
+    "categoria": "historia",
+    "texto": "¿En qué continente se encuentra Egipto?",
+    "opciones": ["Asia", "África", "Europa", "Oceanía"],
+    "correcta": "B",
+    "dato_curioso": "Egipto es un país transcontinental, pero la mayor parte de su territorio está en África.",
+    "tiempo": 10,
+    "dificultad": "facil"
+  },
+  {
+    "id": 2,
+    "ronda": "Curiosidades",
+    "categoria": "ciencia",
+    "texto": "¿Cuál es el planeta más grande del sistema solar?",
+    "opciones": ["Marte", "Saturno", "Júpiter", "Venus"],
+    "correcta": "C",
+    "dato_curioso": "Júpiter tiene una masa mayor que la de todos los demás planetas juntos.",
+    "tiempo": 15,
+    "dificultad": "media"
+  },
+  {
+    "id": 3,
+    "ronda": "Desafío",
+    "categoria": "geografia",
+    "texto": "¿Cuál es la capital de Japón?",
+    "opciones": ["Kioto", "Seúl", "Pekín", "Tokio"],
+    "correcta": "D",
+    "dato_curioso": "Tokio forma una de las áreas metropolitanas más pobladas del mundo.",
+    "tiempo": 12,
+    "dificultad": "facil"
+  }
+]

@@ -1,0 +1,296 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/presenter/presenter_root_controller.gd" id="1_script"]
+
+[node name="PresenterRoot" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="RoleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Control del presentador"
+
+[node name="PhaseLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Ronda"
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="CurrentQuestionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Sin pregunta activa"
+
+[node name="LockLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Sin bloqueo"
+
+[node name="TeamStateLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Mesa"
+
+[node name="ScoreLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Marcador"
+
+[node name="SummaryDivider" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="SelectorSectionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Selección de pregunta"
+
+[node name="SelectorPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SelectorTitle" type="Label" parent="MarginContainer/VBoxContainer/SelectorPanel"]
+layout_mode = 2
+text = "Elegí la ronda y la pregunta que sale al aire"
+
+[node name="RoundRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SelectorPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RoundLabel" type="Label" parent="MarginContainer/VBoxContainer/SelectorPanel/RoundRow"]
+layout_mode = 2
+text = "Ronda:"
+
+[node name="RoundSelector" type="OptionButton" parent="MarginContainer/VBoxContainer/SelectorPanel/RoundRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="QuestionRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SelectorPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="QuestionLabel" type="Label" parent="MarginContainer/VBoxContainer/SelectorPanel/QuestionRow"]
+layout_mode = 2
+text = "Pregunta:"
+
+[node name="QuestionSelector" type="OptionButton" parent="MarginContainer/VBoxContainer/SelectorPanel/QuestionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SelectorActionsRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SelectorPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LoadSelectedButton" type="Button" parent="MarginContainer/VBoxContainer/SelectorPanel/SelectorActionsRow"]
+layout_mode = 2
+text = "Abrir seleccionada"
+
+[node name="LoadRandomButton" type="Button" parent="MarginContainer/VBoxContainer/SelectorPanel/SelectorActionsRow"]
+layout_mode = 2
+text = "Sacar aleatoria"
+
+[node name="ResetUsedButton" type="Button" parent="MarginContainer/VBoxContainer/SelectorPanel/SelectorActionsRow"]
+layout_mode = 2
+text = "Limpiar usadas"
+
+[node name="ClearSessionButton" type="Button" parent="MarginContainer/VBoxContainer/SelectorPanel/SelectorActionsRow"]
+layout_mode = 2
+text = "Borrar sesión"
+
+[node name="PreviewLabel" type="Label" parent="MarginContainer/VBoxContainer/SelectorPanel"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Vista previa privada"
+
+[node name="ArbitrationDivider" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ArbitrationSectionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Arbitraje por equipo"
+
+[node name="ArbitrationPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ArbitrationTitle" type="Label" parent="MarginContainer/VBoxContainer/ArbitrationPanel"]
+layout_mode = 2
+text = "Bloqueá tablets o reservá el turno manualmente"
+
+[node name="Team1LockRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ArbitrationPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Team1LockLabel" type="Label" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team1LockRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Equipo 1"
+
+[node name="Team1LockButton" type="Button" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team1LockRow"]
+layout_mode = 2
+text = "Bloquear"
+
+[node name="Team1ForceButton" type="Button" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team1LockRow"]
+layout_mode = 2
+text = "Dar turno"
+
+[node name="Team2LockRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ArbitrationPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Team2LockLabel" type="Label" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team2LockRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Equipo 2"
+
+[node name="Team2LockButton" type="Button" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team2LockRow"]
+layout_mode = 2
+text = "Bloquear"
+
+[node name="Team2ForceButton" type="Button" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team2LockRow"]
+layout_mode = 2
+text = "Dar turno"
+
+[node name="Team3LockRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ArbitrationPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Team3LockLabel" type="Label" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team3LockRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Equipo 3"
+
+[node name="Team3LockButton" type="Button" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team3LockRow"]
+layout_mode = 2
+text = "Bloquear"
+
+[node name="Team3ForceButton" type="Button" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team3LockRow"]
+layout_mode = 2
+text = "Dar turno"
+
+[node name="ActionsDivider" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ActionsSectionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Acciones de ronda"
+
+[node name="ActionsRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RefreshContentButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
+layout_mode = 2
+text = "Recargar preguntas"
+
+[node name="StartQuestionButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
+layout_mode = 2
+text = "Abrir aleatoria"
+
+[node name="ReopenQuestionButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
+layout_mode = 2
+text = "Reabrir ronda"
+
+[node name="ResetLocksButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
+layout_mode = 2
+text = "Reabrir mesa"
+
+[node name="MarkCorrectButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
+layout_mode = 2
+text = "Dar correcta"
+
+[node name="MarkIncorrectButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
+layout_mode = 2
+text = "Dar incorrecta"
+
+[node name="RevealAnswerButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
+layout_mode = 2
+text = "Mostrar correcta"
+
+[node name="ScoreDivider" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ScoreSectionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Marcador manual"
+
+[node name="ScoreControls" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Team1Row" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ScoreControls"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Team1Label" type="Label" parent="MarginContainer/VBoxContainer/ScoreControls/Team1Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Equipo 1"
+
+[node name="Team1SubtractButton" type="Button" parent="MarginContainer/VBoxContainer/ScoreControls/Team1Row"]
+layout_mode = 2
+text = "-100"
+
+[node name="Team1AddButton" type="Button" parent="MarginContainer/VBoxContainer/ScoreControls/Team1Row"]
+layout_mode = 2
+text = "+100"
+
+[node name="Team2Row" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ScoreControls"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Team2Label" type="Label" parent="MarginContainer/VBoxContainer/ScoreControls/Team2Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Equipo 2"
+
+[node name="Team2SubtractButton" type="Button" parent="MarginContainer/VBoxContainer/ScoreControls/Team2Row"]
+layout_mode = 2
+text = "-100"
+
+[node name="Team2AddButton" type="Button" parent="MarginContainer/VBoxContainer/ScoreControls/Team2Row"]
+layout_mode = 2
+text = "+100"
+
+[node name="Team3Row" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ScoreControls"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Team3Label" type="Label" parent="MarginContainer/VBoxContainer/ScoreControls/Team3Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Equipo 3"
+
+[node name="Team3SubtractButton" type="Button" parent="MarginContainer/VBoxContainer/ScoreControls/Team3Row"]
+layout_mode = 2
+text = "-100"
+
+[node name="Team3AddButton" type="Button" parent="MarginContainer/VBoxContainer/ScoreControls/Team3Row"]
+layout_mode = 2
+text = "+100"

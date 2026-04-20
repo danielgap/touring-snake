@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/bootstrap/main.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/bootstrap/role_select.tscn" id="2_role_select"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="RoleSelect" parent="." instance=ExtResource("2_role_select")]
+
+[node name="ActiveRoot" type="Control" parent="."]
+visible = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
