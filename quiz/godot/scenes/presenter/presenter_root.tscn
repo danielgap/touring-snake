@@ -189,6 +189,7 @@ theme_override_constants/separation = 6
 layout_mode = 2
 
 [node name="T1Name" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team1Card/T1Pad/T1VBox/T1Header"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
@@ -240,6 +241,7 @@ theme_override_constants/separation = 6
 layout_mode = 2
 
 [node name="T2Name" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team2Card/T2Pad/T2VBox/T2Header"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
@@ -291,6 +293,7 @@ theme_override_constants/separation = 6
 layout_mode = 2
 
 [node name="T3Name" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team3Card/T3Pad/T3VBox/T3Header"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
@@ -337,6 +340,7 @@ layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="T1SName" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/T1ScoreRow"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 16
@@ -362,6 +366,7 @@ layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="T2SName" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/T2ScoreRow"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 16
@@ -387,6 +392,7 @@ layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="T3SName" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/T3ScoreRow"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 16

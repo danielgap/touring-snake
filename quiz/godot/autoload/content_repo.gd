@@ -24,7 +24,6 @@ func _ready() -> void:
 				_load_questions_from(configured_path)
 		ShowConfig.questions_file_changed.connect(_on_questions_file_changed)
 		ShowConfig.minigames_file_changed.connect(_on_minigames_file_changed)
-		ShowConfig.minigames_file_changed.connect(_on_minigames_file_changed)
 
 
 func load_questions() -> Array[Question]:
