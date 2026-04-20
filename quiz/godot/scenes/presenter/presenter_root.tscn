@@ -725,7 +725,7 @@ unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 44)
 theme_override_font_sizes/font_size = 16
-text = "Reabrir mesa"
+text = "🔄 Reiniciar jugada"
 
 [node name="ClearSessionBtn" type="Button" parent="RootMargin/RootVBox/BottomBar"]
 unique_name_in_owner = true

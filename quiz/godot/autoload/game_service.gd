@@ -252,7 +252,7 @@ func reset_team_locks() -> void:
 	if not state.current_question.text.is_empty():
 		state.phase = Enums.GamePhase.QUESTION
 		state.answers_enabled = true
-		state.status_text = "Mesa reabierta. Todos los equipos pueden volver a responder."
+		state.status_text = "Jugada reiniciada. Todos los equipos pueden volver a responder."
 	else:
 		state.status_text = "Bloqueos de equipos reiniciados."
 	AppState.apply_game_state(state)
@@ -291,7 +291,7 @@ func force_active_team(team_id: int) -> void:
 	var state: GameState = AppState.current_state.duplicate_state()
 	if state.active_team_id == team_id:
 		state.active_team_id = 0
-		state.status_text = "Turno manual liberado. La mesa vuelve a quedar abierta."
+		state.status_text = "Turno manual liberado. Pregunta abierta para todos."
 		AppState.apply_game_state(state)
 		_save_presenter_session()
 		_publish_state(state)
@@ -386,7 +386,7 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 			state.last_selected_option = String(payload.get("opcion", ""))
 			state.answer_feedback_status = Enums.AnswerFeedbackStatus.PENDING
 			state.correction_applied = false
-			state.status_text = "Equipo %d respondió primero. La mesa queda cerrada hasta corrección." % state.locked_team_id
+			state.status_text = "Equipo %d respondió primero. Pregunta cerrada hasta corrección." % state.locked_team_id
 			AppState.apply_game_state(state)
 			emit_signal("answer_received", state.locked_team_id, state.last_selected_option)
 			_save_presenter_session()

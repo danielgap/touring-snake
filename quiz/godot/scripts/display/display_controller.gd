@@ -438,7 +438,7 @@ func _render_lock_info(state: GameState) -> void:
 		lock_label.text = "Turno · %s" % ShowConfig.get_team_name(state.active_team_id)
 		lock_label.add_theme_color_override("font_color", TEXT_DIM)
 	elif state.answers_enabled:
-		lock_label.text = "Mesa abierta · Esperando respuesta..."
+		lock_label.text = "Pregunta abierta · Esperando respuesta..."
 		lock_label.add_theme_color_override("font_color", TEXT_DIM)
 	else:
 		lock_label.text = ""

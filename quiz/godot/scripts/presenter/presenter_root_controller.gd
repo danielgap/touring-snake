@@ -622,7 +622,7 @@ func _render_question_panel(state: GameState) -> void:
 	elif state.active_team_id > 0:
 		lock_info.text = "Turno reservado · %s" % ShowConfig.get_team_name(state.active_team_id)
 	elif state.answers_enabled:
-		lock_info.text = "Mesa abierta · Esperando respuesta..."
+		lock_info.text = "Pregunta abierta · Esperando respuesta..."
 	else:
 		lock_info.text = ""
 

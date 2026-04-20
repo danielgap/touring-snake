@@ -343,7 +343,7 @@ func _feedback_text(state: GameState, can_answer: bool) -> String:
 	if state.active_team_id == AppState.selected_team_id and can_answer:
 		return "SU TURNO — Respondan ahora."
 	if can_answer:
-		return "RESPONDAN AHORA — La primera respuesta cierra la mesa."
+		return "RESPONDAN AHORA — La primera respuesta cierra la ronda."
 	if state.current_question.text.is_empty():
 		return "Esperando pregunta del presentador."
 	return "Esperen habilitación del presentador."
