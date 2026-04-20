@@ -40,17 +40,17 @@ func to_public_dict() -> Dictionary:
 static func from_dict(data: Dictionary) -> Question:
 	var question: Question = Question.new()
 	question.id = int(data.get("id", 0))
-	question.round_name = String(data.get("round", data.get("ronda", "")))
-	question.category = String(data.get("category", data.get("categoria", "")))
-	question.text = String(data.get("text", data.get("texto", "")))
-	question.correct_option = String(data.get("correct", data.get("correcta", "")))
-	question.trivia = String(data.get("dato_curioso", data.get("trivia", "")))
+	question.round_name = str(data.get("round", data.get("ronda", "")))
+	question.category = str(data.get("category", data.get("categoria", "")))
+	question.text = str(data.get("text", data.get("texto", data.get("pregunta", ""))))
+	question.correct_option = str(data.get("correct", data.get("correcta", "")))
+	question.trivia = str(data.get("dato_curioso", data.get("trivia", data.get("dato", ""))))
 	question.timeout_seconds = int(data.get("timeout", data.get("tiempo", 15)))
-	question.difficulty = String(data.get("difficulty", data.get("dificultad", "")))
+	question.difficulty = str(data.get("difficulty", data.get("dificultad", "")))
 
 	var raw_options: Variant = data.get("options", data.get("opciones", []))
 	if typeof(raw_options) == TYPE_ARRAY:
 		for option in raw_options:
-			question.options.append(String(option))
+			question.options.append(str(option))
 
 	return question

@@ -1,35 +1,1282 @@
 [
   {
     "id": 1,
-    "ronda": "Ronda Veloz",
+    "ronda": "veloz",
     "categoria": "historia",
-    "texto": "¿En qué continente se encuentra Egipto?",
-    "opciones": ["Asia", "África", "Europa", "Oceanía"],
+    "pregunta": "¿Qué rey fundó la Universidad de Palencia, la primera de Castilla y León?",
+    "opciones": [
+      "Alfonso VI",
+      "Alfonso VIII",
+      "Alfonso X el Sabio",
+      "Fernando III"
+    ],
     "correcta": "B",
-    "dato_curioso": "Egipto es un país transcontinental, pero la mayor parte de su territorio está en África.",
-    "tiempo": 10,
-    "dificultad": "facil"
+    "dificultad": 2,
+    "dato": "Alfonso VIII la fundó hacia 1212, antes incluso de que Salamanca alcanzara su esplendor.",
+    "tiempo": 10
   },
   {
     "id": 2,
-    "ronda": "Curiosidades",
-    "categoria": "ciencia",
-    "texto": "¿Cuál es el planeta más grande del sistema solar?",
-    "opciones": ["Marte", "Saturno", "Júpiter", "Venus"],
-    "correcta": "C",
-    "dato_curioso": "Júpiter tiene una masa mayor que la de todos los demás planetas juntos.",
-    "tiempo": 15,
-    "dificultad": "media"
+    "ronda": "veloz",
+    "categoria": "monumentos",
+    "pregunta": "¿Qué monumento natural es el símbolo más conocido de Palencia?",
+    "opciones": [
+      "Las Médulas",
+      "El Cristo del Otero",
+      "Los Picos de Europa",
+      "Las Torcas de Tormes"
+    ],
+    "correcta": "B",
+    "dificultad": 1,
+    "dato": "El Cristo del Otero, obra de Victorio Macho, mide 20 metros y se inauguró en 1931.",
+    "tiempo": 10
   },
   {
     "id": 3,
-    "ronda": "Desafío",
+    "ronda": "veloz",
+    "categoria": "gastronomia",
+    "pregunta": "¿Cuál es el plato estrella de la gastronomía palentina?",
+    "opciones": [
+      "Cocido maragato",
+      "Lechazo asado",
+      "Machacón de Langreo",
+      "Botillo del Bierzo"
+    ],
+    "correcta": "B",
+    "dificultad": 1,
+    "dato": "El lechazo asado de Castilla y León tiene DO protegida, y Palencia es una de sus cunas.",
+    "tiempo": 10
+  },
+  {
+    "id": 4,
+    "ronda": "veloz",
     "categoria": "geografia",
-    "texto": "¿Cuál es la capital de Japón?",
-    "opciones": ["Kioto", "Seúl", "Pekín", "Tokio"],
+    "pregunta": "¿Qué río principal atraviesa la ciudad de Palencia?",
+    "opciones": [
+      "Río Pisuerga",
+      "Río Duero",
+      "Río Carrión",
+      "Río Arlanzón"
+    ],
+    "correcta": "C",
+    "dificultad": 1,
+    "dato": "El río Carrión atraviesa Palencia de norte a sur y desemboca en el Pisuerga.",
+    "tiempo": 10
+  },
+  {
+    "id": 5,
+    "ronda": "veloz",
+    "categoria": "historia",
+    "pregunta": "¿Qué vía romana pasa por la provincia de Palencia?",
+    "opciones": [
+      "Vía de la Plata",
+      "Vía de la Estrella",
+      "Vía Aquitania",
+      "Camino Francés del Camino de Santiago"
+    ],
     "correcta": "D",
-    "dato_curioso": "Tokio forma una de las áreas metropolitanas más pobladas del mundo.",
-    "tiempo": 12,
-    "dificultad": "facil"
+    "dificultad": 2,
+    "dato": "El Camino Francés atraviesa la provincia de norte a sur pasando por Frómista, Carrión de los Condes y Sahagún (límite con León).",
+    "tiempo": 10
+  },
+  {
+    "id": 6,
+    "ronda": "veloz",
+    "categoria": "naturaleza",
+    "pregunta": "¿Qué raza bovina autóctona se cría en los montes palentinos?",
+    "opciones": [
+      "Rubia Gallega",
+      "Pirenaica",
+      "Vaca Tudanca",
+      "Retinta"
+    ],
+    "correcta": "C",
+    "dificultad": 2,
+    "dato": "La vaca tudanca es una raza autóctona en peligro de extinción que se cría en la Montaña Palentina. Tiene pelaje negro y es muy resistente.",
+    "tiempo": 10
+  },
+  {
+    "id": 7,
+    "ronda": "veloz",
+    "categoria": "monumentos",
+    "pregunta": "¿Qué canal histórico de navegación cruza la provincia de Palencia?",
+    "opciones": [
+      "Canal Imperial de Aragón",
+      "Canal de Castilla",
+      "Canal de Guadalquivir",
+      "Canal de Isabel II"
+    ],
+    "correcta": "B",
+    "dificultad": 1,
+    "dato": "El Canal de Castilla tiene 207 km y es el canal de navegación más largo de España. Cruza Palencia de norte a sur.",
+    "tiempo": 10
+  },
+  {
+    "id": 8,
+    "ronda": "veloz",
+    "categoria": "tradiciones",
+    "pregunta": "¿Cómo se llama la celebración más conocida de Palencia durante la Semana Santa?",
+    "opciones": [
+      "Los Pasionarios",
+      "La Procesión del Silencio",
+      "Las Enramadas",
+      "Los Tamborateros"
+    ],
+    "correcta": "D",
+    "dificultad": 2,
+    "dato": "Palencia es conocida como 'Ciudad del Tambor' por sus tamborradas en Semana Santa, declaradas de Interés Turístico Regional.",
+    "tiempo": 10
+  },
+  {
+    "id": 9,
+    "ronda": "veloz",
+    "categoria": "geografia",
+    "pregunta": "¿Qué comarca natural al norte de Palencia se conoce como 'la Suiza palentina'?",
+    "opciones": [
+      "El Cerrato",
+      "La Montaña Palentina",
+      "Tierra de Campos",
+      "El Páramo"
+    ],
+    "correcta": "B",
+    "dificultad": 2,
+    "dato": "La Montaña Palentina, con pueblos como Cervera de Pisuerga, tiene paisajes de montaña verde que recuerdan a los Alpes suizos.",
+    "tiempo": 10
+  },
+  {
+    "id": 10,
+    "ronda": "veloz",
+    "categoria": "gastronomia",
+    "pregunta": "¿Qué producto cárnico de Palencia tiene reconocimiento de calidad?",
+    "opciones": [
+      "Chorizo de Teruel",
+      "Morcilla de Palencia",
+      "Jamón de Trevélez",
+      "Queso de Valdeón"
+    ],
+    "correcta": "B",
+    "dificultad": 1,
+    "dato": "La Morcilla de Palencia tiene Marca de Garantía desde 2019 y se elabora tradicionalmente con arroz, cebolla y sangre.",
+    "tiempo": 10
+  },
+  {
+    "id": 11,
+    "ronda": "veloz",
+    "categoria": "historia",
+    "pregunta": "¿Qué rey castellano lideró la Batalla de Las Navas de Tolosa (1212) con tropas de toda Castilla incluyendo Palencia?",
+    "opciones": [
+      "Batalla de Covadonga",
+      "Batalla de Las Navas de Tolosa",
+      "Batalla de Uclés",
+      "Batalla de Simancas"
+    ],
+    "correcta": "B",
+    "dificultad": 3,
+    "dato": "La Batalla de Las Navas de Tolosa (1212) fue en Jaén, pero tropas palentinas participaron bajo Alfonso VIII.",
+    "tiempo": 10
+  },
+  {
+    "id": 12,
+    "ronda": "veloz",
+    "categoria": "monumentos",
+    "pregunta": "¿Qué iglesia de Palencia, junto a la calle Mayor, mezcla estilos tardorrománico y protogótico?",
+    "opciones": [
+      "San Martín de Frómista",
+      "San Miguel de Palencia",
+      "Santa María de Melque",
+      "San Baudelio de Berlanga"
+    ],
+    "correcta": "B",
+    "dificultad": 2,
+    "dato": "La iglesia de San Miguel (siglo XII) es de estilo tardorrománico y protogótico, construida sobre un templo anterior de Fernando I.",
+    "tiempo": 10
+  },
+  {
+    "id": 13,
+    "ronda": "veloz",
+    "categoria": "naturaleza",
+    "pregunta": "¿Qué parque natural se encuentra en la provincia de Palencia?",
+    "opciones": [
+      "Parque Nacional de Ordesa",
+      "Fuentes Carrionas y Fuente Cobre",
+      "Montes de Valsaín",
+      "Hoces del Río Duratón"
+    ],
+    "correcta": "B",
+    "dificultad": 2,
+    "dato": "Fuentes Carrionas y Fuente Cobre es un parque natural de 783 km² donde nace el río Carrión. Alberga lobos, corzos y nutrias.",
+    "tiempo": 10
+  },
+  {
+    "id": 14,
+    "ronda": "veloz",
+    "categoria": "deportes",
+    "pregunta": "¿Qué equipo histórico de fútbol de Palencia alcanzó la Segunda División A en los años 60?",
+    "opciones": [
+      "CD Palencia Balompié",
+      "Palencia Club de Fútbol",
+      "Athletic Palencia",
+      "CF Palencia Industrial"
+    ],
+    "correcta": "B",
+    "dificultad": 3,
+    "dato": "El Palencia CF alcanzó la 2ª División A en 1962-63. El CD Palencia Balompié (2011-2019) jugó en 2ª B.",
+    "tiempo": 10
+  },
+  {
+    "id": 15,
+    "ronda": "veloz",
+    "categoria": "geografia",
+    "pregunta": "¿Qué comarca palentina es famosa por sus lagunas y es paraíso de aves acuáticas?",
+    "opciones": [
+      "La Lora",
+      "Las Loras",
+      "La Nava",
+      "Ojeda"
+    ],
+    "correcta": "C",
+    "dificultad": 3,
+    "dato": "La comarca de La Nava alberga la Laguna de La Nava de Campos, un humedal de importancia internacional para aves migratorias.",
+    "tiempo": 10
+  },
+  {
+    "id": 16,
+    "ronda": "veloz",
+    "categoria": "cultura_pop",
+    "pregunta": "¿Qué escritor, Premio Nobel, tiene fuertes vínculos con Castilla y pasó por Palencia?",
+    "opciones": [
+      "Camilo José Cela",
+      "Miguel de Unamuno",
+      "José Saramago",
+      "Mario Vargas Llosa"
+    ],
+    "correcta": "B",
+    "dificultad": 2,
+    "dato": "Unamuno fue catedrático en Salamanca y recorrió Castilla, describiendo paisajes que incluyen la meseta palentina en sus obras.",
+    "tiempo": 10
+  },
+  {
+    "id": 17,
+    "ronda": "veloz",
+    "categoria": "tradiciones",
+    "pregunta": "¿Qué tradición palentina consiste en adornar las calles con ramas de árboles?",
+    "opciones": [
+      "Las Fallas",
+      "Los Mayos",
+      "Las Enramadas",
+      "La Verbena de la Paloma"
+    ],
+    "correcta": "C",
+    "dificultad": 2,
+    "dato": "Las Enramadas de Palencia se celebran el 13 de junio, víspera de San Antonio. Se adornan calles con ramas de chopo y álamo.",
+    "tiempo": 10
+  },
+  {
+    "id": 18,
+    "ronda": "veloz",
+    "categoria": "historia",
+    "pregunta": "¿Qué cueva con grabados rupestres debe su nombre a soldados franceses y está en Revilla de Pomar?",
+    "opciones": [
+      "Cueva de los Franceses",
+      "Cueva de las Monedas",
+      "Cueva del Agua",
+      "Cueva de los Murciélagos"
+    ],
+    "correcta": "A",
+    "dificultad": 3,
+    "dato": "La Cueva de los Franceses (Revilla de Pomar) contiene grabados rupestres y debe su nombre a soldados franceses napoleónicos.",
+    "tiempo": 10
+  },
+  {
+    "id": 19,
+    "ronda": "veloz",
+    "categoria": "gastronomia",
+    "pregunta": "¿Cómo se llaman los dulces tradicionales de Palencia, hechos de hojaldre de mantequilla con forma de P?",
+    "opciones": [
+      "Palentinos",
+      "Hojaldres de San Antolín",
+      "P de mantequilla",
+      "Canastillos palentinos"
+    ],
+    "correcta": "A",
+    "dificultad": 2,
+    "dato": "Los 'Palentinos' son un dulce de hojaldre de mantequilla en forma de P, típicos de la repostería palentina.",
+    "tiempo": 10
+  },
+  {
+    "id": 20,
+    "ronda": "veloz",
+    "categoria": "monumentos",
+    "pregunta": "¿Qué escultor palentino es autor del Cristo del Otero y está enterrado bajo él?",
+    "opciones": [
+      "Eduardo Chillida",
+      "Victorio Macho",
+      "Mariano Benlliure",
+      "Pablo Gargallo"
+    ],
+    "correcta": "B",
+    "dificultad": 1,
+    "dato": "Victorio Macho (1887-1966) es el escultor más universal de Palencia. Pidió ser enterrado a los pies de su Cristo del Otero.",
+    "tiempo": 10
+  },
+  {
+    "id": 21,
+    "ronda": "imagen",
+    "categoria": "monumentos",
+    "pregunta": "[IMAGEN] Iglesia de tres naves con portada románica de arquivoltas, en un pueblo del Camino de Santiago. ¿Qué iglesia es?",
+    "opciones": [
+      "San Martín de Frómista",
+      "San Zoilo de Carrión",
+      "Santa María de Becerril",
+      "Santiago de Wamba"
+    ],
+    "correcta": "A",
+    "dificultad": 2,
+    "dato": "San Martín de Frómista (siglo XI) es considerada una de las mejores iglesias románicas de España. Financiada por Doña Mayor, esposa de Alfonso V.",
+    "tiempo": 15
+  },
+  {
+    "id": 22,
+    "ronda": "imagen",
+    "categoria": "naturaleza",
+    "pregunta": "[IMAGEN] Formación rocosa caliza con ojos de agua que nace un río importante. ¿Dónde está?",
+    "opciones": [
+      "Hoz de Jaca",
+      "Fuentes Carrionas",
+      "Las Tuerces",
+      "Picos de Europa"
+    ],
+    "correcta": "B",
+    "dificultad": 2,
+    "dato": "Las Fuentes Carrionas, a 2.000m de altitud en la Montaña Palentina, es donde nace el río Carrión con múltiples manantiales.",
+    "tiempo": 15
+  },
+  {
+    "id": 23,
+    "ronda": "imagen",
+    "categoria": "monumentos",
+    "pregunta": "[IMAGEN] Gran estatua de Cristo con los brazos abiertos sobre un cerro con vistas a la ciudad. ¿Cuánto mide?",
+    "opciones": [
+      "12 metros",
+      "15 metros",
+      "20 metros",
+      "25 metros"
+    ],
+    "correcta": "C",
+    "dificultad": 2,
+    "dato": "El Cristo del Otero mide 20 metros de altura sobre un pedestal de 6 metros. Se puede ver desde kilómetros de distancia.",
+    "tiempo": 15
+  },
+  {
+    "id": 24,
+    "ronda": "imagen",
+    "categoria": "monumentos",
+    "pregunta": "[IMAGEN] Canal de navegación con esclusas de piedra y puentes de arco. ¿Cuántos kilómetros mide en la provincia de Palencia?",
+    "opciones": [
+      "50 km",
+      "80 km",
+      "115 km",
+      "150 km"
+    ],
+    "correcta": "C",
+    "dificultad": 3,
+    "dato": "De los 207 km totales del Canal de Castilla, unos 115 km discurren por la provincia de Palencia con 22 esclusas.",
+    "tiempo": 15
+  },
+  {
+    "id": 25,
+    "ronda": "imagen",
+    "categoria": "geografia",
+    "pregunta": "[IMAGEN] Paisaje llano con campos de cereal hasta el horizonte, interrumpido por torres medievales. ¿Qué comarca es?",
+    "opciones": [
+      "La Montaña",
+      "Tierra de Campos",
+      "El Cerrato",
+      "La Nava"
+    ],
+    "correcta": "B",
+    "dificultad": 2,
+    "dato": "Tierra de Campos es la comarca más extensa de Palencia, conocida como 'el granero de Castilla'. Sus campos infinitos son su seña de identidad.",
+    "tiempo": 15
+  },
+  {
+    "id": 26,
+    "ronda": "imagen",
+    "categoria": "monumentos",
+    "pregunta": "[IMAGEN] Monasterio con claustro de dos pisos y portada románica, en un pueblo del Camino. ¿Cuál es?",
+    "opciones": [
+      "Monasterio de San Zoilo",
+      "Monasterio de Santo Toribio",
+      "Monasterio de Sahagún",
+      "Monasterio de Santa María la Real"
+    ],
+    "correcta": "A",
+    "dificultad": 3,
+    "dato": "San Zoilo de Carrión de los Condes tiene un impresionante claustro renacentista sobre base románica del siglo XI.",
+    "tiempo": 15
+  },
+  {
+    "id": 27,
+    "ronda": "imagen",
+    "categoria": "naturaleza",
+    "pregunta": "[IMAGEN] Pueblo de casas de piedra roja junto a un embalse en la montaña. ¿Qué pueblo es?",
+    "opciones": [
+      "Cervera de Pisuerga",
+      "Aguilar de Campoo",
+      "Guardo",
+      "Riaño"
+    ],
+    "correcta": "B",
+    "dificultad": 2,
+    "dato": "Aguilar de Campoo, junto al embalse del mismo nombre, es famoso por su castillo y sus casas de piedra rojiza.",
+    "tiempo": 15
+  },
+  {
+    "id": 28,
+    "ronda": "imagen",
+    "categoria": "monumentos",
+    "pregunta": "¿Qué puente medieval de Palencia fue reformado con un arco central en 1500 para la visita de Felipe I?",
+    "opciones": [
+      "Puente Mayor",
+      "Puente de Hierro",
+      "Puente de Villalobón",
+      "Puente de Castilla"
+    ],
+    "correcta": "A",
+    "dificultad": 2,
+    "dato": "El Puente Mayor de Palencia tiene un arco central de 1500. El puente original es medieval.",
+    "tiempo": 15
+  },
+  {
+    "id": 29,
+    "ronda": "imagen",
+    "categoria": "naturaleza",
+    "pregunta": "[IMAGEN] Vega verde con chopos y el Canal de Castilla reflejando el agua. ¿Qué zona es?",
+    "opciones": [
+      "Vega de Simancas",
+      "Vega de Valdelucio",
+      "Las Vegas de Palencia",
+      "Páramos de Poza"
+    ],
+    "correcta": "B",
+    "dificultad": 3,
+    "dato": "La Vega de Valdelucio, en el norte de la provincia, es un valle verde entre montañas con un paisaje muy diferente al secano palentino.",
+    "tiempo": 15
+  },
+  {
+    "id": 30,
+    "ronda": "imagen",
+    "categoria": "monumentos",
+    "pregunta": "[IMAGEN] Castillo medieval en lo alto de un cerro, dominando un pueblo de casas encaladas. ¿En qué pueblo está?",
+    "opciones": [
+      "Castillo de Ampudia",
+      "Castillo de Astudillo",
+      "Castillo de Duenas",
+      "Castillo de Gormaz"
+    ],
+    "correcta": "A",
+    "dificultad": 2,
+    "dato": "El castillo de Ampudia es una fortaleza del siglo XV que domina la comarca del Cerrato. Actualmente alberga un museo.",
+    "tiempo": 15
+  },
+  {
+    "id": 31,
+    "ronda": "imagen",
+    "categoria": "naturaleza",
+    "pregunta": "[IMAGEN] Hayedo (bosque de hayas) con árboles centenarios en la montaña palentina. ¿Cuál es el más famoso?",
+    "opciones": [
+      "Hayedo de Montejo",
+      "Hayedo de Tejeda",
+      "Hayedo de Riaño",
+      "Hayedo de Santa María de las Hoyas"
+    ],
+    "correcta": "D",
+    "dificultad": 3,
+    "dato": "El hayedo de Santa María de las Hoyas, cerca de Cervera de Pisuerga, es uno de los hayedos más meridionales de Europa.",
+    "tiempo": 15
+  },
+  {
+    "id": 32,
+    "ronda": "imagen",
+    "categoria": "monumentos",
+    "pregunta": "[IMAGEN] Iglesia con fachada plateresca y torre renacentista en la plaza mayor de un pueblo palentino. ¿Dónde?",
+    "opciones": [
+      "Iglesia de Santa Cecilia en Becerril",
+      "Colegiata de San Miguel en Ampudia",
+      "Iglesia de Santa María en Frómista",
+      "Iglesia de San Juan en Herrera"
+    ],
+    "correcta": "B",
+    "dificultad": 3,
+    "dato": "La Colegiata de San Miguel en Ampudia es una joya del gótico-renacentista con una impresionante portada plateresca.",
+    "tiempo": 15
+  },
+  {
+    "id": 33,
+    "ronda": "imagen",
+    "categoria": "geografia",
+    "pregunta": "[IMAGEN] Laguna artificial rodeada de juncos y aves acuáticas en plena meseta. ¿Qué humedal es?",
+    "opciones": [
+      "Laguna de la Nava",
+      "Laguna de Piedras",
+      "Laguna de los Oteros",
+      "Laguna de Valdescasa"
+    ],
+    "correcta": "A",
+    "dificultad": 2,
+    "dato": "La Laguna de la Nava de Campos era el mayor lago de Castilla y León antes de su desecación parcial. Hoy se está recuperando.",
+    "tiempo": 15
+  },
+  {
+    "id": 34,
+    "ronda": "imagen",
+    "categoria": "monumentos",
+    "pregunta": "[IMAGEN] Arco romano de piedra en medio de un pueblo. ¿Qué monumento es y dónde?",
+    "opciones": [
+      "Arco de Medinaceli",
+      "Arco Romano de Cerrato",
+      "Puerta de San Basilio en Palencia",
+      "Arco de la Villa en Sahagún"
+    ],
+    "correcta": "C",
+    "dificultad": 3,
+    "dato": "La Puerta de San Basilio, también conocida como Arco Romano, es el único resto de la muralla medieval de Palencia.",
+    "tiempo": 15
+  },
+  {
+    "id": 35,
+    "ronda": "imagen",
+    "categoria": "naturaleza",
+    "pregunta": "[IMAGEN] Cascada de agua entre rocas calizas en la Montaña Palentina. ¿Cómo se llama?",
+    "opciones": [
+      "Cascada del Naranjo de Bulnes",
+      "Cascada de las Cercas",
+      "Cascada de Orbaneja del Castillo",
+      "Cascada de Pisuerga"
+    ],
+    "correcta": "B",
+    "dificultad": 3,
+    "dato": "Las Cercas de Ruesga es una cascada natural en la Montaña Palentina, accesible tras una ruta senderista.",
+    "tiempo": 15
+  },
+  {
+    "id": 36,
+    "ronda": "curiosidades",
+    "categoria": "datos_insólitos",
+    "pregunta": "¿Qué idioma se hablaba en Palencia antes de la llegada del latín?",
+    "opciones": [
+      "Árabe",
+      "Euskera",
+      "Vasco-ibérico",
+      "Celta"
+    ],
+    "correcta": "C",
+    "dificultad": 3,
+    "dato": "Los vacceos, pueblo prerromano de la zona, hablaban una lengua celta-related. Topónimos como 'Pisuerga' tienen raíces indoeuropeas antiguas.",
+    "tiempo": 15
+  },
+  {
+    "id": 37,
+    "ronda": "curiosidades",
+    "categoria": "datos_insólitos",
+    "pregunta": "¿Qué porcentaje de la provincia de Palencia está dedicado a agricultura?",
+    "opciones": [
+      "Alrededor del 40%",
+      "Alrededor del 55%",
+      "Alrededor del 70%",
+      "Alrededor del 85%"
+    ],
+    "correcta": "C",
+    "dificultad": 2,
+    "dato": "Cerca del 70% del territorio provincial es terreno agrícola, mayoritariamente cerealistas. Es una de las provincias más agrícolas de España.",
+    "tiempo": 15
+  },
+  {
+    "id": 38,
+    "ronda": "curiosidades",
+    "categoria": "historia",
+    "pregunta": "¿Qué reina castellana murió en Palencia en 1109 y fue madre de Alfonso VII el Emperador?",
+    "opciones": [
+      "Doña Urraca",
+      "Doña Jimena",
+      "Doña Sancha",
+      "Doña Leonor"
+    ],
+    "correcta": "A",
+    "dificultad": 3,
+    "dato": "Doña Urraca, reina de León y Castilla, falleció en Palencia en 1109. Es una de las mujeres más poderosas de la Edad Media española.",
+    "tiempo": 15
+  },
+  {
+    "id": 39,
+    "ronda": "curiosidades",
+    "categoria": "naturaleza",
+    "pregunta": "¿Cuántas especies de aves se han catalogado en la Laguna de la Nava?",
+    "opciones": [
+      "Más de 100",
+      "Más de 150",
+      "Más de 200",
+      "Más de 250"
+    ],
+    "correcta": "C",
+    "dificultad": 3,
+    "dato": "En la Laguna de la Nava y su entorno se han registrado más de 200 especies de aves, siendo punto clave para la migración.",
+    "tiempo": 15
+  },
+  {
+    "id": 40,
+    "ronda": "curiosidades",
+    "categoria": "gastronomia",
+    "pregunta": "¿Qué embutido curado se elabora tradicionalmente en la Montaña Palencia?",
+    "opciones": [
+      "Chorizo palentino",
+      "Longaniza de Pisuerga",
+      "Sobrasada de la Montaña",
+      "Lomo embuchado palentino"
+    ],
+    "correcta": "B",
+    "dificultad": 3,
+    "dato": "La longaniza de Pisuerga y otros embutidos curados son tradicionales en la Montaña Palentina.",
+    "tiempo": 15
+  },
+  {
+    "id": 41,
+    "ronda": "curiosidades",
+    "categoria": "historia",
+    "pregunta": "¿Qué código medieval del siglo XI influyó en los fueros de muchos pueblos castellanos?",
+    "opciones": [
+      "Fuero de León",
+      "Fuero de Nájera",
+      "Fuero de Avilés",
+      "Fuero Juzgo"
+    ],
+    "correcta": "B",
+    "dificultad": 3,
+    "dato": "El Fuero de Nájera (1052) influyó en los fueros de muchos pueblos de Castilla, incluyendo la zona palentina.",
+    "tiempo": 15
+  },
+  {
+    "id": 42,
+    "ronda": "curiosidades",
+    "categoria": "datos_insólitos",
+    "pregunta": "¿Qué distancia recorre el Canal de Castilla solo con la fuerza de la gravedad, sin bombas?",
+    "opciones": [
+      "50 km",
+      "100 km",
+      "Toda su longitud",
+      "No usa gravedad"
+    ],
+    "correcta": "B",
+    "dificultad": 3,
+    "dato": "El Canal de Castilla aprovecha un desnivel de 150 metros para mover el agua por gravedad durante unos 100 km de su recorrido.",
+    "tiempo": 15
+  },
+  {
+    "id": 43,
+    "ronda": "curiosidades",
+    "categoria": "naturaleza",
+    "pregunta": "¿Qué animal, extinto en el resto de España, sobrevivió en los montes de Palencia hasta el siglo XIX?",
+    "opciones": [
+      "Oso pardo",
+      "Lince ibérico",
+      "Uro",
+      "Lobo"
+    ],
+    "correcta": "A",
+    "dificultad": 2,
+    "dato": "El oso pardo cantábrico se refugió en la Cordillera Cantábrica (que incluye la Montaña Palentina) cuando desapareció del resto de la Península.",
+    "tiempo": 15
+  },
+  {
+    "id": 44,
+    "ronda": "curiosidades",
+    "categoria": "historia",
+    "pregunta": "¿Qué pueblo palentino, clave del Camino Francés, toma su nombre de 'Sancti Facundi'?",
+    "opciones": [
+      "Frómista",
+      "Carrión de los Condes",
+      "Sahagún",
+      "Calzadilla de la Cueza"
+    ],
+    "correcta": "C",
+    "dificultad": 3,
+    "dato": "Sahagún deriva de 'Sancti Facundi' (San Facundo) y es un punto clave del Camino Francés.",
+    "tiempo": 15
+  },
+  {
+    "id": 45,
+    "ronda": "curiosidades",
+    "categoria": "datos_insólitos",
+    "pregunta": "¿Cuántas esclusas tiene el Canal de Castilla en todo su recorrido?",
+    "opciones": [
+      "35",
+      "49",
+      "62",
+      "78"
+    ],
+    "correcta": "B",
+    "dificultad": 3,
+    "dato": "El Canal de Castilla tiene 49 esclusas distribuidas en tres ramos: Norte (24), Sur (18) y Campos (7).",
+    "tiempo": 15
+  },
+  {
+    "id": 46,
+    "ronda": "curiosidades",
+    "categoria": "gastronomia",
+    "pregunta": "¿Qué plato palentino se elabora con pan duro, ajo y caldo, y era comida de pastores?",
+    "opciones": [
+      "Sopa de ajo",
+      "Sopa castellana",
+      "Sopa de pastor palentina",
+      "Gazpacho"
+    ],
+    "correcta": "B",
+    "dificultad": 1,
+    "dato": "La sopa castellana (sopa de ajo) es un plato humilde de pastores que se ha convertido en clásico de la gastronomía palentina y castellana.",
+    "tiempo": 15
+  },
+  {
+    "id": 47,
+    "ronda": "curiosidades",
+    "categoria": "monumentos",
+    "pregunta": "¿Qué museo de Palencia alberga una de las mejores colecciones de arte románico de España?",
+    "opciones": [
+      "Museo del Prado",
+      "Museo de Palencia",
+      "Museo de Arte Románico de Aguilar de Campoo",
+      "Museo Arqueológico de Valladolid"
+    ],
+    "correcta": "C",
+    "dificultad": 2,
+    "dato": "El Museo de Arte Románico de Aguilar de Campoo está considerado el mejor dedicado exclusivamente al arte románico en España.",
+    "tiempo": 15
+  },
+  {
+    "id": 48,
+    "ronda": "curiosidades",
+    "categoria": "deportes",
+    "pregunta": "¿Qué estación de esquí cerca de Palencia lleva décadas como proyecto sin construirse?",
+    "opciones": [
+      "San Glorio",
+      "Fuentes de Invierno",
+      "Leitariegos",
+      "Valgrande-Pajares"
+    ],
+    "correcta": "A",
+    "dificultad": 2,
+    "dato": "San Glorio es un proyecto de estación de esquí que nunca se construyó, generando gran polémica ecologista.",
+    "tiempo": 15
+  },
+  {
+    "id": 49,
+    "ronda": "curiosidades",
+    "categoria": "datos_insólitos",
+    "pregunta": "¿Qué provincia es la más despoblada de Castilla y León por km²?",
+    "opciones": [
+      "Soria",
+      "Palencia",
+      "Zamora",
+      "Ávila"
+    ],
+    "correcta": "B",
+    "dificultad": 2,
+    "dato": "Palencia tiene aproximadamente 22 habitantes por km², siendo una de las provincias menos densamente pobladas de España. Solo por detrás de Soria en la comunidad.",
+    "tiempo": 15
+  },
+  {
+    "id": 50,
+    "ronda": "curiosidades",
+    "categoria": "tradiciones",
+    "pregunta": "¿Qué danza tradicional palentina se ejecuta con palos y se baila en fiestas patronales?",
+    "opciones": [
+      "Jota aragonesa",
+      "Danza de los Zancos",
+      "Danza de las Cintas",
+      "Paloteo"
+    ],
+    "correcta": "D",
+    "dificultad": 2,
+    "dato": "El paloteo es una danza tradicional castellana donde los bailarines golpean palos rítmicamente. Se baila en varias localidades palentinas.",
+    "tiempo": 15
+  },
+  {
+    "id": 51,
+    "ronda": "profunda",
+    "categoria": "historia",
+    "pregunta": "¿Qué obispo de Palencia impulsó la construcción de la catedral gótica en el siglo XIV?",
+    "opciones": [
+      "Obispo de Astorga",
+      "Obispo Juan Infantes",
+      "Obispo Pedro de Castilla",
+      "Obispo Fonseca"
+    ],
+    "correcta": "B",
+    "dificultad": 4,
+    "dato": "El obispo Juan Infantes promovió la construcción de la catedral gótica de Palencia en el siglo XIV, reemplazando la anterior románica.",
+    "tiempo": 20
+  },
+  {
+    "id": 52,
+    "ronda": "profunda",
+    "categoria": "monumentos",
+    "pregunta": "¿Qué estilo arquitectónico predomina en la Catedral de Palencia?",
+    "opciones": [
+      "Románico",
+      "Gótico",
+      "Renacentista",
+      "Barroco"
+    ],
+    "correcta": "B",
+    "dificultad": 2,
+    "dato": "La Catedral de Palencia es un templo mayoritariamente gótico (siglos XIV-XVI), aunque conserva elementos románicos y renacentistas.",
+    "tiempo": 20
+  },
+  {
+    "id": 53,
+    "ronda": "profunda",
+    "categoria": "historia",
+    "pregunta": "¿Qué rey nació en la localidad palentina de Dueñas?",
+    "opciones": [
+      "Felipe II",
+      "Carlos I",
+      "Fernando el Católico",
+      "Alfonso XIII"
+    ],
+    "correcta": "C",
+    "dificultad": 3,
+    "dato": "Fernando el Católico nació en Dueñas (Palencia) en 1452, aunque pasó su infancia entre那里 y Aragón.",
+    "tiempo": 20
+  },
+  {
+    "id": 54,
+    "ronda": "profunda",
+    "categoria": "geografia",
+    "pregunta": "¿Cuántos municipios tiene la provincia de Palencia?",
+    "opciones": [
+      "152",
+      "191",
+      "219",
+      "245"
+    ],
+    "correcta": "C",
+    "dificultad": 3,
+    "dato": "La provincia de Palencia tiene 191 municipios, aunque muchos tienen menos de 100 habitantes. Es la 4ª provincia más grande de Castilla y León.",
+    "tiempo": 20
+  },
+  {
+    "id": 55,
+    "ronda": "profunda",
+    "categoria": "naturaleza",
+    "pregunta": "¿A qué altura máxima se encuentran las Fuentes Carrionas, nacimiento del Carrión?",
+    "opciones": [
+      "1.500 metros",
+      "1.800 metros",
+      "2.220 metros",
+      "2.538 metros"
+    ],
+    "correcta": "C",
+    "dificultad": 4,
+    "dato": "Las Fuentes Carrionas están a 2.220m de altitud, donde nace el río Carrión.",
+    "tiempo": 20
+  },
+  {
+    "id": 56,
+    "ronda": "profunda",
+    "categoria": "historia",
+    "pregunta": "¿Qué batalla medieval, conocida como 'la mayor batalla de la Reconquista', se libró en tierras palentinas?",
+    "opciones": [
+      "Batalla de Simancas",
+      "Batalla de Calatañazor",
+      "Batalla de Atapuerca",
+      "Batalla de Tamarón"
+    ],
+    "correcta": "D",
+    "dificultad": 4,
+    "dato": "La Batalla de Tamarón (1037) entre Fernando I de Castilla y Vermudo III de León se libró cerca de Tamarón (Burgos/Palencia).",
+    "tiempo": 20
+  },
+  {
+    "id": 57,
+    "ronda": "profunda",
+    "categoria": "monumentos",
+    "pregunta": "¿Qué sarcófago romano del siglo IV se encuentra en la iglesia de San Juan Bautista de Palencia?",
+    "opciones": [
+      "Sarcófago de los Hermanos",
+      "Sarcófago de Santa Eulalia",
+      "Sarcófago de los Potros",
+      "Sarcófago de Hispania"
+    ],
+    "correcta": "A",
+    "dificultad": 4,
+    "dato": "El Sarcófago de los Hermanos (siglo IV d.C.) es un sarcófago paleocristiano con relieves que se conserva en la iglesia de San Juan Bautista.",
+    "tiempo": 20
+  },
+  {
+    "id": 58,
+    "ronda": "profunda",
+    "categoria": "geografia",
+    "pregunta": "¿Qué comarca palentina limita con Burgos, Valladolid y León simultáneamente?",
+    "opciones": [
+      "Tierra de Campos",
+      "El Cerrato",
+      "La Nava",
+      "Boedo-Ojeda"
+    ],
+    "correcta": "A",
+    "dificultad": 3,
+    "dato": "Tierra de Campos es la comarca más extensa y limita con las tres provincias vecinas, extendiéndose también por Valladolid y Zamora.",
+    "tiempo": 20
+  },
+  {
+    "id": 59,
+    "ronda": "profunda",
+    "categoria": "gastronomia",
+    "pregunta": "¿Qué queso palentino se elabora con leche de oveja en los pueblos de la Montaña?",
+    "opciones": [
+      "Queso de Valdeón",
+      "Queso de Burgos",
+      "Queso de oveja palentino",
+      "Queso de los Ancares"
+    ],
+    "correcta": "C",
+    "dificultad": 3,
+    "dato": "El queso de oveja palentino, elaborado artesanalmente en la Montaña Palentina, es un queso curado con sabor intenso.",
+    "tiempo": 20
+  },
+  {
+    "id": 60,
+    "ronda": "profunda",
+    "categoria": "historia",
+    "pregunta": "¿Qué monasterio palentino fue uno de los más importantes del Camino de Santiago en la Edad Media?",
+    "opciones": [
+      "San Zoilo de Carrión",
+      "Santo Toribio de Liébana",
+      "San Millán de la Cogolla",
+      "Silos"
+    ],
+    "correcta": "A",
+    "dificultad": 2,
+    "dato": "El Monasterio de San Zoilo de Carrión de los Condes fue un importante hospital de peregrinos y centro de poder en la Edad Media.",
+    "tiempo": 20
+  },
+  {
+    "id": 61,
+    "ronda": "profunda",
+    "categoria": "naturaleza",
+    "pregunta": "¿Qué especie de árbol, relicto de la Era Terciaria, crece en los bosques de la Montaña Palentina?",
+    "opciones": [
+      "Tejo",
+      "Acebo",
+      "Abeto rojo",
+      "Pino laricio"
+    ],
+    "correcta": "B",
+    "dificultad": 4,
+    "dato": "El acebo (Ilex aquifolium) es un relicto de la Era Terciaria que encuentra refugio en los bosques húmedos de la Montaña Palentina.",
+    "tiempo": 20
+  },
+  {
+    "id": 62,
+    "ronda": "profunda",
+    "categoria": "personajes",
+    "pregunta": "¿Qué santo, patrón de Palencia, dio nombre a la antigua 'Iglesia de San Antolín'?",
+    "opciones": [
+      "San Antolín",
+      "San Froilán",
+      "San Toribio",
+      "San Isidoro"
+    ],
+    "correcta": "A",
+    "dificultad": 1,
+    "dato": "San Antolín (San Antolin) es el patrón de Palencia. La Iglesia de San Antolín fue la catedral primitiva antes de la actual.",
+    "tiempo": 20
+  },
+  {
+    "id": 63,
+    "ronda": "profunda",
+    "categoria": "historia",
+    "pregunta": "¿En qué año se inauguró oficialmente el Canal de Castilla para navegación?",
+    "opciones": [
+      "1753",
+      "1791",
+      "1849",
+      "1873"
+    ],
+    "correcta": "B",
+    "dificultad": 4,
+    "dato": "En 1791 se completó el tramo inferior del Canal. La navegación comenzó en 1792.",
+    "tiempo": 20
+  },
+  {
+    "id": 64,
+    "ronda": "profunda",
+    "categoria": "geografia",
+    "pregunta": "¿Qué pueblo palentino es el más alto de la provincia?",
+    "opciones": [
+      "Cervera de Pisuerga",
+      "Barruelo de Santullán",
+      "Brañosera",
+      "Castillería"
+    ],
+    "correcta": "B",
+    "dificultad": 4,
+    "dato": "Barruelo de Santullán, en la comarca de la Montaña, es uno de los pueblos más altos de la provincia, situado a más de 1.100 metros.",
+    "tiempo": 20
+  },
+  {
+    "id": 65,
+    "ronda": "profunda",
+    "categoria": "datos_insólitos",
+    "pregunta": "¿Qué 'camino' histórico distinto al de Santiago cruza Palencia de sur a norte?",
+    "opciones": [
+      "Camino de la Lana",
+      "Camino del Ebro",
+      "Vía de la Plata",
+      "Camino Lebaniego"
+    ],
+    "correcta": "A",
+    "dificultad": 4,
+    "dato": "El Camino de la Lana unía Cuenca con Burgos pasando por Palencia, usado por los pastores trashumantes.",
+    "tiempo": 20
+  },
+  {
+    "id": 66,
+    "ronda": "desafio",
+    "categoria": "gastronomia",
+    "pregunta": "[DESAFÍO] El presentador enseña un plato de lechazo. ¿Cuánto tiempo aproximado de horneado necesita un lechazo de 8-10 kg?",
+    "opciones": [
+      "1 hora",
+      "1,5 horas",
+      "2 horas",
+      "3 horas"
+    ],
+    "correcta": "C",
+    "dificultad": 2,
+    "dato": "El lechazo asado tradicional se hornea unos 2 horas a fuego medio-bajo en horno de leña. La clave es la cocción lenta.",
+    "tiempo": 15
+  },
+  {
+    "id": 67,
+    "ronda": "desafio",
+    "categoria": "geografia",
+    "pregunta": "[DESAFÍO] Sin mirar un mapa: ¿en qué dirección queda la Montaña Palentina desde la capital?",
+    "opciones": [
+      "Norte",
+      "Sur",
+      "Este",
+      "Oeste"
+    ],
+    "correcta": "A",
+    "dificultad": 1,
+    "dato": "La Montaña Palentina está al norte de la provincia, en la Cordillera Cantábrica, a unos 100 km de la capital.",
+    "tiempo": 10
+  },
+  {
+    "id": 68,
+    "ronda": "desafio",
+    "categoria": "monumentos",
+    "pregunta": "[DESAFÍO] El presentador muestra una foto del Cristo del Otero de noche iluminado. ¿En qué cerro se encuentra?",
+    "opciones": [
+      "Cerro del Cristo",
+      "Cerro de San Miguel",
+      "Cerro de Villalobón",
+      "Cerro del Castillo"
+    ],
+    "correcta": "A",
+    "dificultad": 2,
+    "dato": "El Cristo del Otero se encuentra en el cerro homónimo, al noreste de la ciudad, a unos 843 metros de altitud.",
+    "tiempo": 10
+  },
+  {
+    "id": 69,
+    "ronda": "desafio",
+    "categoria": "tradiciones",
+    "pregunta": "[DESAFÍO RETO] Un miembro de cada equipo debe imitar el sonido del tambor de Semana Santa de Palencia durante 10 segundos. El mejor gana puntos extra. ¿Desde qué día empiezan los tambores?",
+    "opciones": [
+      "Miércoles Santo",
+      "Jueves Santo",
+      "Viernes Santo",
+      "Domingo de Ramos"
+    ],
+    "correcta": "A",
+    "dificultad": 2,
+    "dato": "Los tambores de Palencia suenan desde el Miércoles Santo por la tarde, cuando se rompe el silencio con la 'llamada'.",
+    "tiempo": 20
+  },
+  {
+    "id": 70,
+    "ronda": "desafio",
+    "categoria": "historia",
+    "pregunta": "[DESAFÍO] ¿En qué siglo se construyó el primer puente sobre el Carrión en Palencia?",
+    "opciones": [
+      "Siglo X",
+      "Siglo XI",
+      "Siglo XII",
+      "Siglo XIII"
+    ],
+    "correcta": "B",
+    "dificultad": 3,
+    "dato": "El primer puente documentado sobre el Carrión data del siglo XI, aunque ha sido reconstruido múltiples veces.",
+    "tiempo": 15
+  },
+  {
+    "id": 71,
+    "ronda": "desafio",
+    "categoria": "gastronomia",
+    "pregunta": "[DESAFÍO RETO] El presentador sirve una muestra de morcilla palentina a ciegas. ¿Qué ingrediente la diferencia de otras morcillas?",
+    "opciones": [
+      "Pimentón",
+      "Arroz",
+      "Piñones",
+      "Cebolla"
+    ],
+    "correcta": "B",
+    "dificultad": 2,
+    "dato": "La morcilla de Palencia se distingue por llevar arroz como ingrediente principal, a diferencia de otras que llevan cebolla o piñones.",
+    "tiempo": 20
+  },
+  {
+    "id": 72,
+    "ronda": "desafio",
+    "categoria": "naturaleza",
+    "pregunta": "[DESAFÍO] ¿Cuántas especies de anfibios viven en los humedales palentinos?",
+    "opciones": [
+      "Más de 5",
+      "Más de 10",
+      "Más de 15",
+      "Más de 20"
+    ],
+    "correcta": "C",
+    "dificultad": 3,
+    "dato": "Los humedales de La Nava albergan más de 15 especies de anfibios, incluyendo el tritón palustre y la rana común.",
+    "tiempo": 15
+  },
+  {
+    "id": 73,
+    "ronda": "desafio",
+    "categoria": "geografia",
+    "pregunta": "[DESAFÍO] ¿Cuál es el pueblo más pequeño de Palencia por población?",
+    "opciones": [
+      "Villota del Páramo",
+      "San Cebrián de Campos",
+      "Valle de Valdeluce",
+      "Meneses de Campos"
+    ],
+    "correcta": "B",
+    "dificultad": 4,
+    "dato": "Varios pueblos palentinos tienen menos de 10 habitantes. San Cebrián de Campos y otros de la comarca de La Nava están entre los más pequeños.",
+    "tiempo": 20
+  },
+  {
+    "id": 74,
+    "ronda": "desafio",
+    "categoria": "monumentos",
+    "pregunta": "[DESAFÍO] ¿Cuántas iglesias románicas se pueden visitar en un radio de 30 km alrededor de Carrión de los Condes?",
+    "opciones": [
+      "5",
+      "10",
+      "Más de 15",
+      "Más de 20"
+    ],
+    "correcta": "C",
+    "dificultad": 3,
+    "dato": "La zona de Carrión de los Condes y Frómista concentra más de 15 iglesias románicas, formando uno de los conjuntos más importantes de España.",
+    "tiempo": 15
+  },
+  {
+    "id": 75,
+    "ronda": "desafio",
+    "categoria": "historia",
+    "pregunta": "[DESAFÍO RETO] Cada equipo debe escribir en un papel 3 reyes de Castilla relacionados con Palencia en 30 segundos. ¿Cuántos puntos si aciertan los 3?",
+    "opciones": [
+      "0 puntos (es la siguiente pregunta)",
+      "50 puntos extra",
+      "100 puntos extra",
+      "Dobla la puntuación de la ronda"
+    ],
+    "correcta": "C",
+    "dificultad": 2,
+    "dato": "Alfonso VIII, Fernando el Católico (nacido en Dueñas) y Doña Urraca (murió en Palencia) son tres reyes con vínculo directo.",
+    "tiempo": 30
+  },
+  {
+    "id": 76,
+    "ronda": "desafio",
+    "categoria": "naturaleza",
+    "pregunta": "[DESAFÍO] ¿Qué porcentaje de la provincia de Palencia está cubierto por bosques?",
+    "opciones": [
+      "10%",
+      "20%",
+      "30%",
+      "40%"
+    ],
+    "correcta": "B",
+    "dificultad": 3,
+    "dato": "Aproximadamente el 20% de la provincia está cubierto por masas forestales, principalmente pinar y robledal en la Montaña.",
+    "tiempo": 15
+  },
+  {
+    "id": 77,
+    "ronda": "desafio",
+    "categoria": "cultura_pop",
+    "pregunta": "[DESAFÍO] ¿Qué película o serie se ha rodado en localizaciones de la provincia de Palencia?",
+    "opciones": [
+      "El Cid",
+      "Doctor Zhivago",
+      "La lengua de las mariposas",
+      "El bueno, el feo y el malo"
+    ],
+    "correcta": "A",
+    "dificultad": 3,
+    "dato": "Partes de 'El Cid' (2024) se han rodado en localizaciones castellanoleonenses. Palencia ha sido escenario de varios rodajes históricos.",
+    "tiempo": 15
+  },
+  {
+    "id": 78,
+    "ronda": "desafio",
+    "categoria": "datos_insólitos",
+    "pregunta": "[DESAFÍO] ¿Cuál es la temperatura media anual en Palencia ciudad?",
+    "opciones": [
+      "10°C",
+      "12°C",
+      "14°C",
+      "16°C"
+    ],
+    "correcta": "A",
+    "dificultad": 3,
+    "dato": "Palencia tiene una temperatura media anual de unos 10-11°C, con inviernos fríos (-5°C) y veranos cálidos (30°C+).",
+    "tiempo": 15
+  },
+  {
+    "id": 79,
+    "ronda": "desafio",
+    "categoria": "gastronomia",
+    "pregunta": "[DESAFÍO RETO] El presentador muestra 3 quesos. ¿Cuál es de oveja palentina? (Prueba visual + cata)",
+    "opciones": [
+      "El más blanco y suave",
+      "El más curado y amarillento",
+      "El de pasta azul",
+      "El fresco y líquido"
+    ],
+    "correcta": "B",
+    "dificultad": 2,
+    "dato": "El queso de oveja palentino curado tiene una corteza amarillenta y sabor intenso, a diferencia de los quesos frescos de burgos.",
+    "tiempo": 30
+  },
+  {
+    "id": 80,
+    "ronda": "desafio",
+    "categoria": "historia",
+    "pregunta": "[DESAFÍO] ¿Qué famoso viajero del siglo XX escribió sobre los campos de Palencia en su libro 'Viaje al país de los campos'?",
+    "opciones": [
+      "Camilo José Cela",
+      "Juan Goytisolo",
+      "Julio Llamazares",
+      "Pío Baroja"
+    ],
+    "correcta": "A",
+    "dificultad": 4,
+    "dato": "Camilo José Cela viajó por Tierra de Campos y escribió sobre los paisajes palentinos en sus libros de viajes por Castilla.",
+    "tiempo": 20
   }
 ]
