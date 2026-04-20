@@ -6,6 +6,7 @@ extends Node
 
 signal config_changed()
 signal questions_file_changed(path: String)
+signal minigames_file_changed(path: String)
 
 const RES_CONFIG_PATH: String = "res://data/show_config.json"
 const USER_CONFIG_PATH: String = "user://show_config.json"
@@ -93,6 +94,7 @@ func _get_hardcoded_defaults() -> Dictionary:
 		"points_correct": 100,
 		"points_incorrect": 0,
 		"questions_file": "res://data/preguntas.json",
+		"minigames_file": "res://data/minijuegos.json",
 		"mqtt_host": "127.0.0.1",
 		"mqtt_port": 1883,
 	}
@@ -148,6 +150,10 @@ func get_points_incorrect() -> int:
 
 func get_questions_file() -> String:
 	return String(_config.get("questions_file", "res://data/preguntas.json"))
+
+
+func get_minigames_file() -> String:
+	return String(_config.get("minigames_file", "res://data/minijuegos.json"))
 
 
 func get_mqtt_host() -> String:
@@ -207,6 +213,13 @@ func set_questions_file(path: String) -> void:
 	_config["questions_file"] = path
 	if old != path:
 		emit_signal("questions_file_changed", path)
+
+
+func set_minigames_file(path: String) -> void:
+	var old: String = String(_config.get("minigames_file", ""))
+	_config["minigames_file"] = path
+	if old != path:
+		emit_signal("minigames_file_changed", path)
 
 
 func set_mqtt_host(value: String) -> void:

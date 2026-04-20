@@ -35,6 +35,7 @@ const PHASE_LOCKED_COLOR := Color("#fcd34d") # bright amber
 const PHASE_REVEAL_COLOR := Color("#6ee7a0") # bright mint green — survives washout as clear green
 const PHASE_CORRECT_COLOR := Color("#6ee7a0")
 const PHASE_INCORRECT_COLOR := Color("#fca5a5")
+const PHASE_MINIGAME_COLOR := Color("#fcd34d")
 
 const TEXT_BRIGHT := Color("#ffffff")          # PURE white — non-negotiable on projector
 const TEXT_DIM := Color("#c8d4e4")             # bright secondary — still clearly readable
@@ -65,6 +66,12 @@ const GLOW_ALPHA := 0.75                       # strong — perceived as ~0.25 a
 ## Dynamic nodes
 var _trivia_card: PanelContainer
 var _trivia_label: Label
+var _minigame_card: PanelContainer
+var _minigame_title: Label
+var _minigame_desc: Label
+var _minigame_material: Label
+var _minigame_rules: Label
+var _minigame_meta: Label
 
 ## ── Animation state ──────────────────────────────────────────────
 var _prev_phase: int = -1
@@ -143,6 +150,9 @@ func _apply_styles() -> void:
 
 	# Trivia card — shown only on REVEAL phase
 	_create_trivia_card()
+
+	# Minigame card — shown only on MINIGAME phase
+	_create_minigame_card()
 
 
 func _make_glow_card(bg: Color, border: Color, border_w: int, glow_color: Color = Color.TRANSPARENT, glow_size: int = 0) -> StyleBoxFlat:
@@ -227,6 +237,113 @@ func _render_trivia(state: GameState) -> void:
 	_trivia_label.text = "💡 %s" % question.trivia
 
 
+func _create_minigame_card() -> void:
+	var center_vbox: VBoxContainer = get_node_or_null("MarginContainer/RootVBox/CenterVBox")
+	if center_vbox == null:
+		push_warning("DisplayController: CenterVBox not found for minigame card")
+		return
+	_minigame_card = PanelContainer.new()
+	_minigame_card.name = "MinigameCard"
+	_minigame_card.visible = false
+	center_vbox.add_child(_minigame_card)
+
+	var margin: MarginContainer = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 32)
+	margin.add_theme_constant_override("margin_top", 20)
+	margin.add_theme_constant_override("margin_right", 32)
+	margin.add_theme_constant_override("margin_bottom", 20)
+	_minigame_card.add_child(margin)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 12)
+	margin.add_child(vbox)
+
+	_minigame_title = Label.new()
+	_minigame_title.name = "MgTitle"
+	_minigame_title.add_theme_font_size_override("font_size", 40)
+	_minigame_title.add_theme_color_override("font_color", PHASE_MINIGAME_COLOR)
+	_minigame_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_minigame_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_minigame_title.text = ""
+	vbox.add_child(_minigame_title)
+
+	_minigame_desc = Label.new()
+	_minigame_desc.name = "MgDesc"
+	_minigame_desc.add_theme_font_size_override("font_size", 28)
+	_minigame_desc.add_theme_color_override("font_color", TEXT_BRIGHT)
+	_minigame_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_minigame_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_minigame_desc.text = ""
+	vbox.add_child(_minigame_desc)
+
+	_minigame_material = Label.new()
+	_minigame_material.name = "MgMaterial"
+	_minigame_material.add_theme_font_size_override("font_size", 24)
+	_minigame_material.add_theme_color_override("font_color", TEXT_DIM)
+	_minigame_material.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_minigame_material.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_minigame_material.text = ""
+	vbox.add_child(_minigame_material)
+
+	_minigame_rules = Label.new()
+	_minigame_rules.name = "MgRules"
+	_minigame_rules.add_theme_font_size_override("font_size", 24)
+	_minigame_rules.add_theme_color_override("font_color", TEXT_DIM)
+	_minigame_rules.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_minigame_rules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_minigame_rules.text = ""
+	vbox.add_child(_minigame_rules)
+
+	_minigame_meta = Label.new()
+	_minigame_meta.name = "MgMeta"
+	_minigame_meta.add_theme_font_size_override("font_size", 24)
+	_minigame_meta.add_theme_color_override("font_color", PHASE_MINIGAME_COLOR)
+	_minigame_meta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_minigame_meta.text = ""
+	vbox.add_child(_minigame_meta)
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("#1a1500")
+	style.border_color = PHASE_MINIGAME_COLOR
+	style.set_border_width_all(BORDER_THICK)
+	style.set_corner_radius_all(CORNER_RADIUS)
+	style.shadow_color = Color(PHASE_MINIGAME_COLOR.r, PHASE_MINIGAME_COLOR.g, PHASE_MINIGAME_COLOR.b, 0.6)
+	style.shadow_size = 14
+	_minigame_card.add_theme_stylebox_override("panel", style)
+
+
+func _render_minigame_card(state: GameState) -> void:
+	if _minigame_card == null:
+		return
+	if state.phase != Enums.GamePhase.MINIGAME or state.current_minigame.id <= 0:
+		_minigame_card.visible = false
+		return
+	_minigame_card.visible = true
+	var mg: MiniGame = state.current_minigame
+	_minigame_title.text = "🎮 %s" % mg.nombre
+	_minigame_desc.text = mg.descripcion
+
+	if not mg.material.is_empty():
+		var bullets: String = ""
+		for item in mg.material:
+			bullets += "• %s  " % str(item)
+		_minigame_material.text = "📦 %s" % bullets
+	else:
+		_minigame_material.text = ""
+
+	if not mg.reglas.is_empty():
+		_minigame_rules.text = "📜 %s" % mg.reglas
+	else:
+		_minigame_rules.text = ""
+
+	var meta_parts: PackedStringArray = []
+	meta_parts.append("⏱ %ds" % mg.tiempo)
+	if not mg.participantes.is_empty():
+		meta_parts.append("👥 %s" % mg.participantes)
+	meta_parts.append("⭐ Dificultad: %d" % mg.dificultad)
+	_minigame_meta.text = "  ·  ".join(meta_parts)
+
+
 # ═══════════════════════════════════════════════════════════════════
 #  Main render pipeline
 # ═══════════════════════════════════════════════════════════════════
@@ -243,6 +360,7 @@ func _render_state(state: GameState) -> void:
 	_render_feedback(state)
 	_render_lock_info(state)
 	_render_trivia(state)
+	_render_minigame_card(state)
 
 	if phase_changed and _prev_phase >= 0:
 		_animate_phase_transition(state)
@@ -295,6 +413,9 @@ func _render_phase(state: GameState) -> void:
 		Enums.GamePhase.REVEAL:
 			phase_label.text = "REVELADA"
 			phase_color = PHASE_REVEAL_COLOR
+		Enums.GamePhase.MINIGAME:
+			phase_label.text = "MINIJUEGO"
+			phase_color = PHASE_MINIGAME_COLOR
 		_:
 			phase_label.text = "STANDBY"
 			phase_color = PHASE_IDLE_COLOR
@@ -310,6 +431,10 @@ func _render_phase(state: GameState) -> void:
 
 
 func _render_question(state: GameState, animate: bool = false) -> void:
+	if state.phase == Enums.GamePhase.MINIGAME:
+		question_text.text = ""
+		question_text.add_theme_color_override("font_color", TEXT_MUTED)
+		return
 	if state.current_question.text.is_empty():
 		question_text.text = "En instantes..."
 		question_text.add_theme_color_override("font_color", TEXT_MUTED)
@@ -321,6 +446,14 @@ func _render_question(state: GameState, animate: bool = false) -> void:
 
 
 func _render_options(state: GameState, phase_changed: bool = false) -> void:
+	# Hide options during MINIGAME phase
+	if state.phase == Enums.GamePhase.MINIGAME:
+		for label: Label in [opt_a, opt_b, opt_c, opt_d]:
+			label.text = ""
+		for card: PanelContainer in [opt_card_a, opt_card_b, opt_card_c, opt_card_d]:
+			_style_option_card(card, CARD_BG_DIM, CARD_BORDER, BORDER_NORMAL)
+		return
+
 	var options: PackedStringArray = state.current_question.options
 	var letters: Array[String] = ["A", "B", "C", "D"]
 	var labels: Array[Label] = [opt_a, opt_b, opt_c, opt_d]

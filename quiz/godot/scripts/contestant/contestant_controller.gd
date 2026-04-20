@@ -27,6 +27,12 @@ const ACCENT_BLUE := Color("#0ea5e9")
 @onready var feedback_card: PanelContainer = %FeedbackCard
 @onready var feedback_label: Label = %FeedbackLabel
 
+## ── Minigame dynamic nodes ────────────────────────────────────────
+var _mg_card: PanelContainer
+var _mg_title: Label
+var _mg_desc: Label
+var _mg_meta: Label
+
 ## ── Internal ──────────────────────────────────────────────────────
 var _team_color: Color = Color("#3b82f6")
 var _team_bg: Color = Color("#0f2850")
@@ -65,6 +71,9 @@ func _apply_base_styles() -> void:
 	# Answer buttons — big console style
 	for btn: Button in [answer_a, answer_b, answer_c, answer_d]:
 		_apply_answer_button(btn, Color("#151d2e"), Color("#334155"))
+
+	# Minigame card — dynamic
+	_create_minigame_card()
 
 
 func _apply_answer_button(btn: Button, bg: Color, border: Color) -> void:
@@ -167,6 +176,9 @@ func _render_state(state: GameState) -> void:
 	elif state.phase == Enums.GamePhase.IDLE:
 		status_text = "ESPERANDO"
 		status_color = STATUS_READY
+	elif state.phase == Enums.GamePhase.MINIGAME:
+		status_text = "MINIJUEGO"
+		status_color = STATUS_WAITING
 	elif state.is_team_locked_out(team_id):
 		status_text = "BLOQUEADO"
 		status_color = STATUS_LOCKED
@@ -204,8 +216,11 @@ func _render_state(state: GameState) -> void:
 	status_badge.add_theme_stylebox_override("panel", badge_style)
 
 	# ── Question ───────────────────────────────────────────────────
-	question_label.text = state.current_question.text if not state.current_question.text.is_empty() else "Esperando pregunta del presentador..."
-	if question_changed and not state.current_question.text.is_empty():
+	if state.phase == Enums.GamePhase.MINIGAME:
+		question_label.text = ""
+	else:
+		question_label.text = state.current_question.text if not state.current_question.text.is_empty() else "Esperando pregunta del presentador..."
+	if question_changed and not state.current_question.text.is_empty() and state.phase != Enums.GamePhase.MINIGAME:
 		_animate_question_in()
 
 	# ── Answer buttons ─────────────────────────────────────────────
@@ -229,6 +244,9 @@ func _render_state(state: GameState) -> void:
 	# ── Feedback card ──────────────────────────────────────────────
 	feedback_label.text = _feedback_text(state, can_answer)
 	_update_feedback_style(state, can_answer)
+
+	# ── Minigame card ─────────────────────────────────────────────
+	_render_minigame_card(state)
 
 	# ── Animations on state transitions ────────────────────────────
 	if can_answer_changed:
@@ -310,6 +328,8 @@ func _can_answer(state: GameState) -> bool:
 func _feedback_text(state: GameState, can_answer: bool) -> String:
 	if AppState.selected_team_id <= 0:
 		return "Elegí un equipo antes de responder."
+	if state.phase == Enums.GamePhase.MINIGAME:
+		return "Minijuego en curso · El presentador asignará puntaje manualmente."
 	if state.is_team_locked_out(AppState.selected_team_id):
 		return "Tablet bloqueada por el presentador."
 	if state.phase == Enums.GamePhase.REVEAL:
@@ -359,6 +379,88 @@ func _feedback_summary(state: GameState) -> String:
 			return "Espera corrección."
 		_:
 			return "Esperando decisión."
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  Minigame card
+# ═══════════════════════════════════════════════════════════════════
+
+func _create_minigame_card() -> void:
+	var root_vbox: VBoxContainer = get_node_or_null("MarginContainer/RootVBox")
+	if root_vbox == null:
+		push_warning("ContestantController: RootVBox not found for minigame card")
+		return
+	_mg_card = PanelContainer.new()
+	_mg_card.name = "MinigameCard"
+	_mg_card.visible = false
+	root_vbox.add_child(_mg_card)
+
+	var margin: MarginContainer = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 20)
+	margin.add_theme_constant_override("margin_top", 16)
+	margin.add_theme_constant_override("margin_right", 20)
+	margin.add_theme_constant_override("margin_bottom", 16)
+	_mg_card.add_child(margin)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 10)
+	margin.add_child(vbox)
+
+	_mg_title = Label.new()
+	_mg_title.name = "MgTitle"
+	_mg_title.add_theme_font_size_override("font_size", 32)
+	_mg_title.add_theme_color_override("font_color", TEXT_BRIGHT)
+	_mg_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_mg_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(_mg_title)
+
+	_mg_desc = Label.new()
+	_mg_desc.name = "MgDesc"
+	_mg_desc.add_theme_font_size_override("font_size", 20)
+	_mg_desc.add_theme_color_override("font_color", TEXT_DIM)
+	_mg_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_mg_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(_mg_desc)
+
+	_mg_meta = Label.new()
+	_mg_meta.name = "MgMeta"
+	_mg_meta.add_theme_font_size_override("font_size", 18)
+	_mg_meta.add_theme_color_override("font_color", STATUS_WAITING)
+	_mg_meta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(_mg_meta)
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = _team_bg
+	style.border_color = _team_color
+	style.set_border_width_all(3)
+	style.set_corner_radius_all(CORNER_RADIUS)
+	style.shadow_color = Color(_team_color.r, _team_color.g, _team_color.b, 0.35)
+	style.shadow_size = GLOW_SIZE
+	_mg_card.add_theme_stylebox_override("panel", style)
+
+
+func _render_minigame_card(state: GameState) -> void:
+	if _mg_card == null:
+		return
+	if state.phase != Enums.GamePhase.MINIGAME or state.current_minigame.id <= 0:
+		_mg_card.visible = false
+		return
+	_mg_card.visible = true
+	var mg: MiniGame = state.current_minigame
+	_mg_title.text = "🎮 %s" % mg.nombre
+	_mg_desc.text = mg.descripcion
+	_mg_meta.text = "⏱ %ds" % mg.tiempo
+
+	# Re-style with current team colors
+	var style := StyleBoxFlat.new()
+	style.bg_color = _team_bg
+	style.border_color = _team_color
+	style.set_border_width_all(3)
+	style.set_corner_radius_all(CORNER_RADIUS)
+	style.shadow_color = Color(_team_color.r, _team_color.g, _team_color.b, 0.35)
+	style.shadow_size = GLOW_SIZE
+	_mg_card.add_theme_stylebox_override("panel", style)
+	_mg_title.add_theme_color_override("font_color", _team_color)
 
 
 # ═══════════════════════════════════════════════════════════════════

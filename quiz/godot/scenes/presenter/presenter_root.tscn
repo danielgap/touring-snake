@@ -418,58 +418,73 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="IdleTitle" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
+[node name="TabRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
-text = "Seleccioná una pregunta"
+theme_override_constants/separation = 8
 
-[node name="RoundRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
+[node name="QuestionsTabBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/TabRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "📋 Preguntas"
+
+[node name="MinigamesTabBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/TabRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🎮 Minijuegos"
+
+[node name="QuestionsTab" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="RoundLbl" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/RoundRow"]
+[node name="RoundRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RoundLbl" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab/RoundRow"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
 text = "Ronda:"
 
-[node name="RoundSelector" type="OptionButton" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/RoundRow"]
+[node name="RoundSelector" type="OptionButton" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab/RoundRow"]
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 56)
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 20
 
-[node name="QRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
+[node name="QRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="QLbl" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QRow"]
+[node name="QLbl" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab/QRow"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
 text = "Pregunta:"
 
-[node name="QuestionSelector" type="OptionButton" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QRow"]
+[node name="QuestionSelector" type="OptionButton" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab/QRow"]
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 56)
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 20
 
-[node name="PreviewCard" type="PanelContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
+[node name="PreviewCard" type="PanelContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab"]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="PrevPad" type="MarginContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/PreviewCard"]
+[node name="PrevPad" type="MarginContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab/PreviewCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 10
 
-[node name="PreviewLabel" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/PreviewCard/PrevPad"]
+[node name="PreviewLabel" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab/PreviewCard/PrevPad"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
@@ -477,11 +492,11 @@ theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
 autowrap_mode = 3
 text = "Elegí una ronda y pregunta para ver la vista previa."
 
-[node name="IdleActions" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
+[node name="IdleActions" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="LoadSelectedBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/IdleActions"]
+[node name="LoadSelectedBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab/IdleActions"]
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 64)
@@ -489,7 +504,7 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
 text = "Abrir seleccionada"
 
-[node name="RandomBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/IdleActions"]
+[node name="RandomBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab/IdleActions"]
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 64)
@@ -497,12 +512,91 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
 text = "Aleatoria"
 
-[node name="ResetUsedBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/IdleActions"]
+[node name="ResetUsedBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QuestionsTab/IdleActions"]
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(0, 48)
 theme_override_font_sizes/font_size = 16
 text = "Limpiar usadas"
+
+[node name="MinigamesTab" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MgCategoryRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/MinigamesTab"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MgCategoryLbl" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/MinigamesTab/MgCategoryRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "Categoría:"
+
+[node name="MgCategorySelector" type="OptionButton" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/MinigamesTab/MgCategoryRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+
+[node name="MgRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/MinigamesTab"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MgLbl" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/MinigamesTab/MgRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "Juego:"
+
+[node name="MgSelector" type="OptionButton" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/MinigamesTab/MgRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+
+[node name="MgPreviewCard" type="PanelContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/MinigamesTab"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="MgPrevPad" type="MarginContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/MinigamesTab/MgPreviewCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="MgPreviewLabel" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/MinigamesTab/MgPreviewCard/MgPrevPad"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+autowrap_mode = 3
+text = "Elegí un minijuego para ver la vista previa."
+
+[node name="MgActions" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/MinigamesTab"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MgLaunchBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/MinigamesTab/MgActions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "🎮 Lanzar minijuego"
+
+[node name="MgRandomBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/MinigamesTab/MgActions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "🎲 Aleatorio"
 
 [node name="QuestionPanel" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea"]
 unique_name_in_owner = true
@@ -590,6 +684,57 @@ layout_mode = 2
 custom_minimum_size = Vector2(0, 56)
 theme_override_font_sizes/font_size = 20
 text = "Mostrar correcta"
+
+[node name="MiniGamePanel" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MgActiveTitle" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/MiniGamePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = ""
+
+[node name="MgActiveDesc" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/MiniGamePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+autowrap_mode = 3
+text = ""
+
+[node name="MgActiveMaterial" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/MiniGamePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+autowrap_mode = 3
+text = ""
+
+[node name="MgActiveRules" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/MiniGamePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+autowrap_mode = 3
+text = ""
+
+[node name="MgActiveMeta" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/MiniGamePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = ""
+
+[node name="MgEndBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/MiniGamePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+theme_override_font_sizes/font_size = 24
+text = "✅ Finalizar minijuego"
 
 [node name="LockedPanel" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea"]
 unique_name_in_owner = true

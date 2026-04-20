@@ -10,6 +10,7 @@
   "points_correct": 100,
   "points_incorrect": 0,
   "questions_file": "res://data/preguntas.json",
+  "minigames_file": "res://data/minijuegos.json",
   "mqtt_host": "127.0.0.1",
   "mqtt_port": 1883
 }

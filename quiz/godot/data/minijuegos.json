@@ -1,0 +1,245 @@
+{
+  "nombre": "Palencia Quiz Battle — Banco de MiniJuegos",
+  "descripcion": "MiniJuegos de interior para intercalar entre rondas del Quiz Battle",
+  "puntuacion": "1º = 100 pts, 2º = 60 pts, 3º = 30 pts",
+  "duracion_por_juego": "1-2 minutos",
+  "minijuegos": [
+    {
+      "id": 1,
+      "nombre": "Bolígrafo en la botella",
+      "categoria": "destreza",
+      "descripcion": "Bolígrafo atado a la cintura por detrás. Sentarse y meterlo en una botella en el suelo.",
+      "material": ["3 bolígrafos", "3 cuerdas de 50cm", "3 botellas de plástico (cuello estrecho)"],
+      "participantes": "1 por equipo",
+      "reglas": "Las manos no pueden tocar el bolígrafo. El bolígrafo debe entrar completamente en la botella. Gana el primero en conseguirlo.",
+      "tiempo": 60,
+      "dificultad": 2
+    },
+    {
+      "id": 2,
+      "nombre": "Gomitas en el vaso",
+      "categoria": "precision",
+      "descripcion": "Lanzar gomitas elásticas a un vaso situado a 3 metros de distancia.",
+      "material": ["Gomitas elásticas (20 por equipo)", "3 vasos de plástico", "Cinta adhesiva para marcar la línea"],
+      "participantes": "1 por equipo",
+      "reglas": "Cada equipo tiene 20 gomitas. Desde detrás de la línea, lanzar al vaso. El que meta más gomitas en el vaso en 60 segundos gana.",
+      "tiempo": 60,
+      "dificultad": 2
+    },
+    {
+      "id": 3,
+      "nombre": "Moneda en el vaso de agua",
+      "categoria": "precision",
+      "descripcion": "Lanzar una moneda desde la línea y que caiga dentro de un vaso lleno de agua.",
+      "material": ["Monedas de 1€ (10 por equipo)", "3 vasos de agua", "Cinta para línea de lanzamiento"],
+      "participantes": "1 por equipo",
+      "reglas": "Lanzar desde 3 metros. Cada equipo tiene 10 monedas. El que más acierte en 45 segundos gana.",
+      "tiempo": 45,
+      "dificultad": 3
+    },
+    {
+      "id": 4,
+      "nombre": "Cucharas y pelota de ping-pong",
+      "categoria": "destreza",
+      "descripcion": "Cuchara en la boca, transportar una pelota de ping-pong de vaso en vaso sin tocarla con las manos.",
+      "material": ["3 cucharas", "3 pelotas de ping-pong", "9 vasos de plástico"],
+      "participantes": "1 por equipo",
+      "reglas": "La cuchara va en la boca. La pelota se transporta en la cuchara. Si se cae, volver al inicio. Mover 3 pelotas de vaso en vaso (3 metros). Gana el más rápido.",
+      "tiempo": 60,
+      "dificultad": 3
+    },
+    {
+      "id": 5,
+      "nombre": "Canastas de papel",
+      "categoria": "precision",
+      "descripcion": "Hacer canastas de bolas de papel en una papelera a 4 metros de distancia.",
+      "material": ["Papel para hacer bolas", "3 papeleras o cubos"],
+      "participantes": "1 por equipo",
+      "reglas": "Cada equipo tiene 10 bolas de papel. Desde 4 metros, lanzar a la papelera. El que más canastas meta en 30 segundos gana.",
+      "tiempo": 30,
+      "dificultad": 2
+    },
+    {
+      "id": 6,
+      "nombre": "Stack de donuts",
+      "categoria": "equilibrio",
+      "descripcion": "Apilar 6 donuts en una brocheta sostenida en la boca.",
+      "material": ["18 donuts (6 por equipo)", "3 brochetas de madera o plástico"],
+      "participantes": "1 por equipo",
+      "reglas": "La brocheta se sostiene solo con la boca (sin manos). Apilar 6 donuts. Si se cae alguno, volver a empezar. Gana el primero en apilar los 6.",
+      "tiempo": 60,
+      "dificultad": 2
+    },
+    {
+      "id": 7,
+      "nombre": "Galleta en la cara",
+      "categoria": "equilibrio",
+      "descripcion": "Poner una galleta en la frente y bajarla a la boca solo con muecas, sin usar las manos.",
+      "material": ["3 galletas grandes (tipo María o Digestive)"],
+      "participantes": "1 por equipo",
+      "reglas": "Galleta en la frente. Solo se puede mover la cara (cejas, ojos, boca, nariz). Si se cae la galleta, empezar de nuevo. Gana el primero en comérsela.",
+      "tiempo": 60,
+      "dificultad": 1
+    },
+    {
+      "id": 8,
+      "nombre": "Vaso de agua en la cabeza",
+      "categoria": "equilibrio",
+      "descripcion": "Caminar 5 metros con un vaso de agua en la cabeza sin derramar.",
+      "material": ["3 vasos de plástico con agua", "Cinta para marcar recorrido"],
+      "participantes": "1 por equipo",
+      "reglas": "Vaso lleno de agua en la cabeza. Caminar 5 metros en línea recta sin tocar el vaso. Si se cae o derrama, volver al inicio. Gana el más rápido.",
+      "tiempo": 45,
+      "dificultad": 1
+    },
+    {
+      "id": 9,
+      "nombre": "Tortita en la cabeza",
+      "categoria": "equilibrio",
+      "descripcion": "Un miembro del equipo apila 5 tortitas en la cabeza del compañero. Aguantar 5 segundos.",
+      "material": ["15 tortitas (arroz o maíz, 5 por equipo)"],
+      "participantes": "2 por equipo",
+      "reglas": "Un miembro apila, el otro aguanta quieto con la cabeza recta. Apilar 5 tortitas y aguantar 5 segundos sin que se caigan. Si se caen, volver a empezar.",
+      "tiempo": 60,
+      "dificultad": 2
+    },
+    {
+      "id": 10,
+      "nombre": "Anillos en los dedos",
+      "categoria": "precision",
+      "descripcion": "Lanzar 10 anillos de botella a botellas de diferente tamaño colocadas a 2 metros.",
+      "material": ["30 anillos de botella (10 por equipo)", "9 botellas de diferentes tamaños"],
+      "participantes": "1 por equipo",
+      "reglas": "Lanzar anillos desde 2 metros. Cada equipo tiene 10 anillos. Botellas a diferentes distancias (más lejos = más puntos). Puntuación: botella grande 10pts, mediana 20pts, pequeña 30pts. Gana el que más puntos acumule.",
+      "tiempo": 45,
+      "dificultad": 2
+    },
+    {
+      "id": 11,
+      "nombre": "Hilo en la aguja",
+      "categoria": "velocidad",
+      "descripcion": "Encebrar 3 agujas con hilo lo más rápido posible.",
+      "material": ["9 agujas (3 por equipo)", "3 carretes de hilo"],
+      "participantes": "1 por equipo",
+      "reglas": "Encebrar 3 agujas e hilvanar al menos 5cm de hilo en cada una. Gana el primero en terminar las 3.",
+      "tiempo": 30,
+      "dificultad": 2
+    },
+    {
+      "id": 12,
+      "nombre": "Pasta en el espagueti",
+      "categoria": "velocidad",
+      "descripcion": "Mover un espagueti con la boca e ir ensartando macarrones uno a uno.",
+      "material": ["3 espaguetis cocidos", "18 macarrones cocidos (6 por equipo)", "3 platos"],
+      "participantes": "1 por equipo",
+      "reglas": "Espagueti en la boca (colgando). Sin usar las manos, ensartar 6 macarrones en el espagueti. Gana el primero en conseguir los 6.",
+      "tiempo": 60,
+      "dificultad": 3
+    },
+    {
+      "id": 13,
+      "nombre": "Abrochar camisa",
+      "categoria": "velocidad",
+      "descripcion": "Abrocharse una camisa de hombre entera (todos los botones) lo más rápido posible.",
+      "material": ["3 camisas de hombre"],
+      "participantes": "1 por equipo",
+      "reglas": "Camisa cerrada con todos los botones desabrochados. Abrochar todos los botones correctamente (alineados). Gana el primero en terminar con todos los botones bien puestos.",
+      "tiempo": 45,
+      "dificultad": 1
+    },
+    {
+      "id": 14,
+      "nombre": "Ordenar monedas",
+      "categoria": "velocidad",
+      "descripcion": "Separar 50 monedas mezcladas por valor en pilas diferentes en 30 segundos.",
+      "material": ["150 monedas mezcladas (50 por equipo: 1c, 2c, 5c, 10c, 20c, 50c, 1€, 2€)"],
+      "participantes": "1 por equipo",
+      "reglas": "Monedas mezcladas en una pila. Separar en pilas por valor. Gana el equipo con más pilas correctas al terminar el tiempo.",
+      "tiempo": 30,
+      "dificultad": 1
+    },
+    {
+      "id": 15,
+      "nombre": "Escribir al revés",
+      "categoria": "cerebro",
+      "descripcion": "Escribir 'PALENCIA QUIZ BATTLE' en un papel al revés (como si se viera en un espejo) sin errores.",
+      "material": ["3 papeles", "3 bolígrafos"],
+      "participantes": "1 por equipo",
+      "reglas": "Escribir la frase completa al revés. Letra legible. Sin usar espejos ni ayuda. Gana el primero en terminarla sin errores.",
+      "tiempo": 45,
+      "dificultad": 3
+    },
+    {
+      "id": 16,
+      "nombre": "Hombre de cinta",
+      "categoria": "destreza",
+      "descripcion": "Un miembro del equipo pegado a la pared con cinta adhesiva. El equipo le lanza cinta y debe adherirla. El que más capas acumule gana.",
+      "material": ["Cinta de embalar (3 rollos)", "Cinta adhesiva para pegar a la pared"],
+      "participantes": "2 por equipo (1 pegado a la pared, 1 lanza)",
+      "reglas": "Un jugador se queda pegado de espaldas a la pared con un trozo de cinta. El compañero le lanza trozos de cinta que deben adherirse al jugador. El que tenga más trozos pegados al final gana.",
+      "tiempo": 60,
+      "dificultad": 2
+    },
+    {
+      "id": 17,
+      "nombre": "Botes de pelota contra la pared",
+      "categoria": "velocidad",
+      "descripcion": "Lanzar una pelota de tenis contra la pared y recogerla. Máximo botes en 30 segundos sin parar.",
+      "material": ["3 pelotas de tenis", "Pared"],
+      "participantes": "1 por equipo",
+      "reglas": "Lanzar la pelota contra la pared y recogerla antes de que toque el suelo. Si toca el suelo, se reinicia el contador. Gana el que más botes consecutivos consiga.",
+      "tiempo": 30,
+      "dificultad": 2
+    },
+    {
+      "id": 18,
+      "nombre": "Lanzar calcetines",
+      "categoria": "precision",
+      "descripcion": "Lanzar calcetines enrollados a una caja situada a 4 metros.",
+      "material": ["9 pares de calcetines (3 por equipo)", "3 cajas"],
+      "participantes": "1 por equipo",
+      "reglas": "Cada equipo tiene 3 pares de calcetines. Lanzar desde 4 metros a la caja. El que más calcetines meta en la caja gana.",
+      "tiempo": 30,
+      "dificultad": 1
+    },
+    {
+      "id": 19,
+      "nombre": "Soplar cartas",
+      "categoria": "precision",
+      "descripcion": "Soplar cartas de una baraja desde el borde de la mesa. La carta que caiga más lejos del jugador gana.",
+      "material": ["3 barajas de cartas"],
+      "participantes": "1 por equipo",
+      "reglas": "Baraja apoyada en el borde de la mesa, carta boca arriba. Soplar para moverla lo más lejos posible sin tocarla. 3 intentos por equipo. Gana el que consiga la mayor distancia media.",
+      "tiempo": 30,
+      "dificultad": 1
+    },
+    {
+      "id": 20,
+      "nombre": "Aparcamiento del cucharón",
+      "categoria": "trabajo_equipo",
+      "descripcion": "Un miembro con los ojos vendados debe meter un cucharón en un tarro, guiado solo por las instrucciones de su equipo.",
+      "material": ["3 cucharones", "3 tarros o botellas anchas", "3 pañuelos o vendas para los ojos"],
+      "participantes": "2 por equipo (1 vendado, 1 guía)",
+      "reglas": "El jugador vendado tiene un cucharón en la mano. Debe meterlo en el tarro a 3 metros. El compañero guía SOLO con la voz (no puede tocarle). Si toca el tarro con la mano, vuelve al inicio. Gana el primero en meter el cucharón.",
+      "tiempo": 60,
+      "dificultad": 2
+    }
+  ],
+  "categorias": {
+    "destreza": {"icono": "🎯", "juegos": [1, 4, 16]},
+    "precision": {"icono": "🎯", "juegos": [2, 3, 5, 10]},
+    "equilibrio": {"icono": "⚖️", "juegos": [6, 7, 8, 9]},
+    "velocidad": {"icono": "⚡", "juegos": [11, 12, 13, 14, 17]},
+    "cerebro": {"icono": "🧠", "juegos": [15]},
+    "trabajo_equipo": {"icono": "🤝", "juegos": [20]}
+  },
+  "notas_para_presentador": [
+    "Cada minijuego se juega con 1 equipo a la vez (los demás esperan)",
+    "Puntuación: 1º = 100 pts, 2º = 60 pts, 3º = 30 pts",
+    "Usar la tablet del presentador para sumar puntos manualmente",
+    "Ideal: 3-5 minijuegos intercalados entre rondas de preguntas",
+    "Preparar todo el material antes del evento en bandejas por equipo",
+    "Llevar material de repuesto (gomas se rompen, monedas se pierden)",
+    "Si un minijuego es empate, hacer ronda de muerte súbita"
+  ]
+}

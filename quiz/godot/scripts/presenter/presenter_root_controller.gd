@@ -23,6 +23,7 @@ const PHASE_LOCKED_COLOR := Color("#f59e0b")
 const PHASE_REVEAL_COLOR := Color("#22c55e")
 const PHASE_CORRECT_COLOR := Color("#22c55e")
 const PHASE_INCORRECT_COLOR := Color("#ef4444")
+const PHASE_MINIGAME_COLOR := Color("#f59e0b")
 
 const TEXT_BRIGHT := Color("#f1f5f9")
 const TEXT_DIM := Color("#94a3b8")
@@ -35,6 +36,7 @@ const GLOW_SIZE := 6
 @onready var question_panel: VBoxContainer = %QuestionPanel
 @onready var locked_panel: VBoxContainer = %LockedPanel
 @onready var reveal_panel: VBoxContainer = %RevealPanel
+@onready var minigame_panel: VBoxContainer = %MiniGamePanel
 
 ## ── Top bar ──────────────────────────────────────────────────────
 @onready var phase_label: Label = %PhaseLabel
@@ -62,12 +64,23 @@ const GLOW_SIZE := 6
 @onready var team3_add_btn: Button = %T3AddBtn
 
 ## ── Idle panel ───────────────────────────────────────────────────
+@onready var questions_tab_btn: Button = %QuestionsTabBtn
+@onready var minigames_tab_btn: Button = %MinigamesTabBtn
+@onready var questions_tab: VBoxContainer = %QuestionsTab
+@onready var minigames_tab: VBoxContainer = %MinigamesTab
 @onready var round_selector: OptionButton = %RoundSelector
 @onready var question_selector: OptionButton = %QuestionSelector
 @onready var load_selected_btn: Button = %LoadSelectedBtn
 @onready var random_btn: Button = %RandomBtn
 @onready var reset_used_btn: Button = %ResetUsedBtn
 @onready var preview_label: Label = %PreviewLabel
+
+## ── Idle panel — minigame tab ────────────────────────────────────
+@onready var mg_category_selector: OptionButton = %MgCategorySelector
+@onready var mg_selector: OptionButton = %MgSelector
+@onready var mg_preview_label: Label = %MgPreviewLabel
+@onready var mg_launch_btn: Button = %MgLaunchBtn
+@onready var mg_random_btn: Button = %MgRandomBtn
 
 ## ── Question panel ───────────────────────────────────────────────
 @onready var question_text: Label = %QuestionText
@@ -91,6 +104,14 @@ const GLOW_SIZE := 6
 @onready var result_label: Label = %ResultLabel
 @onready var next_btn: Button = %NextBtn
 
+## ── MiniGame panel ───────────────────────────────────────────────
+@onready var mg_active_title: Label = %MgActiveTitle
+@onready var mg_active_desc: Label = %MgActiveDesc
+@onready var mg_active_material: Label = %MgActiveMaterial
+@onready var mg_active_rules: Label = %MgActiveRules
+@onready var mg_active_meta: Label = %MgActiveMeta
+@onready var mg_end_btn: Button = %MgEndBtn
+
 ## ── Bottom bar ───────────────────────────────────────────────────
 @onready var refresh_btn: Button = %RefreshBtn
 @onready var reset_locks_btn: Button = %ResetLocksBtn
@@ -100,8 +121,11 @@ const GLOW_SIZE := 6
 ## ── Internal state ───────────────────────────────────────────────
 var _round_values: Array[String] = []
 var _question_ids: Array[int] = []
+var _mg_ids: Array[int] = []
 var _selector_syncing: bool = false
+var _mg_selector_syncing: bool = false
 var _showing_selector: bool = false
+var _mg_tab_active: bool = false
 var _correct_btn_style: StyleBoxFlat
 var _incorrect_btn_style: StyleBoxFlat
 var _prev_phase: int = -1
@@ -184,6 +208,8 @@ func _apply_styles() -> void:
 		team3_lock_btn, team3_force_btn,
 		team1_sub_btn, team1_add_btn, team2_sub_btn, team2_add_btn,
 		team3_sub_btn, team3_add_btn,
+		questions_tab_btn, minigames_tab_btn,
+		mg_launch_btn, mg_random_btn, mg_end_btn,
 	]
 	for btn: Button in all_buttons:
 		_apply_console_button(btn)
@@ -193,6 +219,10 @@ func _apply_styles() -> void:
 	_apply_accent_button(random_btn, Color("#8b5cf6"))   # Purple for random
 	_apply_accent_button(next_btn, PHASE_REVEAL_COLOR)
 	_apply_accent_button(q_reveal_btn, Color("#a855f7"))
+	_apply_accent_button(mg_launch_btn, PHASE_MINIGAME_COLOR)
+	_apply_accent_button(mg_random_btn, Color("#8b5cf6"))
+	_apply_accent_button(mg_end_btn, PHASE_REVEAL_COLOR)
+	%MgPreviewCard.add_theme_stylebox_override("panel", _make_card(CARD_BG_ALT, CARD_BORDER))
 
 
 func _make_card(bg: Color, border: Color, border_w: int = 1) -> StyleBoxFlat:
@@ -392,6 +422,19 @@ func _connect_signals() -> void:
 	round_selector.item_selected.connect(_on_round_selected)
 	question_selector.item_selected.connect(_on_question_selected)
 
+	# Tab buttons
+	questions_tab_btn.pressed.connect(_on_questions_tab_pressed)
+	minigames_tab_btn.pressed.connect(_on_minigames_tab_pressed)
+
+	# Minigame selectors
+	mg_category_selector.item_selected.connect(_on_mg_category_selected)
+	mg_selector.item_selected.connect(_on_mg_selected)
+
+	# Minigame actions
+	mg_launch_btn.pressed.connect(GameService.load_selected_minigame)
+	mg_random_btn.pressed.connect(GameService.load_random_minigame)
+	mg_end_btn.pressed.connect(GameService.end_current_minigame)
+
 	# Team arbitration
 	team1_lock_btn.pressed.connect(func() -> void: GameService.toggle_team_lock(1))
 	team1_force_btn.pressed.connect(func() -> void: GameService.force_active_team(1))
@@ -415,6 +458,8 @@ func _connect_signals() -> void:
 	ContentRepo.questions_loaded.connect(_on_questions_loaded)
 	GameService.presenter_selector_changed.connect(_on_selector_changed)
 	GameService.used_questions_changed.connect(_on_used_questions_changed)
+	GameService.presenter_minigame_selector_changed.connect(_on_mg_selector_changed)
+	ContentRepo.minigames_loaded.connect(_on_minigames_loaded)
 
 	# Settings panel
 	settings_btn.pressed.connect(_on_settings_pressed)
@@ -436,6 +481,7 @@ func _render_state(state: GameState) -> void:
 	_render_question_panel(state)
 	_render_locked_panel(state)
 	_render_reveal_panel(state)
+	_render_minigame_panel(state)
 	_render_bottom_bar(state)
 	if phase_changed and _prev_phase >= 0:
 		_animate_panel_in(state)
@@ -465,6 +511,7 @@ func _update_phase_panels(state: GameState) -> void:
 	var show_question := false
 	var show_locked := false
 	var show_reveal := false
+	var show_minigame := false
 
 	if _showing_selector:
 		show_idle = true
@@ -478,6 +525,8 @@ func _update_phase_panels(state: GameState) -> void:
 				show_locked = true
 			Enums.GamePhase.REVEAL:
 				show_reveal = true
+			Enums.GamePhase.MINIGAME:
+				show_minigame = true
 			_:
 				show_idle = true
 
@@ -485,6 +534,7 @@ func _update_phase_panels(state: GameState) -> void:
 	question_panel.visible = show_question
 	locked_panel.visible = show_locked
 	reveal_panel.visible = show_reveal
+	minigame_panel.visible = show_minigame
 
 	# Reset selector override when phase changes away from REVEAL
 	if state.phase != Enums.GamePhase.REVEAL:
@@ -531,6 +581,9 @@ func _render_phase_label(state: GameState) -> void:
 		Enums.GamePhase.REVEAL:
 			phase_label.text = "REVELADA%s" % round_suffix
 			phase_color = PHASE_REVEAL_COLOR
+		Enums.GamePhase.MINIGAME:
+			phase_label.text = "MINIJUEGO"
+			phase_color = PHASE_MINIGAME_COLOR
 		_:
 			phase_label.text = "STANDBY"
 			phase_color = PHASE_IDLE_COLOR
@@ -574,7 +627,7 @@ func _render_sidebar(state: GameState) -> void:
 	team3_force_btn.disabled = not question_open or state.is_team_locked_out(3)
 
 	# Score buttons
-	var scoring: bool = not state.current_question.text.is_empty() and state.phase in [Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL]
+	var scoring: bool = (not state.current_question.text.is_empty() and state.phase in [Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL]) or state.phase == Enums.GamePhase.MINIGAME
 	team1_sub_btn.disabled = not scoring
 	team1_add_btn.disabled = not scoring
 	team2_sub_btn.disabled = not scoring
@@ -592,6 +645,14 @@ func _render_idle_panel(state: GameState) -> void:
 	random_btn.disabled = not has_round_questions
 	reset_used_btn.disabled = not has_questions
 	clear_session_btn.disabled = not GameService.has_persisted_presenter_session()
+
+	var has_minigames: bool = ContentRepo.get_minigame_count() > 0
+	var has_selected_mg: bool = _mg_ids.size() > 0
+	mg_launch_btn.disabled = not has_selected_mg
+	mg_random_btn.disabled = not has_minigames
+
+	# Update tab button styles
+	_update_tab_styles()
 
 
 func _render_question_panel(state: GameState) -> void:
@@ -859,6 +920,8 @@ func _animate_panel_in(state: GameState) -> void:
 			target_panel = locked_panel
 		Enums.GamePhase.REVEAL:
 			target_panel = reveal_panel
+		Enums.GamePhase.MINIGAME:
+			target_panel = minigame_panel
 		_:
 			return
 	if not target_panel:
@@ -880,6 +943,170 @@ func _animate_score_pulse(team_id: int) -> void:
 	score_label.scale = Vector2(1.3, 1.3)
 	var tw := create_tween()
 	tw.tween_property(score_label, "scale", Vector2(1.0, 1.0), 0.4).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  Minigame tab + selector
+# ═══════════════════════════════════════════════════════════════════
+
+func _on_questions_tab_pressed() -> void:
+	_mg_tab_active = false
+	questions_tab.visible = true
+	minigames_tab.visible = false
+	_update_tab_styles()
+
+
+func _on_minigames_tab_pressed() -> void:
+	_mg_tab_active = true
+	questions_tab.visible = false
+	minigames_tab.visible = true
+	_update_tab_styles()
+
+
+func _update_tab_styles() -> void:
+	if _mg_tab_active:
+		_apply_accent_button(minigames_tab_btn, PHASE_MINIGAME_COLOR)
+		_apply_console_button(questions_tab_btn)
+		minigames_tab_btn.add_theme_color_override("font_color", PHASE_MINIGAME_COLOR)
+		questions_tab_btn.add_theme_color_override("font_color", TEXT_DIM)
+	else:
+		_apply_accent_button(questions_tab_btn, ACCENT_BLUE)
+		_apply_console_button(minigames_tab_btn)
+		questions_tab_btn.add_theme_color_override("font_color", ACCENT_BLUE)
+		minigames_tab_btn.add_theme_color_override("font_color", TEXT_DIM)
+
+
+func _on_mg_category_selected(index: int) -> void:
+	if _mg_selector_syncing or index < 0:
+		return
+	var categories: PackedStringArray = ContentRepo.get_minigame_categories()
+	if index >= categories.size():
+		return
+	_sync_minigame_selector(categories[index])
+
+
+func _on_mg_selected(index: int) -> void:
+	if _mg_selector_syncing or index < 0 or index >= _mg_ids.size():
+		return
+	GameService.set_presenter_minigame(_mg_ids[index])
+
+
+func _on_mg_selector_changed(minigame_id: int) -> void:
+	_render_minigame_preview()
+
+
+func _on_minigames_loaded(_count: int) -> void:
+	_sync_minigame_selector()
+
+
+func _sync_minigame_selector(force_category: String = "") -> void:
+	_mg_selector_syncing = true
+	_mg_ids.clear()
+	mg_category_selector.clear()
+	mg_selector.clear()
+
+	var categories: PackedStringArray = ContentRepo.get_minigame_categories()
+	var selected_category: String = force_category
+	if selected_category.is_empty():
+		if mg_category_selector.get_selected_id() >= 0:
+			var cat_idx: int = mg_category_selector.get_selected()
+			if cat_idx >= 0 and cat_idx < categories.size():
+				selected_category = categories[cat_idx]
+	# Populate categories
+	for cat in categories:
+		mg_category_selector.add_item(cat)
+	# Select category
+	if not selected_category.is_empty():
+		for idx: int in range(categories.size()):
+			if categories[idx] == selected_category:
+				mg_category_selector.select(idx)
+				break
+	else:
+		if not categories.is_empty():
+			mg_category_selector.select(0)
+			selected_category = categories[0]
+
+	# Populate minigames for selected category
+	var filtered: Array[MiniGame]
+	if not selected_category.is_empty():
+		filtered = ContentRepo.get_minigames_for_category(selected_category)
+	else:
+		filtered = ContentRepo.minigames
+
+	for mg in filtered:
+		_mg_ids.append(mg.id)
+		var summary: String = mg.nombre.strip_edges()
+		if summary.length() > 60:
+			summary = "%s…" % summary.substr(0, 60)
+		mg_selector.add_item("MG%d — %s" % [mg.id, summary])
+
+	# Select the current selected minigame if it's in the list
+	var current_mg_id: int = GameService.get_selected_minigame_id()
+	var found_idx: int = -1
+	for idx: int in range(_mg_ids.size()):
+		if _mg_ids[idx] == current_mg_id:
+			found_idx = idx
+			break
+	if found_idx >= 0:
+		mg_selector.select(found_idx)
+	elif not _mg_ids.is_empty():
+		mg_selector.select(0)
+		GameService.set_presenter_minigame(_mg_ids[0])
+
+	_mg_selector_syncing = false
+	_render_minigame_preview()
+	_render_idle_panel(AppState.current_state)
+
+
+func _render_minigame_preview() -> void:
+	var mg: MiniGame = GameService.get_selected_minigame()
+	if mg.id <= 0:
+		mg_preview_label.text = "Elegí un minijuego para ver la vista previa."
+		return
+	var material_text: String = ""
+	if not mg.material.is_empty():
+		material_text = " · 📦 " + ", ".join(mg.material)
+	mg_preview_label.text = "⏱ %ds · 👥 %s · ⭐ %d\n%s%s" % [
+		mg.tiempo,
+		mg.participantes if not mg.participantes.is_empty() else "N/D",
+		mg.dificultad,
+		mg.descripcion,
+		material_text,
+	]
+
+
+func _render_minigame_panel(state: GameState) -> void:
+	if not minigame_panel.visible:
+		return
+	if state.current_minigame.id <= 0:
+		mg_active_title.text = ""
+		mg_active_desc.text = ""
+		mg_active_material.text = ""
+		mg_active_rules.text = ""
+		mg_active_meta.text = ""
+		return
+
+	var mg: MiniGame = state.current_minigame
+	mg_active_title.text = "🎮 %s" % mg.nombre
+	mg_active_title.add_theme_color_override("font_color", PHASE_MINIGAME_COLOR)
+	mg_active_desc.text = mg.descripcion
+
+	if not mg.material.is_empty():
+		mg_active_material.text = "📦 Material: " + ", ".join(mg.material)
+	else:
+		mg_active_material.text = ""
+
+	if not mg.reglas.is_empty():
+		mg_active_rules.text = "📜 %s" % mg.reglas
+	else:
+		mg_active_rules.text = ""
+
+	var meta_parts: PackedStringArray = []
+	meta_parts.append("⏱ %ds" % mg.tiempo)
+	if not mg.participantes.is_empty():
+		meta_parts.append("👥 %s" % mg.participantes)
+	meta_parts.append("⭐ Dificultad: %d" % mg.dificultad)
+	mg_active_meta.text = "  ·  ".join(meta_parts)
 
 
 ## Settings panel toggle

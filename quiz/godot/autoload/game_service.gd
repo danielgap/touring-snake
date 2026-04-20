@@ -3,6 +3,7 @@ extends Node
 signal role_initialized(role: int)
 signal answer_received(team_id: int, option: String)
 signal presenter_selector_changed(round_name: String, question_id: int)
+signal presenter_minigame_selector_changed(minigame_id: int)
 signal used_questions_changed()
 
 const MQTT_HOST: String = "127.0.0.1"
@@ -16,6 +17,7 @@ const TEAM_IDS: Array[int] = [1, 2, 3]
 var _current_question_index: int = -1
 var _selected_round_name: String = ""
 var _selected_question_id: int = 0
+var _selected_minigame_id: int = 0
 var _used_question_ids: Dictionary = {}
 var _random: RandomNumberGenerator = RandomNumberGenerator.new()
 var _can_persist_presenter_session: bool = false
@@ -28,6 +30,7 @@ func _ready() -> void:
 	MqttBus.connected.connect(_on_mqtt_connected)
 	ContentRepo.questions_loaded.connect(_on_questions_loaded)
 	ContentRepo.content_missing.connect(_on_content_missing)
+	ContentRepo.minigames_loaded.connect(_on_minigames_loaded)
 
 
 func _get_mqtt_host() -> String:
@@ -324,6 +327,98 @@ func adjust_score(team_id: int, delta: int) -> void:
 	_publish_state(state)
 
 
+func set_presenter_minigame(minigame_id: int) -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	var resolved_id: int = minigame_id
+	var mg: MiniGame = ContentRepo.get_minigame_by_id(resolved_id)
+	if mg.id <= 0:
+		var all_minigames: Array[MiniGame] = ContentRepo.minigames
+		if not all_minigames.is_empty():
+			resolved_id = all_minigames[0].id
+		else:
+			resolved_id = 0
+	if _selected_minigame_id == resolved_id:
+		return
+	_selected_minigame_id = resolved_id
+	emit_signal("presenter_minigame_selector_changed", _selected_minigame_id)
+	_save_presenter_session()
+
+
+func load_selected_minigame() -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	var mg: MiniGame = ContentRepo.get_minigame_by_id(_selected_minigame_id)
+	if mg.id <= 0:
+		_publish_empty_presenter_state("No hay minijuegos cargados.")
+		return
+	var state: GameState = AppState.current_state.duplicate_state()
+	state.phase = Enums.GamePhase.MINIGAME
+	state.current_minigame = mg
+	state.active_team_id = 0
+	state.locked_team_id = 0
+	state.locked_out_team_ids = {1: false, 2: false, 3: false}
+	state.answers_enabled = false
+	state.revealed_correct_option = ""
+	state.last_selected_option = ""
+	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
+	state.correction_applied = false
+	state.status_text = "Minijuego activo: %s" % mg.nombre
+	AppState.apply_game_state(state)
+	_save_presenter_session()
+	_publish_state(state)
+
+
+func load_random_minigame() -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	var all_minigames: Array[MiniGame] = ContentRepo.minigames
+	if all_minigames.is_empty():
+		_publish_empty_presenter_state("No hay minijuegos cargados.")
+		return
+	var random_index: int = _random.randi_range(0, all_minigames.size() - 1)
+	var mg: MiniGame = all_minigames[random_index]
+	_selected_minigame_id = mg.id
+	emit_signal("presenter_minigame_selector_changed", _selected_minigame_id)
+	var state: GameState = AppState.current_state.duplicate_state()
+	state.phase = Enums.GamePhase.MINIGAME
+	state.current_minigame = mg
+	state.active_team_id = 0
+	state.locked_team_id = 0
+	state.locked_out_team_ids = {1: false, 2: false, 3: false}
+	state.answers_enabled = false
+	state.revealed_correct_option = ""
+	state.last_selected_option = ""
+	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
+	state.correction_applied = false
+	state.status_text = "Minijuego aleatorio: %s" % mg.nombre
+	AppState.apply_game_state(state)
+	_save_presenter_session()
+	_publish_state(state)
+
+
+func end_current_minigame() -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	var state: GameState = AppState.current_state.duplicate_state()
+	state.phase = Enums.GamePhase.IDLE
+	state.current_minigame = MiniGame.new()
+	state.status_text = "Minijuego finalizado"
+	AppState.apply_game_state(state)
+	_save_presenter_session()
+	_publish_state(state)
+
+
+func get_selected_minigame_id() -> int:
+	return _selected_minigame_id
+
+
+func get_selected_minigame() -> MiniGame:
+	if _selected_minigame_id <= 0:
+		return MiniGame.new()
+	return ContentRepo.get_minigame_by_id(_selected_minigame_id)
+
+
 func submit_answer(option: String) -> void:
 	if AppState.selected_role != Enums.AppRole.CONTESTANT:
 		return
@@ -428,6 +523,15 @@ func _on_content_missing(_path: String) -> void:
 	_update_presenter_selector("", 0)
 
 
+func _on_minigames_loaded(_count: int) -> void:
+	if AppState.selected_role == Enums.AppRole.PRESENTER:
+		if _selected_minigame_id > 0:
+			var mg: MiniGame = ContentRepo.get_minigame_by_id(_selected_minigame_id)
+			if mg.id <= 0:
+				_selected_minigame_id = 0
+				emit_signal("presenter_minigame_selector_changed", 0)
+
+
 func _ensure_presenter_selection() -> bool:
 	var available_rounds: PackedStringArray = ContentRepo.get_rounds()
 	if available_rounds.is_empty():
@@ -510,6 +614,7 @@ func _restore_presenter_session() -> void:
 	_current_question_index = -1
 	_selected_round_name = ""
 	_selected_question_id = 0
+	_selected_minigame_id = 0
 	_used_question_ids.clear()
 
 	if FileAccess.file_exists(PRESENTER_SESSION_SAVE_PATH):
@@ -520,6 +625,7 @@ func _restore_presenter_session() -> void:
 				var payload: Dictionary = parsed
 				_selected_round_name = String(payload.get("selected_round_name", ""))
 				_selected_question_id = int(payload.get("selected_question_id", 0))
+				_selected_minigame_id = int(payload.get("selected_minigame_id", 0))
 				for question_id in payload.get("used_question_ids", []):
 					var normalized_id: int = int(question_id)
 					if normalized_id > 0:
@@ -559,6 +665,7 @@ func _presenter_session_to_dict() -> Dictionary:
 		"version": 1,
 		"selected_round_name": _selected_round_name,
 		"selected_question_id": _selected_question_id,
+		"selected_minigame_id": _selected_minigame_id,
 		"used_question_ids": _used_question_ids.keys(),
 		"game_state": AppState.current_state.to_dict(),
 	}
