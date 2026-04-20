@@ -11,51 +11,214 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.024, 0.039, 0.071, 1)
+
+[node name="CenterVBox" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -180.0
-offset_right = 220.0
-offset_bottom = 180.0
+offset_left = -480.0
+offset_top = -260.0
+offset_right = 480.0
+offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 32
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
+[node name="TitleLabel" type="Label" parent="CenterVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "QUIZ OFFLINE"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="CenterVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.58, 0.627, 0.678, 1)
+text = "Seleccioná tu rol para entrar al juego"
+horizontal_alignment = 1
+
+[node name="CardsRow" type="HBoxContainer" parent="CenterVBox"]
+layout_mode = 2
+theme_override_constants/separation = 20
+size_flags_vertical = 3
+
+[node name="PresenterCard" type="PanelContainer" parent="CenterVBox/CardsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PPad" type="MarginContainer" parent="CenterVBox/CardsRow/PresenterCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
+theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
+theme_override_constants/margin_bottom = 20
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
+[node name="PVBox" type="VBoxContainer" parent="CenterVBox/CardsRow/PresenterCard/PPad"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PIcon" type="Label" parent="CenterVBox/CardsRow/PresenterCard/PPad/PVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+theme_override_colors/font_color = Color(0.055, 0.647, 0.914, 1)
+text = "P"
+horizontal_alignment = 1
+
+[node name="PRoleTitle" type="Label" parent="CenterVBox/CardsRow/PresenterCard/PPad/PVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "PRESENTADOR"
+horizontal_alignment = 1
+
+[node name="PDesc" type="Label" parent="CenterVBox/CardsRow/PresenterCard/PPad/PVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.58, 0.627, 0.678, 1)
+text = "Control general del juego"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="PresenterButton" type="Button" parent="CenterVBox/CardsRow/PresenterCard/PPad/PVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+theme_override_font_sizes/font_size = 22
+text = "ENTRAR"
+
+[node name="TeamCard" type="PanelContainer" parent="CenterVBox/CardsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TPad" type="MarginContainer" parent="CenterVBox/CardsRow/TeamCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="TVBox" type="VBoxContainer" parent="CenterVBox/CardsRow/TeamCard/TPad"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="TitleLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
+[node name="TIcon" type="Label" parent="CenterVBox/CardsRow/TeamCard/TPad/TVBox"]
 layout_mode = 2
-text = "Quiz Offline — selección de rol"
+theme_override_font_sizes/font_size = 48
+theme_override_colors/font_color = Color(0.961, 0.62, 0.043, 1)
+text = "E"
 horizontal_alignment = 1
 
-[node name="PresenterButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer"]
+[node name="TRoleTitle" type="Label" parent="CenterVBox/CardsRow/TeamCard/TPad/TVBox"]
 layout_mode = 2
-text = "Entrar como Presentador"
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "EQUIPO"
+horizontal_alignment = 1
 
-[node name="ContestantButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer"]
+[node name="TDesc" type="Label" parent="CenterVBox/CardsRow/TeamCard/TPad/TVBox"]
 layout_mode = 2
-text = "Entrar como Equipo"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.58, 0.627, 0.678, 1)
+text = "Elegí tu equipo"
+horizontal_alignment = 1
 
-[node name="TeamSelector" type="OptionButton" parent="PanelContainer/MarginContainer/VBoxContainer"]
+[node name="TeamButtons" type="HBoxContainer" parent="CenterVBox/CardsRow/TeamCard/TPad/TVBox"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
-[node name="DisplayButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer"]
+[node name="Team1Btn" type="Button" parent="CenterVBox/CardsRow/TeamCard/TPad/TVBox/TeamButtons"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Entrar como Pantalla"
+custom_minimum_size = Vector2(0, 64)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "E1"
 
-[node name="StatusLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
+[node name="Team2Btn" type="Button" parent="CenterVBox/CardsRow/TeamCard/TPad/TVBox/TeamButtons"]
+unique_name_in_owner = true
 layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "E2"
+
+[node name="Team3Btn" type="Button" parent="CenterVBox/CardsRow/TeamCard/TPad/TVBox/TeamButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "E3"
+
+[node name="DisplayCard" type="PanelContainer" parent="CenterVBox/CardsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DPad" type="MarginContainer" parent="CenterVBox/CardsRow/DisplayCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="DVBox" type="VBoxContainer" parent="CenterVBox/CardsRow/DisplayCard/DPad"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="DIcon" type="Label" parent="CenterVBox/CardsRow/DisplayCard/DPad/DVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+theme_override_colors/font_color = Color(0.655, 0.361, 0.965, 1)
+text = "TV"
+horizontal_alignment = 1
+
+[node name="DRoleTitle" type="Label" parent="CenterVBox/CardsRow/DisplayCard/DPad/DVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "PANTALLA"
+horizontal_alignment = 1
+
+[node name="DDesc" type="Label" parent="CenterVBox/CardsRow/DisplayCard/DPad/DVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.58, 0.627, 0.678, 1)
+text = "Display del estudio"
+horizontal_alignment = 1
 autowrap_mode = 3
+
+[node name="DisplayButton" type="Button" parent="CenterVBox/CardsRow/DisplayCard/DPad/DVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+theme_override_font_sizes/font_size = 22
+text = "ENTRAR"
+
+[node name="StatusRow" type="HBoxContainer" parent="CenterVBox"]
+layout_mode = 2
+
+[node name="StatusSpacer" type="Control" parent="CenterVBox/StatusRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatusLabel" type="Label" parent="CenterVBox/StatusRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.38, 0.424, 0.49, 1)
+text = "Elegí un rol para entrar al juego"

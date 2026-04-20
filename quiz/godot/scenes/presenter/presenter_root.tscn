@@ -11,286 +11,737 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
+color = Color(0.031, 0.047, 0.078, 1)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="RootMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 12
+
+[node name="RootVBox" type="VBoxContainer" parent="RootMargin"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 12
 
-[node name="RoleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="TopBar" type="HBoxContainer" parent="RootMargin/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PhaseCard" type="PanelContainer" parent="RootMargin/RootVBox/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="PhasePad" type="MarginContainer" parent="RootMargin/RootVBox/TopBar/PhaseCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 14
+
+[node name="PhaseLabel" type="Label" parent="RootMargin/RootVBox/TopBar/PhaseCard/PhasePad"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "STANDBY"
+
+[node name="TopSpacer" type="Control" parent="RootMargin/RootVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ScoreBar" type="HBoxContainer" parent="RootMargin/RootVBox/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ScoreCard1" type="PanelContainer" parent="RootMargin/RootVBox/TopBar/ScoreBar"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ScorePad1" type="MarginContainer" parent="RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard1"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 10
+
+[node name="ScoreVBox1" type="VBoxContainer" parent="RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard1/ScorePad1"]
+layout_mode = 2
+
+[node name="Team1Name" type="Label" parent="RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard1/ScorePad1/ScoreVBox1"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "E1"
+horizontal_alignment = 1
+
+[node name="Team1ScoreValue" type="Label" parent="RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard1/ScorePad1/ScoreVBox1"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "0"
+horizontal_alignment = 1
+
+[node name="ScoreCard2" type="PanelContainer" parent="RootMargin/RootVBox/TopBar/ScoreBar"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ScorePad2" type="MarginContainer" parent="RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard2"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 10
+
+[node name="ScoreVBox2" type="VBoxContainer" parent="RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard2/ScorePad2"]
+layout_mode = 2
+
+[node name="Team2Name" type="Label" parent="RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard2/ScorePad2/ScoreVBox2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "E2"
+horizontal_alignment = 1
+
+[node name="Team2ScoreValue" type="Label" parent="RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard2/ScorePad2/ScoreVBox2"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "0"
+horizontal_alignment = 1
+
+[node name="ScoreCard3" type="PanelContainer" parent="RootMargin/RootVBox/TopBar/ScoreBar"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ScorePad3" type="MarginContainer" parent="RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard3"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 10
+
+[node name="ScoreVBox3" type="VBoxContainer" parent="RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard3/ScorePad3"]
+layout_mode = 2
+
+[node name="Team3Name" type="Label" parent="RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard3/ScorePad3/ScoreVBox3"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "E3"
+horizontal_alignment = 1
+
+[node name="Team3ScoreValue" type="Label" parent="RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard3/ScorePad3/ScoreVBox3"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "0"
+horizontal_alignment = 1
+
+[node name="ContentArea" type="HBoxContainer" parent="RootMargin/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+size_flags_vertical = 3
+
+[node name="Sidebar" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.7
+theme_override_constants/separation = 6
+
+[node name="TeamsTitle" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "Equipos"
+
+[node name="Team1Card" type="PanelContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="T1Pad" type="MarginContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team1Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="T1VBox" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team1Card/T1Pad"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="T1Header" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team1Card/T1Pad/T1VBox"]
+layout_mode = 2
+
+[node name="T1Name" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team1Card/T1Pad/T1VBox/T1Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "Equipo 1"
+
+[node name="T1Status" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team1Card/T1Pad/T1VBox/T1Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "Listo"
+horizontal_alignment = 2
+
+[node name="T1Btns" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team1Card/T1Pad/T1VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="T1LockBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team1Card/T1Pad/T1VBox/T1Btns"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 16
+text = "Bloquear"
+
+[node name="T1ForceBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team1Card/T1Pad/T1VBox/T1Btns"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 16
+text = "Dar turno"
+
+[node name="Team2Card" type="PanelContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="T2Pad" type="MarginContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team2Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="T2VBox" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team2Card/T2Pad"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="T2Header" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team2Card/T2Pad/T2VBox"]
+layout_mode = 2
+
+[node name="T2Name" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team2Card/T2Pad/T2VBox/T2Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "Equipo 2"
+
+[node name="T2Status" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team2Card/T2Pad/T2VBox/T2Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "Listo"
+horizontal_alignment = 2
+
+[node name="T2Btns" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team2Card/T2Pad/T2VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="T2LockBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team2Card/T2Pad/T2VBox/T2Btns"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 16
+text = "Bloquear"
+
+[node name="T2ForceBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team2Card/T2Pad/T2VBox/T2Btns"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 16
+text = "Dar turno"
+
+[node name="Team3Card" type="PanelContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="T3Pad" type="MarginContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team3Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="T3VBox" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team3Card/T3Pad"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="T3Header" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team3Card/T3Pad/T3VBox"]
+layout_mode = 2
+
+[node name="T3Name" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team3Card/T3Pad/T3VBox/T3Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "Equipo 3"
+
+[node name="T3Status" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team3Card/T3Pad/T3VBox/T3Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "Listo"
+horizontal_alignment = 2
+
+[node name="T3Btns" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team3Card/T3Pad/T3VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="T3LockBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team3Card/T3Pad/T3VBox/T3Btns"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 16
+text = "Bloquear"
+
+[node name="T3ForceBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/Sidebar/Team3Card/T3Pad/T3VBox/T3Btns"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 16
+text = "Dar turno"
+
+[node name="ScoreSep" type="HSeparator" parent="RootMargin/RootVBox/ContentArea/Sidebar"]
+layout_mode = 2
+
+[node name="ScoreTitle" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "Puntaje manual"
+
+[node name="T1ScoreRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="T1SName" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/T1ScoreRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "E1"
+
+[node name="T1SubBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/Sidebar/T1ScoreRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+theme_override_font_sizes/font_size = 16
+text = "-100"
+
+[node name="T1AddBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/Sidebar/T1ScoreRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+theme_override_font_sizes/font_size = 16
+text = "+100"
+
+[node name="T2ScoreRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="T2SName" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/T2ScoreRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "E2"
+
+[node name="T2SubBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/Sidebar/T2ScoreRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+theme_override_font_sizes/font_size = 16
+text = "-100"
+
+[node name="T2AddBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/Sidebar/T2ScoreRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+theme_override_font_sizes/font_size = 16
+text = "+100"
+
+[node name="T3ScoreRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/Sidebar"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="T3SName" type="Label" parent="RootMargin/RootVBox/ContentArea/Sidebar/T3ScoreRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "E3"
+
+[node name="T3SubBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/Sidebar/T3ScoreRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+theme_override_font_sizes/font_size = 16
+text = "-100"
+
+[node name="T3AddBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/Sidebar/T3ScoreRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+theme_override_font_sizes/font_size = 16
+text = "+100"
+
+[node name="MainArea" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+theme_override_constants/separation = 12
+
+[node name="IdlePanel" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="IdleTitle" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Control del presentador"
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "Seleccioná una pregunta"
 
-[node name="PhaseLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="RoundRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Ronda"
+theme_override_constants/separation = 12
 
-[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="RoundLbl" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/RoundRow"]
 layout_mode = 2
-autowrap_mode = 3
-
-[node name="CurrentQuestionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-autowrap_mode = 3
-text = "Sin pregunta activa"
-
-[node name="LockLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-autowrap_mode = 3
-text = "Sin bloqueo"
-
-[node name="TeamStateLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-autowrap_mode = 3
-text = "Mesa"
-
-[node name="ScoreLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Marcador"
-
-[node name="SummaryDivider" type="HSeparator" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="SelectorSectionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Selección de pregunta"
-
-[node name="SelectorPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="SelectorTitle" type="Label" parent="MarginContainer/VBoxContainer/SelectorPanel"]
-layout_mode = 2
-text = "Elegí la ronda y la pregunta que sale al aire"
-
-[node name="RoundRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SelectorPanel"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="RoundLabel" type="Label" parent="MarginContainer/VBoxContainer/SelectorPanel/RoundRow"]
-layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
 text = "Ronda:"
 
-[node name="RoundSelector" type="OptionButton" parent="MarginContainer/VBoxContainer/SelectorPanel/RoundRow"]
+[node name="RoundSelector" type="OptionButton" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/RoundRow"]
+unique_name_in_owner = true
 layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
 
-[node name="QuestionRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SelectorPanel"]
+[node name="QRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 12
 
-[node name="QuestionLabel" type="Label" parent="MarginContainer/VBoxContainer/SelectorPanel/QuestionRow"]
+[node name="QLbl" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QRow"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
 text = "Pregunta:"
 
-[node name="QuestionSelector" type="OptionButton" parent="MarginContainer/VBoxContainer/SelectorPanel/QuestionRow"]
+[node name="QuestionSelector" type="OptionButton" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/QRow"]
+unique_name_in_owner = true
 layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
 
-[node name="SelectorActionsRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SelectorPanel"]
+[node name="PreviewCard" type="PanelContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 8
 
-[node name="LoadSelectedButton" type="Button" parent="MarginContainer/VBoxContainer/SelectorPanel/SelectorActionsRow"]
+[node name="PrevPad" type="MarginContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/PreviewCard"]
 layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="PreviewLabel" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/PreviewCard/PrevPad"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+autowrap_mode = 3
+text = "Elegí una ronda y pregunta para ver la vista previa."
+
+[node name="IdleActions" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LoadSelectedBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/IdleActions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
 text = "Abrir seleccionada"
 
-[node name="LoadRandomButton" type="Button" parent="MarginContainer/VBoxContainer/SelectorPanel/SelectorActionsRow"]
+[node name="RandomBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/IdleActions"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Sacar aleatoria"
+custom_minimum_size = Vector2(0, 64)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "Aleatoria"
 
-[node name="ResetUsedButton" type="Button" parent="MarginContainer/VBoxContainer/SelectorPanel/SelectorActionsRow"]
+[node name="ResetUsedBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/IdlePanel/IdleActions"]
+unique_name_in_owner = true
 layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+theme_override_font_sizes/font_size = 16
 text = "Limpiar usadas"
 
-[node name="ClearSessionButton" type="Button" parent="MarginContainer/VBoxContainer/SelectorPanel/SelectorActionsRow"]
+[node name="QuestionPanel" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
-text = "Borrar sesión"
+theme_override_constants/separation = 12
 
-[node name="PreviewLabel" type="Label" parent="MarginContainer/VBoxContainer/SelectorPanel"]
+[node name="QuestionCard" type="PanelContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel"]
+unique_name_in_owner = true
 layout_mode = 2
+
+[node name="QCardPad" type="MarginContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QuestionCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="QCardVBox" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QuestionCard/QCardPad"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="QPhaseLbl" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QuestionCard/QCardPad/QCardVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.122, 0.435, 0.922, 1)
+text = "PREGUNTA ACTIVA"
+
+[node name="QuestionText" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QuestionCard/QCardPad/QCardVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
 autowrap_mode = 3
-text = "Vista previa privada"
+text = "Esperando pregunta..."
 
-[node name="ArbitrationDivider" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="OptGrid" type="GridContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QuestionCard/QCardPad/QCardVBox"]
 layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 8
 
-[node name="ArbitrationSectionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="OptA" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QuestionCard/QCardPad/QCardVBox/OptGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Arbitraje por equipo"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "A) --"
 
-[node name="ArbitrationPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="OptB" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QuestionCard/QCardPad/QCardVBox/OptGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "B) --"
 
-[node name="ArbitrationTitle" type="Label" parent="MarginContainer/VBoxContainer/ArbitrationPanel"]
+[node name="OptC" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QuestionCard/QCardPad/QCardVBox/OptGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Bloqueá tablets o reservá el turno manualmente"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "C) --"
 
-[node name="Team1LockRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ArbitrationPanel"]
+[node name="OptD" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QuestionCard/QCardPad/QCardVBox/OptGrid"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+text = "D) --"
 
-[node name="Team1LockLabel" type="Label" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team1LockRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Equipo 1"
-
-[node name="Team1LockButton" type="Button" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team1LockRow"]
-layout_mode = 2
-text = "Bloquear"
-
-[node name="Team1ForceButton" type="Button" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team1LockRow"]
-layout_mode = 2
-text = "Dar turno"
-
-[node name="Team2LockRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ArbitrationPanel"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Team2LockLabel" type="Label" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team2LockRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Equipo 2"
-
-[node name="Team2LockButton" type="Button" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team2LockRow"]
-layout_mode = 2
-text = "Bloquear"
-
-[node name="Team2ForceButton" type="Button" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team2LockRow"]
-layout_mode = 2
-text = "Dar turno"
-
-[node name="Team3LockRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ArbitrationPanel"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Team3LockLabel" type="Label" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team3LockRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Equipo 3"
-
-[node name="Team3LockButton" type="Button" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team3LockRow"]
-layout_mode = 2
-text = "Bloquear"
-
-[node name="Team3ForceButton" type="Button" parent="MarginContainer/VBoxContainer/ArbitrationPanel/Team3LockRow"]
-layout_mode = 2
-text = "Dar turno"
-
-[node name="ActionsDivider" type="HSeparator" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="ActionsSectionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="LockInfo" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Acciones de ronda"
+theme_override_colors/font_color = Color(0.824, 0.6, 0.133, 1)
+autowrap_mode = 3
 
-[node name="ActionsRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="QActions" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 
-[node name="RefreshContentButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
+[node name="QRevealBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QActions"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "Recargar preguntas"
-
-[node name="StartQuestionButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
-layout_mode = 2
-text = "Abrir aleatoria"
-
-[node name="ReopenQuestionButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
-layout_mode = 2
-text = "Reabrir ronda"
-
-[node name="ResetLocksButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
-layout_mode = 2
-text = "Reabrir mesa"
-
-[node name="MarkCorrectButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
-layout_mode = 2
-text = "Dar correcta"
-
-[node name="MarkIncorrectButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
-layout_mode = 2
-text = "Dar incorrecta"
-
-[node name="RevealAnswerButton" type="Button" parent="MarginContainer/VBoxContainer/ActionsRow"]
-layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+theme_override_font_sizes/font_size = 20
 text = "Mostrar correcta"
 
-[node name="ScoreDivider" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="LockedPanel" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
+theme_override_constants/separation = 16
 
-[node name="ScoreSectionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="LockedQText" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Marcador manual"
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+autowrap_mode = 3
 
-[node name="ScoreControls" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="AnsweredCard" type="PanelContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 8
 
-[node name="Team1Row" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ScoreControls"]
+[node name="AnsPad" type="MarginContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel/AnsweredCard"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
 
-[node name="Team1Label" type="Label" parent="MarginContainer/VBoxContainer/ScoreControls/Team1Row"]
+[node name="AnsweredLabel" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel/AnsweredCard/AnsPad"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.824, 0.6, 0.133, 1)
+autowrap_mode = 3
+text = "Sin respuesta"
+
+[node name="CorrectionRow" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="CorrectBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel/CorrectionRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 80)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "CORRECTA"
+
+[node name="IncorrectBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel/CorrectionRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 80)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "INCORRECTA"
+
+[node name="LockedActions" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ReopenBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel/LockedActions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 52)
+theme_override_font_sizes/font_size = 18
+text = "Reabrir ronda"
+
+[node name="LockedRevealBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel/LockedActions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 52)
+theme_override_font_sizes/font_size = 18
+text = "Mostrar correcta"
+
+[node name="RevealPanel" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="RevealCard" type="PanelContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/RevealPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="RevPad" type="MarginContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/RevealPanel/RevealCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="RevVBox" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/RevealPanel/RevealCard/RevPad"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="RevTitle" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/RevealPanel/RevealCard/RevPad/RevVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "La correcta era:"
+
+[node name="RevealAnswer" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/RevealPanel/RevealCard/RevPad/RevVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(0.18, 0.631, 0.263, 1)
+text = "--"
+
+[node name="ResultLabel" type="Label" parent="RootMargin/RootVBox/ContentArea/MainArea/RevealPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
+autowrap_mode = 3
+
+[node name="NextBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/RevealPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+theme_override_font_sizes/font_size = 24
+text = "Próxima pregunta"
+
+[node name="BottomBar" type="HBoxContainer" parent="RootMargin/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RefreshBtn" type="Button" parent="RootMargin/RootVBox/BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 16
+text = "Recargar preguntas"
+
+[node name="ResetLocksBtn" type="Button" parent="RootMargin/RootVBox/BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 16
+text = "Reabrir mesa"
+
+[node name="ClearSessionBtn" type="Button" parent="RootMargin/RootVBox/BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+theme_override_font_sizes/font_size = 16
+text = "🗑 Nueva partida"
+tooltip_text = "Reinicia scores, pregunta y estado del juego"
+
+[node name="Spacer" type="Control" parent="RootMargin/RootVBox/BottomBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Equipo 1"
 
-[node name="Team1SubtractButton" type="Button" parent="MarginContainer/VBoxContainer/ScoreControls/Team1Row"]
+[node name="SettingsBtn" type="Button" parent="RootMargin/RootVBox/BottomBar"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "-100"
-
-[node name="Team1AddButton" type="Button" parent="MarginContainer/VBoxContainer/ScoreControls/Team1Row"]
-layout_mode = 2
-text = "+100"
-
-[node name="Team2Row" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ScoreControls"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Team2Label" type="Label" parent="MarginContainer/VBoxContainer/ScoreControls/Team2Row"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Equipo 2"
-
-[node name="Team2SubtractButton" type="Button" parent="MarginContainer/VBoxContainer/ScoreControls/Team2Row"]
-layout_mode = 2
-text = "-100"
-
-[node name="Team2AddButton" type="Button" parent="MarginContainer/VBoxContainer/ScoreControls/Team2Row"]
-layout_mode = 2
-text = "+100"
-
-[node name="Team3Row" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ScoreControls"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="Team3Label" type="Label" parent="MarginContainer/VBoxContainer/ScoreControls/Team3Row"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Equipo 3"
-
-[node name="Team3SubtractButton" type="Button" parent="MarginContainer/VBoxContainer/ScoreControls/Team3Row"]
-layout_mode = 2
-text = "-100"
-
-[node name="Team3AddButton" type="Button" parent="MarginContainer/VBoxContainer/ScoreControls/Team3Row"]
-layout_mode = 2
-text = "+100"
+custom_minimum_size = Vector2(44, 44)
+theme_override_font_sizes/font_size = 22
+text = "⚙"

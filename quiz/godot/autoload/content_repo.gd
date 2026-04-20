@@ -12,21 +12,37 @@ var last_error: String = ""
 
 func _ready() -> void:
 	load_questions()
+	# If ShowConfig overrides questions file, use that
+	if ShowConfig:
+		var configured_path: String = ShowConfig.get_questions_file()
+		if not configured_path.is_empty() and configured_path != QUESTIONS_PATH:
+			if FileAccess.file_exists(configured_path):
+				_load_questions_from(configured_path)
+		ShowConfig.questions_file_changed.connect(_on_questions_file_changed)
 
 
 func load_questions() -> Array[Question]:
+	var path: String = QUESTIONS_PATH
+	if ShowConfig:
+		var configured_path: String = ShowConfig.get_questions_file()
+		if not configured_path.is_empty():
+			path = configured_path
+	return _load_questions_from(path)
+
+
+func _load_questions_from(path: String) -> Array[Question]:
 	questions.clear()
 	last_error = ""
 
-	if not FileAccess.file_exists(QUESTIONS_PATH):
-		last_error = "Questions file not found: %s" % QUESTIONS_PATH
-		emit_signal("content_missing", QUESTIONS_PATH)
+	if not FileAccess.file_exists(path):
+		last_error = "Questions file not found: %s" % path
+		emit_signal("content_missing", path)
 		emit_signal("questions_loaded", 0)
 		return questions
 
-	var file: FileAccess = FileAccess.open(QUESTIONS_PATH, FileAccess.READ)
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		last_error = "Unable to open questions file: %s" % QUESTIONS_PATH
+		last_error = "Unable to open questions file: %s" % path
 		emit_signal("content_error", last_error)
 		emit_signal("questions_loaded", 0)
 		return questions
@@ -46,6 +62,10 @@ func load_questions() -> Array[Question]:
 
 	emit_signal("questions_loaded", questions.size())
 	return questions
+
+
+func _on_questions_file_changed(path: String) -> void:
+	_load_questions_from(path)
 
 
 func get_question(index: int) -> Question:

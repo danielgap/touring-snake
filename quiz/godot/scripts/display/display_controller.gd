@@ -1,129 +1,598 @@
 extends Control
 
-@onready var title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
-@onready var phase_label: Label = $MarginContainer/VBoxContainer/PhaseLabel
-@onready var status_label: Label = $MarginContainer/VBoxContainer/StatusLabel
-@onready var question_label: Label = $MarginContainer/VBoxContainer/QuestionLabel
-@onready var lock_label: Label = $MarginContainer/VBoxContainer/LockLabel
-@onready var team_locks_label: Label = $MarginContainer/VBoxContainer/TeamLocksLabel
-@onready var feedback_label: Label = $MarginContainer/VBoxContainer/FeedbackLabel
-@onready var option_a: Label = $MarginContainer/VBoxContainer/OptionsVBox/OptionALabel
-@onready var option_b: Label = $MarginContainer/VBoxContainer/OptionsVBox/OptionBLabel
-@onready var option_c: Label = $MarginContainer/VBoxContainer/OptionsVBox/OptionCLabel
-@onready var option_d: Label = $MarginContainer/VBoxContainer/OptionsVBox/OptionDLabel
-@onready var score_label: Label = $MarginContainer/VBoxContainer/ScoreLabel
+## ── HY300 mini-projector optimized palette ──────────────────────
+## Target: HY300-class Android mini projector
+##   • ~150 lumens, native 320x240/640x360, contrast ~500:1
+##   • Godot renders at 720p → projector downscales ~3x
+##   • Blacks → gray, subtle differences → invisible, thin borders → gone
+##
+## Strategy:
+##   • BG lighter (projector can't show deep black anyway)
+##   • Cards MUCH lighter than BG — need clear edge separation
+##   • Borders 4-5px (survive 3x downscale as 1-2px)
+##   • Glow alpha 0.75+ (perceived ~0.25 after washout)
+##   • PURE white text, bright saturated accents
+##   • Active states use BRIGHT solid backgrounds, not subtle tints
+##
+## Presenter & Contestant keep the subtler tablet palette.
+
+const BG_CONSOLE := Color("#111827")         # medium-dark — projector turns this into gray anyway, lighter = cleaner
+const CARD_BG := Color("#1e3050")            # clearly lighter than BG — visible card edges even after washout
+const CARD_BG_DIM := Color("#182440")        # dimmer but still distinct from BG
+const CARD_BORDER := Color("#3a5575")        # medium-bright border visible after downscale
+const CORNER_RADIUS := 16                    # larger radius survives downscale better
+
+const TEAM1_COLOR := Color("#93bbfd")        # very bright blue — survives washout as clear blue
+const TEAM2_COLOR := Color("#fcd34d")        # very bright amber — survives as clear yellow
+const TEAM3_COLOR := Color("#fca5a5")        # very bright red — survives as clear pink-red
+const TEAM1_BG := Color("#1e3a6e")           # clearly blue-tinted — team identity visible
+const TEAM2_BG := Color("#4a3814")           # clearly amber-tinted
+const TEAM3_BG := Color("#4a2020")           # clearly red-tinted
+
+const PHASE_IDLE_COLOR := Color("#7a8a9e")   # bright gray — readable on washed-out BG
+const PHASE_QUESTION_COLOR := Color("#67d4f8") # very bright cyan — AL AIRE needs to pop
+const PHASE_LOCKED_COLOR := Color("#fcd34d") # bright amber
+const PHASE_REVEAL_COLOR := Color("#6ee7a0") # bright mint green — survives washout as clear green
+const PHASE_CORRECT_COLOR := Color("#6ee7a0")
+const PHASE_INCORRECT_COLOR := Color("#fca5a5")
+
+const TEXT_BRIGHT := Color("#ffffff")          # PURE white — non-negotiable on projector
+const TEXT_DIM := Color("#c8d4e4")             # bright secondary — still clearly readable
+const TEXT_MUTED := Color("#7a8ea6")           # dim but NOT invisible
+const ACCENT_BLUE := Color("#67d4f8")          # very bright accent
+const BORDER_THICK := 5                        # survives 3x downscale as 1-2px
+const BORDER_NORMAL := 3                       # survives as 1px minimum
+const GLOW_SIZE := 16                          # big glow — survives as ~5px halo
+const GLOW_ALPHA := 0.75                       # strong — perceived as ~0.25 after washout
+
+## ── Nodes ─────────────────────────────────────────────────────────
+@onready var phase_label: Label = %PhaseLabel
+@onready var t1_score: Label = %T1Score
+@onready var t2_score: Label = %T2Score
+@onready var t3_score: Label = %T3Score
+@onready var question_text: Label = %QuestionText
+@onready var opt_a: Label = %OptA
+@onready var opt_b: Label = %OptB
+@onready var opt_c: Label = %OptC
+@onready var opt_d: Label = %OptD
+@onready var opt_card_a: PanelContainer = %OptCardA
+@onready var opt_card_b: PanelContainer = %OptCardB
+@onready var opt_card_c: PanelContainer = %OptCardC
+@onready var opt_card_d: PanelContainer = %OptCardD
+@onready var team_locks_label: Label = %TeamLocksLabel
+@onready var feedback_label: Label = %FeedbackLabel
+@onready var lock_label: Label = %LockLabel
+## Dynamic nodes
+var _trivia_card: PanelContainer
+var _trivia_label: Label
+
+## ── Animation state ──────────────────────────────────────────────
+var _prev_phase: int = -1
+var _prev_question_text: String = ""
+var _prev_scores: Dictionary = {}
+var _active_tweens: Array[Tween] = []
 
 
 func _ready() -> void:
-	title_label.text = "Pantalla principal"
+	_apply_styles()
+	_wire_config_values()
+	_update_team_visibility()
 	AppState.game_state_changed.connect(_render_state)
 	AppState.scores_changed.connect(_render_scores)
+	ShowConfig.config_changed.connect(_on_config_changed)
 	_render_state(AppState.current_state)
 	_render_scores(AppState.current_state.scores)
 
 
+# ═══════════════════════════════════════════════════════════════════
+#  Config wiring (runtime overrides from ShowConfig)
+# ═══════════════════════════════════════════════════════════════════
+
+func _wire_config_values() -> void:
+	%T1Name.text = ShowConfig.get_team_short(1)
+	%T2Name.text = ShowConfig.get_team_short(2)
+	%T3Name.text = ShowConfig.get_team_short(3)
+
+
+func _on_config_changed() -> void:
+	_wire_config_values()
+	_update_team_visibility()
+
+
+func _update_team_visibility() -> void:
+	var count: int = ShowConfig.get_team_count()
+	%ScoreCard2.visible = count >= 2
+	%ScoreCard3.visible = count >= 3
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  Visual styling (applied once at startup)
+# ═══════════════════════════════════════════════════════════════════
+
+func _apply_styles() -> void:
+	$Background.color = BG_CONSOLE
+
+	# Phase card — thick border, strong glow
+	%PhaseCard.add_theme_stylebox_override("panel", _make_glow_card(CARD_BG, PHASE_IDLE_COLOR, BORDER_THICK, PHASE_IDLE_COLOR, GLOW_SIZE))
+	phase_label.add_theme_color_override("font_color", PHASE_IDLE_COLOR)
+
+	# Score cards — team-colored with STRONG glow (projector needs it)
+	%ScoreCard1.add_theme_stylebox_override("panel", _make_glow_card(TEAM1_BG, TEAM1_COLOR, BORDER_THICK, TEAM1_COLOR, GLOW_SIZE))
+	%ScoreCard2.add_theme_stylebox_override("panel", _make_glow_card(TEAM2_BG, TEAM2_COLOR, BORDER_THICK, TEAM2_COLOR, GLOW_SIZE))
+	%ScoreCard3.add_theme_stylebox_override("panel", _make_glow_card(TEAM3_BG, TEAM3_COLOR, BORDER_THICK, TEAM3_COLOR, GLOW_SIZE))
+	t1_score.add_theme_color_override("font_color", TEAM1_COLOR)
+	t2_score.add_theme_color_override("font_color", TEAM2_COLOR)
+	t3_score.add_theme_color_override("font_color", TEAM3_COLOR)
+	%T1Name.add_theme_color_override("font_color", TEAM1_COLOR)
+	%T2Name.add_theme_color_override("font_color", TEAM2_COLOR)
+	%T3Name.add_theme_color_override("font_color", TEAM3_COLOR)
+
+	# Question card — bright blue border, strong glow
+	%QuestionCard.add_theme_stylebox_override("panel", _make_glow_card(Color("#0f1f35"), ACCENT_BLUE, BORDER_THICK, ACCENT_BLUE, 12))
+
+	# Option cards — default dim state with visible border
+	_style_option_card(opt_card_a, CARD_BG_DIM, CARD_BORDER, BORDER_NORMAL)
+	_style_option_card(opt_card_b, CARD_BG_DIM, CARD_BORDER, BORDER_NORMAL)
+	_style_option_card(opt_card_c, CARD_BG_DIM, CARD_BORDER, BORDER_NORMAL)
+	_style_option_card(opt_card_d, CARD_BG_DIM, CARD_BORDER, BORDER_NORMAL)
+
+	# Bottom bar — readable dim text
+	team_locks_label.add_theme_color_override("font_color", TEXT_DIM)
+	feedback_label.add_theme_color_override("font_color", TEXT_DIM)
+	lock_label.add_theme_color_override("font_color", TEXT_DIM)
+
+	# Trivia card — shown only on REVEAL phase
+	_create_trivia_card()
+
+
+func _make_glow_card(bg: Color, border: Color, border_w: int, glow_color: Color = Color.TRANSPARENT, glow_size: int = 0) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg
+	style.border_color = border
+	style.set_border_width_all(border_w)
+	style.set_corner_radius_all(CORNER_RADIUS)
+	if glow_size > 0:
+		style.shadow_color = Color(glow_color.r, glow_color.g, glow_color.b, GLOW_ALPHA)
+		style.shadow_size = glow_size
+		style.anti_aliasing_size = 1
+	return style
+
+
+func _style_option_card(card: PanelContainer, bg: Color, border: Color, border_w: int = BORDER_NORMAL, glow_color: Color = Color.TRANSPARENT, glow_size: int = 0) -> void:
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg
+	style.border_color = border
+	style.set_border_width_all(border_w)
+	style.set_corner_radius_all(CORNER_RADIUS)
+	if glow_size > 0:
+		style.shadow_color = Color(glow_color.r, glow_color.g, glow_color.b, GLOW_ALPHA)
+		style.shadow_size = glow_size
+	card.add_theme_stylebox_override("panel", style)
+
+
+func _create_trivia_card() -> void:
+	var center_vbox: VBoxContainer = get_node_or_null("MarginContainer/RootVBox/CenterVBox")
+	if center_vbox == null:
+		push_warning("DisplayController: CenterVBox not found for trivia card")
+		return
+	_trivia_card = PanelContainer.new()
+	_trivia_card.name = "TriviaCard"
+	_trivia_card.visible = false
+	# Insert after OptionsGrid in CenterVBox
+	var options_grid: Node = center_vbox.get_node_or_null("OptionsGrid")
+	if options_grid != null:
+		var idx: int = options_grid.get_index()
+		center_vbox.add_child(_trivia_card)
+		center_vbox.move_child(_trivia_card, idx + 1)
+	else:
+		center_vbox.add_child(_trivia_card)
+
+	var margin: MarginContainer = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 28)
+	margin.add_theme_constant_override("margin_top", 16)
+	margin.add_theme_constant_override("margin_right", 28)
+	margin.add_theme_constant_override("margin_bottom", 16)
+	_trivia_card.add_child(margin)
+
+	_trivia_label = Label.new()
+	_trivia_label.name = "TriviaText"
+	_trivia_label.add_theme_font_size_override("font_size", 30)
+	_trivia_label.add_theme_color_override("font_color", TEXT_DIM)
+	_trivia_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_trivia_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_trivia_label.text = ""
+	margin.add_child(_trivia_label)
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("#0f1f35")
+	style.border_color = ACCENT_BLUE
+	style.set_border_width_all(BORDER_THICK)
+	style.set_corner_radius_all(CORNER_RADIUS)
+	style.shadow_color = Color(ACCENT_BLUE.r, ACCENT_BLUE.g, ACCENT_BLUE.b, 0.5)
+	style.shadow_size = 10
+	_trivia_card.add_theme_stylebox_override("panel", style)
+
+
+func _render_trivia(state: GameState) -> void:
+	if _trivia_card == null:
+		return
+	if state.phase != Enums.GamePhase.REVEAL or state.current_question.id <= 0:
+		_trivia_card.visible = false
+		return
+	var question: Question = ContentRepo.get_question_by_id(state.current_question.id)
+	if question.trivia.is_empty():
+		_trivia_card.visible = false
+		return
+	_trivia_card.visible = true
+	_trivia_label.text = "💡 %s" % question.trivia
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  Main render pipeline
+# ═══════════════════════════════════════════════════════════════════
+
 func _render_state(state: GameState) -> void:
-	phase_label.text = _phase_summary(state)
-	status_label.text = "Estado: %s" % state.status_text
-	question_label.text = state.current_question.text if not state.current_question.text.is_empty() else "En instantes aparece la próxima pregunta."
-	lock_label.text = _lock_summary(state)
-	team_locks_label.text = _team_locks_summary(state)
-	feedback_label.text = _feedback_summary(state)
-	var options: PackedStringArray = state.current_question.options
-	option_a.text = _option_text("A", options, 0, state)
-	option_b.text = _option_text("B", options, 1, state)
-	option_c.text = _option_text("C", options, 2, state)
-	option_d.text = _option_text("D", options, 3, state)
+	var phase_changed: bool = _prev_phase != state.phase
+	var question_changed: bool = _prev_question_text != state.current_question.text
+
+	_render_phase(state)
+	_render_question(state, question_changed)
+	_render_options(state, phase_changed)
+	_render_score_cards(state)
+	_render_team_locks(state)
+	_render_feedback(state)
+	_render_lock_info(state)
+	_render_trivia(state)
+
+	if phase_changed and _prev_phase >= 0:
+		_animate_phase_transition(state)
+	_prev_phase = state.phase
+	_prev_question_text = state.current_question.text
 
 
 func _render_scores(scores: Dictionary) -> void:
-	score_label.text = "Marcador · E1: %d | E2: %d | E3: %d" % [
-		int(scores.get(1, 0)),
-		int(scores.get(2, 0)),
-		int(scores.get(3, 0)),
-	]
+	var changed_teams: Array[int] = []
+	var count: int = ShowConfig.get_team_count()
+	for team_id in range(1, count + 1):
+		if int(scores.get(team_id, 0)) != int(_prev_scores.get(team_id, 0)):
+			changed_teams.append(team_id)
+	t1_score.text = str(int(scores.get(1, 0)))
+	t2_score.text = str(int(scores.get(2, 0)))
+	t3_score.text = str(int(scores.get(3, 0)))
+	for team_id in changed_teams:
+		_animate_score_pulse(team_id)
+	_prev_scores = scores.duplicate()
 
 
-func _option_text(letter: String, options: PackedStringArray, index: int, state: GameState) -> String:
-	var text: String = "%s) --" % letter
-	if index < options.size():
-		text = "%s) %s" % [letter, options[index]]
-	if state.locked_team_id > 0 and state.last_selected_option == letter:
-		text += "  %s" % _locked_option_marker(state)
-	if state.phase == Enums.GamePhase.REVEAL and state.revealed_correct_option == letter:
-		if state.answer_feedback_status == Enums.AnswerFeedbackStatus.CORRECT and state.last_selected_option == letter:
-			return text
-		text += "  ✅"
-	return text
+# ═══════════════════════════════════════════════════════════════════
+#  Section renderers
+# ═══════════════════════════════════════════════════════════════════
+
+func _render_phase(state: GameState) -> void:
+	var phase_color: Color = PHASE_IDLE_COLOR
+	match state.phase:
+		Enums.GamePhase.IDLE:
+			phase_label.text = "STANDBY"
+			phase_color = PHASE_IDLE_COLOR
+		Enums.GamePhase.QUESTION:
+			if state.answers_enabled:
+				phase_label.text = "AL AIRE"
+				phase_color = PHASE_QUESTION_COLOR
+			else:
+				phase_label.text = "EN JUEGO"
+				phase_color = PHASE_QUESTION_COLOR
+		Enums.GamePhase.LOCKED:
+			match state.answer_feedback_status:
+				Enums.AnswerFeedbackStatus.CORRECT:
+					phase_label.text = "CORRECTA"
+					phase_color = PHASE_CORRECT_COLOR
+				Enums.AnswerFeedbackStatus.INCORRECT:
+					phase_label.text = "INCORRECTA"
+					phase_color = PHASE_INCORRECT_COLOR
+				_:
+					phase_label.text = "RESPUESTA"
+					phase_color = PHASE_LOCKED_COLOR
+		Enums.GamePhase.REVEAL:
+			phase_label.text = "REVELADA"
+			phase_color = PHASE_REVEAL_COLOR
+		_:
+			phase_label.text = "STANDBY"
+			phase_color = PHASE_IDLE_COLOR
+
+	# Dynamic phase card — bright border + massive glow for HY300
+	phase_label.add_theme_color_override("font_color", phase_color)
+	var phase_style: StyleBoxFlat = %PhaseCard.get_theme_stylebox("panel")
+	if phase_style:
+		phase_style.border_color = phase_color
+		phase_style.bg_color = Color(phase_color.r * 0.25, phase_color.g * 0.25, phase_color.b * 0.25, 1.0)
+		phase_style.shadow_color = Color(phase_color.r, phase_color.g, phase_color.b, 0.85)
+		phase_style.shadow_size = GLOW_SIZE + 8
 
 
-func _phase_summary(state: GameState) -> String:
-	if state.phase == Enums.GamePhase.LOCKED:
-		return "RESPUESTA TOMADA"
-	if state.phase == Enums.GamePhase.QUESTION and state.answers_enabled:
-		return "PREGUNTA ABIERTA"
+func _render_question(state: GameState, animate: bool = false) -> void:
+	if state.current_question.text.is_empty():
+		question_text.text = "En instantes..."
+		question_text.add_theme_color_override("font_color", TEXT_MUTED)
+	else:
+		question_text.text = state.current_question.text
+		question_text.add_theme_color_override("font_color", TEXT_BRIGHT)
+		if animate:
+			_animate_question_in()
+
+
+func _render_options(state: GameState, phase_changed: bool = false) -> void:
+	var options: PackedStringArray = state.current_question.options
+	var letters: Array[String] = ["A", "B", "C", "D"]
+	var labels: Array[Label] = [opt_a, opt_b, opt_c, opt_d]
+	var cards: Array[PanelContainer] = [opt_card_a, opt_card_b, opt_card_c, opt_card_d]
+
+	# Fill option text
+	for i in range(4):
+		if i < options.size():
+			labels[i].text = "%s) %s" % [letters[i], options[i]]
+		else:
+			labels[i].text = "%s) --" % letters[i]
+
+	# Dynamic styling per option — projector needs BOLD differentiation
+	var selected_letter: String = state.last_selected_option.to_upper() if not state.last_selected_option.is_empty() else ""
+	var correct_letter: String = state.revealed_correct_option.to_upper() if not state.revealed_correct_option.is_empty() else ""
+
+	for i in range(4):
+		var letter := letters[i]
+		var card := cards[i]
+		var label := labels[i]
+
+		if state.phase == Enums.GamePhase.REVEAL:
+			_render_option_reveal(i, letter, card, label, selected_letter, correct_letter, state)
+		elif state.phase == Enums.GamePhase.LOCKED and letter == selected_letter:
+			# Selected option — VERY BRIGHT team-colored bg + thick border + massive glow
+			# 0.4 multiplier so bg is bright enough to see on HY300
+			var tc := _team_color(state.locked_team_id)
+			_style_option_card(card, Color(tc.r * 0.4, tc.g * 0.4, tc.b * 0.4, 1.0), tc, BORDER_THICK, tc, 18)
+			label.add_theme_color_override("font_color", TEXT_BRIGHT)
+		elif state.phase == Enums.GamePhase.QUESTION and not state.current_question.text.is_empty():
+			# Question active — bright blue border (0.8 multiplier for HY300 visibility)
+			_style_option_card(card, CARD_BG, Color(ACCENT_BLUE.r * 0.8, ACCENT_BLUE.g * 0.8, ACCENT_BLUE.b * 0.8, 1.0), BORDER_THICK)
+			label.add_theme_color_override("font_color", TEXT_BRIGHT)
+		else:
+			# Idle — dim but still readable on projector
+			_style_option_card(card, CARD_BG_DIM, CARD_BORDER, BORDER_NORMAL)
+			label.add_theme_color_override("font_color", TEXT_DIM)
+
+
+func _render_option_reveal(i: int, letter: String, card: PanelContainer, label: Label, selected: String, correct: String, state: GameState) -> void:
+	if letter == correct:
+		# Correct answer — BRIGHT green bg + thick border + massive glow (HY300 needs it BIG)
+		_style_option_card(card, Color("#0e4528"), PHASE_REVEAL_COLOR, BORDER_THICK, PHASE_REVEAL_COLOR, 20)
+		label.add_theme_color_override("font_color", TEXT_BRIGHT)
+	elif letter == selected and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT:
+		# Wrong selection — BRIGHT red bg + thick border + massive glow
+		_style_option_card(card, Color("#451414"), PHASE_INCORRECT_COLOR, BORDER_THICK, PHASE_INCORRECT_COLOR, 20)
+		label.add_theme_color_override("font_color", TEXT_BRIGHT)
+	else:
+		# Not relevant — dim
+		_style_option_card(card, CARD_BG_DIM, CARD_BORDER, BORDER_NORMAL)
+		label.add_theme_color_override("font_color", TEXT_DIM)
+
+
+func _render_score_cards(state: GameState) -> void:
+	_update_score_card_style(1, %ScoreCard1, TEAM1_BG, TEAM1_COLOR, state)
+	if %ScoreCard2.visible:
+		_update_score_card_style(2, %ScoreCard2, TEAM2_BG, TEAM2_COLOR, state)
+	if %ScoreCard3.visible:
+		_update_score_card_style(3, %ScoreCard3, TEAM3_BG, TEAM3_COLOR, state)
+
+
+func _render_team_locks(state: GameState) -> void:
+	var parts: PackedStringArray = []
+	var count: int = ShowConfig.get_team_count()
+	for team_id in range(1, count + 1):
+		var lock_state: int = state.team_lock_state(team_id)
+		var status_text: String = "listo"
+		match lock_state:
+			Enums.TeamLockState.LOCKED_OUT:
+				status_text = "BLOQUEADO"
+			Enums.TeamLockState.ACTIVE:
+				status_text = "EN TURNO"
+			Enums.TeamLockState.FROZEN:
+				status_text = "EN PAUSA"
+		parts.append("%s: %s" % [ShowConfig.get_team_short(team_id), status_text])
+	team_locks_label.text = "  ·  ".join(parts)
+
+
+func _render_feedback(state: GameState) -> void:
+	if state.locked_team_id <= 0:
+		feedback_label.text = "Aguardando respuesta..."
+		feedback_label.add_theme_color_override("font_color", TEXT_MUTED)
+		return
+
+	match state.answer_feedback_status:
+		Enums.AnswerFeedbackStatus.CORRECT:
+			feedback_label.text = "%s — CORRECTA" % ShowConfig.get_team_name(state.locked_team_id).to_upper()
+			feedback_label.add_theme_color_override("font_color", PHASE_CORRECT_COLOR)
+		Enums.AnswerFeedbackStatus.INCORRECT:
+			feedback_label.text = "%s — INCORRECTA" % ShowConfig.get_team_name(state.locked_team_id).to_upper()
+			feedback_label.add_theme_color_override("font_color", PHASE_INCORRECT_COLOR)
+		Enums.AnswerFeedbackStatus.PENDING:
+			feedback_label.text = "%s — Pendiente" % ShowConfig.get_team_name(state.locked_team_id)
+			feedback_label.add_theme_color_override("font_color", PHASE_LOCKED_COLOR)
+		_:
+			feedback_label.text = "Esperando decisión..."
+			feedback_label.add_theme_color_override("font_color", TEXT_DIM)
+
+
+func _render_lock_info(state: GameState) -> void:
 	if state.phase == Enums.GamePhase.REVEAL:
-		return "RESPUESTA REVELADA"
-	return Enums.phase_name(state.phase).to_upper()
-
-
-func _lock_summary(state: GameState) -> String:
-	if state.phase == Enums.GamePhase.REVEAL:
-		return "Correcta: %s · Respondió: %s" % [
+		lock_label.text = "Correcta: %s · Respondió: %s" % [
 			state.revealed_correct_option if not state.revealed_correct_option.is_empty() else "--",
 			_locked_team_text(state),
 		]
-	if state.locked_team_id > 0:
-		return "Respondió equipo %d con %s" % [
-			state.locked_team_id,
+		lock_label.add_theme_color_override("font_color", TEXT_DIM)
+	elif state.locked_team_id > 0:
+		lock_label.text = "%s eligió %s" % [
+			ShowConfig.get_team_name(state.locked_team_id),
 			state.last_selected_option if not state.last_selected_option.is_empty() else "--",
 		]
-	if state.active_team_id > 0:
-		return "Turno reservado para el equipo %d" % state.active_team_id
-	if state.answers_enabled:
-		return "Esperando la primera respuesta válida."
-	return "Todavía no respondió ningún equipo."
+		lock_label.add_theme_color_override("font_color", _team_color(state.locked_team_id))
+	elif state.active_team_id > 0:
+		lock_label.text = "Turno · %s" % ShowConfig.get_team_name(state.active_team_id)
+		lock_label.add_theme_color_override("font_color", TEXT_DIM)
+	elif state.answers_enabled:
+		lock_label.text = "Mesa abierta · Esperando respuesta..."
+		lock_label.add_theme_color_override("font_color", TEXT_DIM)
+	else:
+		lock_label.text = ""
+		lock_label.add_theme_color_override("font_color", TEXT_MUTED)
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  Helpers
+# ═══════════════════════════════════════════════════════════════════
+
+func _team_color(team_id: int) -> Color:
+	return ShowConfig.get_team_color(team_id)
 
 
 func _locked_team_text(state: GameState) -> String:
 	if state.locked_team_id <= 0:
 		return "nadie"
-	return "Equipo %d (%s)" % [
-		state.locked_team_id,
+	return "%s (%s)" % [
+		ShowConfig.get_team_name(state.locked_team_id),
 		state.last_selected_option if not state.last_selected_option.is_empty() else "sin opción",
 	]
 
 
-func _feedback_summary(state: GameState) -> String:
-	if state.locked_team_id <= 0:
-		return "Aguardando respuesta de un equipo."
-	match state.answer_feedback_status:
-		Enums.AnswerFeedbackStatus.CORRECT:
-			return "Resultado: equipo %d CORRECTO." % state.locked_team_id
-		Enums.AnswerFeedbackStatus.INCORRECT:
-			return "Resultado: equipo %d INCORRECTO." % state.locked_team_id
-		Enums.AnswerFeedbackStatus.PENDING:
-			return "Resultado pendiente: equipo %d espera corrección." % state.locked_team_id
-		_:
-			return "Esperando decisión del presentador."
+func _update_score_card_style(team_id: int, card: PanelContainer, dim_bg: Color, bright: Color, state: GameState) -> void:
+	var border_color: Color = Color(bright.r * 0.7, bright.g * 0.7, bright.b * 0.7, 1.0)
+	var bg: Color = dim_bg
+	var glow_intensity: float = 0.0
+	if state.locked_team_id == team_id:
+		border_color = bright
+		bg = Color(bright.r * 0.35, bright.g * 0.35, bright.b * 0.35, 1.0)
+		glow_intensity = 0.8
+	elif state.active_team_id == team_id:
+		border_color = bright
+		bg = Color(bright.r * 0.28, bright.g * 0.28, bright.b * 0.28, 1.0)
+		glow_intensity = 0.6
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg
+	style.border_color = border_color
+	style.set_border_width_all(BORDER_THICK)
+	style.set_corner_radius_all(CORNER_RADIUS)
+	style.content_margin_left = 24
+	style.content_margin_right = 24
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
+	if glow_intensity > 0.0:
+		style.shadow_color = Color(bright.r, bright.g, bright.b, glow_intensity)
+		style.shadow_size = GLOW_SIZE
+	card.add_theme_stylebox_override("panel", style)
 
 
-func _team_locks_summary(state: GameState) -> String:
-	var summary: String = ""
-	for team_id in [1, 2, 3]:
-		if not summary.is_empty():
-			summary += " · "
-		summary += "E%d %s" % [team_id, Enums.team_lock_state_name(state.team_lock_state(team_id)).to_lower()]
-	return "Equipos: %s" % summary
+# ═══════════════════════════════════════════════════════════════════
+#  Tween animations (HY300-safe — large, bold, dramatic)
+# ═══════════════════════════════════════════════════════════════════
+
+func _kill_tweens() -> void:
+	for tw: Tween in _active_tweens:
+		if tw.is_valid():
+			tw.kill()
+	_active_tweens.clear()
 
 
-func _locked_option_marker(state: GameState) -> String:
-	match state.answer_feedback_status:
-		Enums.AnswerFeedbackStatus.CORRECT:
-			return "✅"
-		Enums.AnswerFeedbackStatus.INCORRECT:
-			return "❌"
-		Enums.AnswerFeedbackStatus.PENDING:
-			return "⏳"
-		_:
-			return "🔒"
+func _make_tween() -> Tween:
+	var tw := create_tween()
+	_active_tweens.append(tw)
+	return tw
+
+
+## Question text — fade in + scale up when new question arrives
+func _animate_question_in() -> void:
+	%QuestionCard.modulate.a = 0.0
+	%QuestionCard.scale = Vector2(0.95, 0.95)
+	var tw := _make_tween()
+	tw.set_parallel(true)
+	tw.tween_property(%QuestionCard, "modulate:a", 1.0, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(%QuestionCard, "scale", Vector2(1.0, 1.0), 0.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+## Option cards — staggered fade in when question phase starts
+func _animate_phase_transition(state: GameState) -> void:
+	match state.phase:
+		Enums.GamePhase.QUESTION:
+			_animate_options_stagger_in()
+		Enums.GamePhase.LOCKED:
+			_animate_option_selected(state)
+		Enums.GamePhase.REVEAL:
+			_animate_reveal(state)
+
+
+func _animate_options_stagger_in() -> void:
+	var cards: Array[PanelContainer] = [opt_card_a, opt_card_b, opt_card_c, opt_card_d]
+	for i in range(4):
+		cards[i].modulate.a = 0.0
+		cards[i].scale = Vector2(0.9, 0.9)
+	var tw := _make_tween()
+	for i in range(4):
+		tw.set_parallel(false)
+		tw.tween_interval(0.08 * i)
+		tw.set_parallel(true)
+		tw.tween_property(cards[i], "modulate:a", 1.0, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(cards[i], "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.set_parallel(false)
+
+
+## Selected option — pulse + scale bump
+func _animate_option_selected(state: GameState) -> void:
+	var selected_letter: String = state.last_selected_option.to_upper()
+	var cards_map: Dictionary = {"A": opt_card_a, "B": opt_card_b, "C": opt_card_c, "D": opt_card_d}
+	var card: PanelContainer = cards_map.get(selected_letter)
+	if not card:
+		return
+	# Pulse: scale up then back
+	card.scale = Vector2(1.08, 1.08)
+	var tw := _make_tween()
+	tw.tween_property(card, "scale", Vector2(1.0, 1.0), 0.4).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+
+
+## Reveal — correct option gets a dramatic pulse, wrong gets a shake
+func _animate_reveal(state: GameState) -> void:
+	var selected_letter: String = state.last_selected_option.to_upper()
+	var correct_letter: String = state.revealed_correct_option.to_upper()
+	var cards_map: Dictionary = {"A": opt_card_a, "B": opt_card_b, "C": opt_card_c, "D": opt_card_d}
+
+	# Correct answer — big scale pulse
+	var correct_card: PanelContainer = cards_map.get(correct_letter)
+	if correct_card:
+		correct_card.scale = Vector2(0.9, 0.9)
+		var tw := _make_tween()
+		tw.tween_property(correct_card, "scale", Vector2(1.06, 1.06), 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.tween_property(correct_card, "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+
+	# Wrong answer — horizontal shake
+	if selected_letter != correct_letter:
+		var wrong_card: PanelContainer = cards_map.get(selected_letter)
+		if wrong_card:
+			var tw2 := _make_tween()
+			tw2.tween_property(wrong_card, "position:x", wrong_card.position.x + 8, 0.05)
+			tw2.tween_property(wrong_card, "position:x", wrong_card.position.x - 8, 0.05)
+			tw2.tween_property(wrong_card, "position:x", wrong_card.position.x + 4, 0.05)
+			tw2.tween_property(wrong_card, "position:x", wrong_card.position.x, 0.05)
+
+	# Phase card flash — brighten then settle
+	%PhaseCard.modulate.a = 0.5
+	var tw3 := _make_tween()
+	tw3.tween_property(%PhaseCard, "modulate:a", 1.0, 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+
+## Score pulse — scale up and back when score changes
+func _animate_score_pulse(team_id: int) -> void:
+	var score_label: Label
+	match team_id:
+		1: score_label = t1_score
+		2: score_label = t2_score
+		3: score_label = t3_score
+		_: return
+	score_label.scale = Vector2(1.4, 1.4)
+	var tw := _make_tween()
+	tw.tween_property(score_label, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)

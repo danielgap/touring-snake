@@ -11,6 +11,15 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.067, 0.094, 0.153, 1)
+
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -18,81 +27,258 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 24
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 28
+
+[node name="RootVBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TopBar" type="HBoxContainer" parent="MarginContainer/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="PhaseCard" type="PanelContainer" parent="MarginContainer/RootVBox/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="PhaseLabel" type="Label" parent="MarginContainer/RootVBox/TopBar/PhaseCard"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 38
+text = "STANDBY"
+horizontal_alignment = 1
+
+[node name="HSpacer1" type="Control" parent="MarginContainer/RootVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ScoreHBox" type="HBoxContainer" parent="MarginContainer/RootVBox/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="ScoreCard1" type="PanelContainer" parent="MarginContainer/RootVBox/TopBar/ScoreHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ScoreVBox1" type="VBoxContainer" parent="MarginContainer/RootVBox/TopBar/ScoreHBox/ScoreCard1"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="T1Name" type="Label" parent="MarginContainer/RootVBox/TopBar/ScoreHBox/ScoreCard1/ScoreVBox1"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "E1"
+horizontal_alignment = 1
+
+[node name="T1Score" type="Label" parent="MarginContainer/RootVBox/TopBar/ScoreHBox/ScoreCard1/ScoreVBox1"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "0"
+horizontal_alignment = 1
+
+[node name="ScoreCard2" type="PanelContainer" parent="MarginContainer/RootVBox/TopBar/ScoreHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ScoreVBox2" type="VBoxContainer" parent="MarginContainer/RootVBox/TopBar/ScoreHBox/ScoreCard2"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="T2Name" type="Label" parent="MarginContainer/RootVBox/TopBar/ScoreHBox/ScoreCard2/ScoreVBox2"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "E2"
+horizontal_alignment = 1
+
+[node name="T2Score" type="Label" parent="MarginContainer/RootVBox/TopBar/ScoreHBox/ScoreCard2/ScoreVBox2"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "0"
+horizontal_alignment = 1
+
+[node name="ScoreCard3" type="PanelContainer" parent="MarginContainer/RootVBox/TopBar/ScoreHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ScoreVBox3" type="VBoxContainer" parent="MarginContainer/RootVBox/TopBar/ScoreHBox/ScoreCard3"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="T3Name" type="Label" parent="MarginContainer/RootVBox/TopBar/ScoreHBox/ScoreCard3/ScoreVBox3"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "E3"
+horizontal_alignment = 1
+
+[node name="T3Score" type="Label" parent="MarginContainer/RootVBox/TopBar/ScoreHBox/ScoreCard3/ScoreVBox3"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "0"
+horizontal_alignment = 1
+
+[node name="HSpacer2" type="Control" parent="MarginContainer/RootVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CenterVBox" type="VBoxContainer" parent="MarginContainer/RootVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="QuestionCard" type="PanelContainer" parent="MarginContainer/RootVBox/CenterVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.0
+
+[node name="QMargin" type="MarginContainer" parent="MarginContainer/RootVBox/CenterVBox/QuestionCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 36
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 36
+theme_override_constants/margin_bottom = 28
+
+[node name="QuestionText" type="Label" parent="MarginContainer/RootVBox/CenterVBox/QuestionCard/QMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 56
+text = "En instantes..."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OptionsGrid" type="GridContainer" parent="MarginContainer/RootVBox/CenterVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 2.0
+columns = 2
+theme_override_constants/h_separation = 28
+theme_override_constants/v_separation = 20
+
+[node name="OptCardA" type="PanelContainer" parent="MarginContainer/RootVBox/CenterVBox/OptionsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 120)
+
+[node name="OptMargin" type="MarginContainer" parent="MarginContainer/RootVBox/CenterVBox/OptionsGrid/OptCardA"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
 theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 24
+theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 24
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="OptA" type="Label" parent="MarginContainer/RootVBox/CenterVBox/OptionsGrid/OptCardA/OptMargin"]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_font_sizes/font_size = 42
+text = "A) --"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="OptCardB" type="PanelContainer" parent="MarginContainer/RootVBox/CenterVBox/OptionsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 120)
+
+[node name="OptMargin" type="MarginContainer" parent="MarginContainer/RootVBox/CenterVBox/OptionsGrid/OptCardB"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="OptB" type="Label" parent="MarginContainer/RootVBox/CenterVBox/OptionsGrid/OptCardB/OptMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 42
+text = "B) --"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OptCardC" type="PanelContainer" parent="MarginContainer/RootVBox/CenterVBox/OptionsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 120)
+
+[node name="OptMargin" type="MarginContainer" parent="MarginContainer/RootVBox/CenterVBox/OptionsGrid/OptCardC"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="OptC" type="Label" parent="MarginContainer/RootVBox/CenterVBox/OptionsGrid/OptCardC/OptMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 42
+text = "C) --"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OptCardD" type="PanelContainer" parent="MarginContainer/RootVBox/CenterVBox/OptionsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 120)
+
+[node name="OptMargin" type="MarginContainer" parent="MarginContainer/RootVBox/CenterVBox/OptionsGrid/OptCardD"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="OptD" type="Label" parent="MarginContainer/RootVBox/CenterVBox/OptionsGrid/OptCardD/OptMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 42
+text = "D) --"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomBar" type="HBoxContainer" parent="MarginContainer/RootVBox"]
+layout_mode = 2
+
+[node name="TeamLocksLabel" type="Label" parent="MarginContainer/RootVBox/BottomBar"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
-text = "Pantalla principal"
+text = "E1: LISTO · E2: LISTO · E3: LISTO"
 
-[node name="PhaseLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="HSpacer" type="Control" parent="MarginContainer/RootVBox/BottomBar"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "Estado de juego"
+size_flags_horizontal = 3
 
-[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="FeedbackLabel" type="Label" parent="MarginContainer/RootVBox/BottomBar"]
+unique_name_in_owner = true
 layout_mode = 2
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 36
+text = "Aguardando respuesta..."
+horizontal_alignment = 1
 
-[node name="QuestionSectionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="HSpacer2" type="Control" parent="MarginContainer/RootVBox/BottomBar"]
 layout_mode = 2
-text = "Pregunta"
+size_flags_horizontal = 3
 
-[node name="QuestionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="LockLabel" type="Label" parent="MarginContainer/RootVBox/BottomBar"]
+unique_name_in_owner = true
 layout_mode = 2
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 24
-text = "Esperando pregunta"
-
-[node name="LockLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-autowrap_mode = 3
-text = "Estado de respuesta"
-
-[node name="TeamLocksLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-autowrap_mode = 3
-text = "Estado de equipos"
-
-[node name="FeedbackLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 20
-text = "Feedback"
-
-[node name="OptionsSectionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Opciones"
-
-[node name="OptionsVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="OptionALabel" type="Label" parent="MarginContainer/VBoxContainer/OptionsVBox"]
-layout_mode = 2
-text = "A) --"
-
-[node name="OptionBLabel" type="Label" parent="MarginContainer/VBoxContainer/OptionsVBox"]
-layout_mode = 2
-text = "B) --"
-
-[node name="OptionCLabel" type="Label" parent="MarginContainer/VBoxContainer/OptionsVBox"]
-layout_mode = 2
-text = "C) --"
-
-[node name="OptionDLabel" type="Label" parent="MarginContainer/VBoxContainer/OptionsVBox"]
-layout_mode = 2
-text = "D) --"
-
-[node name="ScoreLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Marcador"
+theme_override_font_sizes/font_size = 28
+text = ""
+horizontal_alignment = 2

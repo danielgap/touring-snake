@@ -30,6 +30,32 @@ func _ready() -> void:
 	ContentRepo.content_missing.connect(_on_content_missing)
 
 
+func _get_mqtt_host() -> String:
+	if ShowConfig:
+		var host: String = ShowConfig.get_mqtt_host()
+		if not host.is_empty():
+			return host
+	return MQTT_HOST
+
+
+func _get_mqtt_port() -> int:
+	if ShowConfig:
+		return ShowConfig.get_mqtt_port()
+	return MQTT_PORT
+
+
+func _get_points_correct() -> int:
+	if ShowConfig:
+		return ShowConfig.get_points_correct()
+	return 100
+
+
+func _get_points_incorrect() -> int:
+	if ShowConfig:
+		return ShowConfig.get_points_incorrect()
+	return 0
+
+
 func initialize_role(role: int, team_id: int = 0) -> void:
 	AppState.set_role(role)
 	AppState.set_team_id(team_id)
@@ -40,7 +66,7 @@ func initialize_role(role: int, team_id: int = 0) -> void:
 	else:
 		_can_persist_presenter_session = false
 		_pending_presenter_snapshot_publish = false
-	MqttBus.connect_to_broker(MQTT_HOST, MQTT_PORT)
+	MqttBus.connect_to_broker(_get_mqtt_host(), _get_mqtt_port())
 	MqttBus.subscribe_topic(MessageTopics.STATE, SNAPSHOT_QOS)
 	MqttBus.subscribe_topic(MessageTopics.ANSWER, COMMAND_QOS)
 	MqttBus.subscribe_topic(MessageTopics.POINTS, COMMAND_QOS)
