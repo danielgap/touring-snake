@@ -68,7 +68,7 @@ const GLOW_SIZE := 6
 @onready var next_question_btn: Button = %NextQuestionBtn
 @onready var mg_quick_btn: Button = %MgQuickBtn
 @onready var manual_toggle: Button = %ManualToggle
-@onready var manual_content: VBoxContainer = %ManualContent
+@onready var manual_content: ScrollContainer = %ManualContent
 @onready var round_selector: OptionButton = %RoundSelector
 @onready var question_selector: OptionButton = %QuestionSelector
 @onready var load_selected_btn: Button = %LoadSelectedBtn
@@ -79,6 +79,8 @@ const GLOW_SIZE := 6
 @onready var mg_category_selector: OptionButton = %MgCategorySelector
 @onready var mg_selector: OptionButton = %MgSelector
 @onready var mg_launch_btn: Button = %MgLaunchBtn
+@onready var mg_category_row: HBoxContainer = mg_category_selector.get_parent()
+@onready var mg_row: HBoxContainer = mg_selector.get_parent()
 
 ## ── Question panel ───────────────────────────────────────────────
 @onready var question_text: Label = %QuestionText
@@ -124,12 +126,17 @@ var _mg_ids: Array[int] = []
 var _selector_syncing: bool = false
 var _mg_selector_syncing: bool = false
 var _showing_selector: bool = false
-var _manual_expanded: bool = true
+var _manual_expanded: bool = false
 var _showing_mg_preview: bool = false
 var _correct_btn_style: StyleBoxFlat
 var _incorrect_btn_style: StyleBoxFlat
 var _prev_phase: int = -1
 var _prev_scores: Dictionary = {}
+var _question_images_container: VBoxContainer
+var _minigame_images_container: VBoxContainer
+var _buzzer_indicator: Label
+var _prev_question_images: PackedStringArray = PackedStringArray()
+var _prev_minigame_images: PackedStringArray = PackedStringArray()
 
 
 func _ready() -> void:
@@ -228,6 +235,15 @@ func _apply_styles() -> void:
 
 	# ── Manual toggle — subtle text button ──────────────────────────
 	_apply_text_button(manual_toggle)
+
+	# ── Question images container (dynamic) ──────────────────────────
+	_create_question_images_container()
+
+	# ── Minigame images container (dynamic) ───────────────────────────
+	_create_minigame_images_container()
+
+	# ── Buzzer indicator (dynamic) ─────────────────────────────────────
+	_create_buzzer_indicator()
 
 
 func _make_card(bg: Color, border: Color, border_w: int = 1) -> StyleBoxFlat:
@@ -486,17 +502,12 @@ func _connect_signals() -> void:
 	clear_session_btn.pressed.connect(GameService.clear_persisted_presenter_session)
 
 	# Round actions
-	reopen_btn.pressed.connect(GameService.reopen_current_question)
+	reopen_btn.pressed.connect(_on_reopen_or_rebote)
 	reset_locks_btn.pressed.connect(GameService.reset_team_locks)
 	q_reveal_btn.pressed.connect(GameService.reveal_current_answer)
 	locked_reveal_btn.pressed.connect(GameService.reveal_current_answer)
 
-	# Correction
-	correct_btn.pressed.connect(GameService.mark_locked_answer_correct)
-	incorrect_btn.pressed.connect(GameService.mark_locked_answer_incorrect)
-
-	# Next question (local UI only — shows selector)
-	next_btn.pressed.connect(_on_next_question)
+	# Team arbitration
 
 	# Selectors
 	round_selector.item_selected.connect(_on_round_selected)
@@ -510,6 +521,13 @@ func _connect_signals() -> void:
 	mg_launch_btn.pressed.connect(GameService.load_selected_minigame)
 	mg_end_btn.pressed.connect(GameService.end_current_minigame)
 
+	# Rebote
+	correct_btn.pressed.connect(_on_correct_override)
+	incorrect_btn.pressed.connect(_on_incorrect_override)
+
+	# Next question (local UI only — shows selector)
+	next_btn.pressed.connect(_on_next_question)
+
 	# Team arbitration
 	team1_lock_btn.pressed.connect(func() -> void: GameService.toggle_team_lock(1))
 	team1_force_btn.pressed.connect(func() -> void: GameService.force_active_team(1))
@@ -518,14 +536,13 @@ func _connect_signals() -> void:
 	team3_lock_btn.pressed.connect(func() -> void: GameService.toggle_team_lock(3))
 	team3_force_btn.pressed.connect(func() -> void: GameService.force_active_team(3))
 
-	# Score adjustments (configurable points)
-	var pts: int = ShowConfig.get_points_correct()
-	team1_sub_btn.pressed.connect(func() -> void: GameService.adjust_score(1, -pts))
-	team1_add_btn.pressed.connect(func() -> void: GameService.adjust_score(1, pts))
-	team2_sub_btn.pressed.connect(func() -> void: GameService.adjust_score(2, -pts))
-	team2_add_btn.pressed.connect(func() -> void: GameService.adjust_score(2, pts))
-	team3_sub_btn.pressed.connect(func() -> void: GameService.adjust_score(3, -pts))
-	team3_add_btn.pressed.connect(func() -> void: GameService.adjust_score(3, pts))
+	# Score adjustments (reads ShowConfig at call time so settings changes take effect)
+	team1_sub_btn.pressed.connect(func() -> void: GameService.adjust_score(1, -ShowConfig.get_points_correct()))
+	team1_add_btn.pressed.connect(func() -> void: GameService.adjust_score(1, ShowConfig.get_points_correct()))
+	team2_sub_btn.pressed.connect(func() -> void: GameService.adjust_score(2, -ShowConfig.get_points_correct()))
+	team2_add_btn.pressed.connect(func() -> void: GameService.adjust_score(2, ShowConfig.get_points_correct()))
+	team3_sub_btn.pressed.connect(func() -> void: GameService.adjust_score(3, -ShowConfig.get_points_correct()))
+	team3_add_btn.pressed.connect(func() -> void: GameService.adjust_score(3, ShowConfig.get_points_correct()))
 
 	# State signals
 	AppState.game_state_changed.connect(_render_state)
@@ -568,6 +585,8 @@ func _render_state(state: GameState) -> void:
 	_render_reveal_panel(state)
 	_render_minigame_panel(state)
 	_render_bottom_bar(state)
+	_render_question_images(state)
+	_render_minigame_images(state)
 	if phase_changed and _prev_phase >= 0:
 		_animate_panel_in(state)
 	_prev_phase = state.phase
@@ -631,6 +650,24 @@ func _on_next_question() -> void:
 	_update_phase_panels(AppState.current_state)
 
 
+func _on_reopen_or_rebote() -> void:
+	var state: GameState = AppState.current_state
+	if state.phase == Enums.GamePhase.LOCKED \
+		and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT \
+		and GameService.teams_available_for_rebote() > 0:
+		GameService.activate_rebote()
+	else:
+		GameService.reopen_current_question()
+
+
+func _on_correct_override() -> void:
+	GameService.override_answer_correct()
+
+
+func _on_incorrect_override() -> void:
+	GameService.override_answer_incorrect()
+
+
 # ═══════════════════════════════════════════════════════════════════
 #  Section renderers
 # ═══════════════════════════════════════════════════════════════════
@@ -687,6 +724,9 @@ func _render_phase_label(state: GameState) -> void:
 	_update_team_card_style(2, %Team2Card, TEAM2_BG, TEAM2_COLOR, TEAM2_DIM, state)
 	_update_team_card_style(3, %Team3Card, TEAM3_BG, TEAM3_COLOR, TEAM3_DIM, state)
 
+	# ── Buzzer indicator ────────────────────────────────────────────
+	_update_buzzer_indicator(state)
+
 
 func _render_sidebar(state: GameState) -> void:
 	# Team status labels with color coding
@@ -696,6 +736,7 @@ func _render_sidebar(state: GameState) -> void:
 
 	# Lock/force buttons
 	var question_open: bool = not state.current_question.text.is_empty() and state.phase == Enums.GamePhase.QUESTION
+	var has_live_authority: bool = question_open and state.answer_authority_team_id > 0
 
 	team1_lock_btn.text = "Habilitar" if state.is_team_locked_out(1) else "Bloquear"
 	team2_lock_btn.text = "Habilitar" if state.is_team_locked_out(2) else "Bloquear"
@@ -704,9 +745,9 @@ func _render_sidebar(state: GameState) -> void:
 	team2_lock_btn.disabled = not question_open
 	team3_lock_btn.disabled = not question_open
 
-	team1_force_btn.text = "Turno activo" if state.active_team_id == 1 else "Dar turno"
-	team2_force_btn.text = "Turno activo" if state.active_team_id == 2 else "Dar turno"
-	team3_force_btn.text = "Turno activo" if state.active_team_id == 3 else "Dar turno"
+	team1_force_btn.text = "Turno activo" if has_live_authority and state.answer_authority_team_id == 1 else "Dar turno"
+	team2_force_btn.text = "Turno activo" if has_live_authority and state.answer_authority_team_id == 2 else "Dar turno"
+	team3_force_btn.text = "Turno activo" if has_live_authority and state.answer_authority_team_id == 3 else "Dar turno"
 	team1_force_btn.disabled = not question_open or state.is_team_locked_out(1)
 	team2_force_btn.disabled = not question_open or state.is_team_locked_out(2)
 	team3_force_btn.disabled = not question_open or state.is_team_locked_out(3)
@@ -748,6 +789,9 @@ func _render_idle_panel(state: GameState) -> void:
 	reset_used_btn.disabled = not has_questions
 	clear_session_btn.disabled = not GameService.has_persisted_presenter_session()
 	mg_launch_btn.disabled = not has_selected_mg
+	mg_category_row.visible = has_minigames
+	mg_row.visible = has_minigames
+	mg_launch_btn.visible = has_minigames
 
 
 func _render_question_panel(state: GameState) -> void:
@@ -769,16 +813,18 @@ func _render_question_panel(state: GameState) -> void:
 	opt_d.text = "D) %s" % (options[3] if options.size() > 3 else "--")
 
 	# Lock info
-	if state.locked_team_id > 0:
+	if state.buzzer_winner_team_id > 0 and state.locked_team_id == 0 and state.answer_authority_team_id == state.buzzer_winner_team_id:
+		lock_info.text = "⚡ %s pulsó primero — Esperando respuesta..." % ShowConfig.get_team_name(state.buzzer_winner_team_id)
+	elif state.locked_team_id > 0:
 		lock_info.text = "%s eligió %s · %s" % [
 			ShowConfig.get_team_name(state.locked_team_id),
 			state.last_selected_option if not state.last_selected_option.is_empty() else "--",
 			Enums.answer_feedback_name(state.answer_feedback_status),
 		]
-	elif state.active_team_id > 0:
-		lock_info.text = "Turno reservado · %s" % ShowConfig.get_team_name(state.active_team_id)
+	elif state.answers_enabled and state.answer_authority_team_id > 0:
+		lock_info.text = "Turno reservado · %s" % ShowConfig.get_team_name(state.answer_authority_team_id)
 	elif state.answers_enabled:
-		lock_info.text = "Pregunta abierta · Esperando respuesta..."
+		lock_info.text = "Pregunta abierta · Esperando pulsador..."
 	else:
 		lock_info.text = ""
 
@@ -794,21 +840,32 @@ func _render_question_panel(state: GameState) -> void:
 func _render_locked_panel(state: GameState) -> void:
 	locked_q_text.text = state.current_question.text if not state.current_question.text.is_empty() else ""
 
-	# Who answered
+	# Who answered and result (auto-judged)
 	if state.locked_team_id > 0:
-		answered_label.text = "%s eligió %s" % [
-			ShowConfig.get_team_name(state.locked_team_id),
-			state.last_selected_option if not state.last_selected_option.is_empty() else "una opción",
-		]
+		var team_name: String = ShowConfig.get_team_name(state.locked_team_id)
+		var option: String = state.last_selected_option if not state.last_selected_option.is_empty() else "una opción"
+		match state.answer_feedback_status:
+			Enums.AnswerFeedbackStatus.CORRECT:
+				answered_label.text = "✅ %s respondió %s — CORRECTA" % [team_name, option]
+			Enums.AnswerFeedbackStatus.INCORRECT:
+				answered_label.text = "❌ %s respondió %s — INCORRECTA" % [team_name, option]
+			_:
+				answered_label.text = "%s eligió %s" % [team_name, option]
 	else:
 		answered_label.text = "Sin respuesta tomada"
 
-	# Correction buttons
-	var can_correct: bool = state.phase == Enums.GamePhase.LOCKED and state.locked_team_id > 0
-	correct_btn.disabled = not can_correct
-	incorrect_btn.disabled = not can_correct
+	# Correction buttons — now manual override only
+	var can_override: bool = state.phase == Enums.GamePhase.LOCKED and state.locked_team_id > 0
+	correct_btn.text = "✅ Confirmar correcta"
+	incorrect_btn.text = "❌ Confirmar incorrecta"
+	correct_btn.visible = can_override
+	incorrect_btn.visible = can_override
 
-	# Secondary actions
+	# Rebote button — appears when answer was incorrect and teams remain
+	var rebote_available: bool = state.phase == Enums.GamePhase.LOCKED \
+		and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT \
+		and GameService.teams_available_for_rebote() > 0
+	reopen_btn.text = "🔄 Rebote" if rebote_available else "Reabrir ronda"
 	reopen_btn.disabled = state.current_question.text.is_empty() or state.phase not in [Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL]
 
 	var needs_correction: bool = state.phase == Enums.GamePhase.LOCKED \
@@ -857,7 +914,7 @@ func _render_reveal_panel(state: GameState) -> void:
 
 func _render_bottom_bar(state: GameState) -> void:
 	refresh_btn.disabled = false
-	reset_locks_btn.disabled = state.current_question.text.is_empty()
+	reset_locks_btn.disabled = state.current_question.text.is_empty() or state.phase not in [Enums.GamePhase.QUESTION, Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL]
 	clear_session_btn.disabled = not GameService.has_persisted_presenter_session()
 
 
@@ -930,11 +987,7 @@ func _render_preview() -> void:
 	if selected_question.text.is_empty():
 		preview_label.text = "Elegí una ronda y pregunta para ver la vista previa."
 		return
-	preview_label.text = "Correcta: %s · Tiempo: %ds\n%s" % [
-		selected_question.correct_option if not selected_question.correct_option.is_empty() else "--",
-		selected_question.timeout_seconds,
-		selected_question.text,
-	]
+	preview_label.text = selected_question.text.strip_edges()
 
 
 func _find_round_index(round_name: String) -> int:
@@ -953,13 +1006,9 @@ func _find_question_index(question_id: int) -> int:
 
 func _question_option_label(question: Question) -> String:
 	var summary: String = question.text.strip_edges()
-	if summary.length() > 72:
-		summary = "%s…" % summary.substr(0, 72)
-	var category_suffix: String = ""
-	if not question.category.is_empty():
-		category_suffix = " · %s" % question.category
-	var usage_prefix: String = "[Usada]" if GameService.is_question_used(question.id) else "[Nueva]"
-	return "%s Q%d%s — %s" % [usage_prefix, question.id, category_suffix, summary]
+	if summary.length() > 40:
+		summary = "%s…" % summary.substr(0, 40)
+	return "Q%d · %s" % [question.id, summary]
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -974,7 +1023,7 @@ func _update_team_card_style(team_id: int, card: PanelContainer, dim_bg: Color, 
 		border_color = bright
 		bg = Color(bright.r * 0.25, bright.g * 0.25, bright.b * 0.25, 1.0)
 		glow_intensity = 0.5
-	elif state.active_team_id == team_id:
+	elif state.phase == Enums.GamePhase.QUESTION and state.answers_enabled and state.answer_authority_team_id == team_id:
 		border_color = bright
 		bg = Color(bright.r * 0.18, bright.g * 0.18, bright.b * 0.18, 1.0)
 		glow_intensity = 0.35
@@ -1212,3 +1261,157 @@ func _on_settings_pressed() -> void:
 		settings.show_settings()
 	else:
 		push_error("Presenter: Settings panel no tiene show_settings()")
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  Buzzer indicator
+# ═══════════════════════════════════════════════════════════════════
+
+func _create_buzzer_indicator() -> void:
+	_buzzer_indicator = Label.new()
+	_buzzer_indicator.name = "BuzzerIndicator"
+	_buzzer_indicator.add_theme_font_size_override("font_size", 16)
+	_buzzer_indicator.add_theme_color_override("font_color", PHASE_LOCKED_COLOR)
+	_buzzer_indicator.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_buzzer_indicator.text = "MODO PULSADOR ACTIVO"
+	_buzzer_indicator.visible = false
+	# Add to the phase card area
+	var phase_card: PanelContainer = get_node_or_null("RootMargin/RootVBox/TopBar/PhaseCard")
+	if phase_card != null:
+		phase_card.add_child(_buzzer_indicator)
+	else:
+		# Fallback: add to the top bar area
+		var top_bar: Node = get_node_or_null("RootMargin/RootVBox/TopBar")
+		if top_bar != null:
+			top_bar.add_child(_buzzer_indicator)
+
+
+func _update_buzzer_indicator(state: GameState) -> void:
+	if _buzzer_indicator == null:
+		return
+	if state.phase == Enums.GamePhase.QUESTION and state.answer_authority_team_id == 0:
+		var is_rebote: bool = not state.rebote_excluded_team_ids.is_empty()
+		_buzzer_indicator.visible = true
+		_buzzer_indicator.text = "🔄 REBOTE — Esperando pulsador" if is_rebote else "Esperando pulsador..."
+		_buzzer_indicator.add_theme_color_override("font_color", PHASE_LOCKED_COLOR if is_rebote else PHASE_QUESTION_COLOR)
+	elif state.answers_enabled and state.buzzer_winner_team_id > 0 and state.phase == Enums.GamePhase.QUESTION and state.answer_authority_team_id == state.buzzer_winner_team_id:
+		_buzzer_indicator.visible = true
+		_buzzer_indicator.text = "⚡ %s pulsó primero" % ShowConfig.get_team_name(state.buzzer_winner_team_id)
+		_buzzer_indicator.add_theme_color_override("font_color", PHASE_REVEAL_COLOR)
+	elif state.answers_enabled and state.phase == Enums.GamePhase.QUESTION and state.answer_authority_team_id > 0:
+		_buzzer_indicator.visible = true
+		_buzzer_indicator.text = "Turno reservado · %s" % ShowConfig.get_team_name(state.answer_authority_team_id)
+		_buzzer_indicator.add_theme_color_override("font_color", PHASE_REVEAL_COLOR)
+	elif state.phase == Enums.GamePhase.LOCKED and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT:
+		_buzzer_indicator.visible = true
+		_buzzer_indicator.text = "❌ INCORRECTA · Rebote disponible"
+		_buzzer_indicator.add_theme_color_override("font_color", PHASE_INCORRECT_COLOR)
+	else:
+		_buzzer_indicator.visible = false
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  Image rendering (Presenter — max 200×150)
+# ═══════════════════════════════════════════════════════════════════
+
+func _create_question_images_container() -> void:
+	if question_panel == null:
+		return
+	_question_images_container = VBoxContainer.new()
+	_question_images_container.name = "QuestionImages"
+	_question_images_container.add_theme_constant_override("separation", 4)
+	# Insert at index 0 — above the question text label
+	question_panel.add_child(_question_images_container)
+	question_panel.move_child(_question_images_container, 0)
+
+
+func _create_minigame_images_container() -> void:
+	if minigame_panel == null:
+		return
+	_minigame_images_container = VBoxContainer.new()
+	_minigame_images_container.name = "MgImages"
+	_minigame_images_container.add_theme_constant_override("separation", 4)
+	minigame_panel.add_child(_minigame_images_container)
+
+
+func _render_question_images(state: GameState) -> void:
+	if _question_images_container == null:
+		return
+	var images: PackedStringArray = state.current_question.images
+	var should_hide: bool = images.is_empty() or state.phase == Enums.GamePhase.MINIGAME
+	if not should_hide and images == _prev_question_images:
+		return
+	_prev_question_images = images
+	for child: Node in _question_images_container.get_children():
+		child.queue_free()
+	if should_hide:
+		_question_images_container.visible = false
+		_prev_question_images = PackedStringArray()
+		return
+	_question_images_container.visible = true
+	_build_presenter_image_nodes(images, _question_images_container, 200, 150)
+
+
+func _render_minigame_images(state: GameState) -> void:
+	if _minigame_images_container == null:
+		return
+	var should_hide: bool = state.phase != Enums.GamePhase.MINIGAME or state.current_minigame.id <= 0
+	var images: PackedStringArray = state.current_minigame.images if not should_hide else PackedStringArray()
+	if not should_hide and images.is_empty():
+		should_hide = true
+	if not should_hide and images == _prev_minigame_images:
+		return
+	_prev_minigame_images = images
+	for child: Node in _minigame_images_container.get_children():
+		child.queue_free()
+	if should_hide:
+		_minigame_images_container.visible = false
+		_prev_minigame_images = PackedStringArray()
+		return
+	_minigame_images_container.visible = true
+	_build_presenter_image_nodes(images, _minigame_images_container, 200, 150)
+
+
+func _build_presenter_image_nodes(filenames: PackedStringArray, container: VBoxContainer, max_w: int, max_h: int) -> void:
+	if filenames.size() == 1:
+		var tex: Texture2D = ImageLoader.load_image(filenames[0])
+		var rect: TextureRect = _make_image_rect(tex, max_w, max_h)
+		container.add_child(rect)
+	elif filenames.size() > 1:
+		var grid: GridContainer = GridContainer.new()
+		grid.columns = 2
+		grid.add_theme_constant_override("h_separation", 4)
+		grid.add_theme_constant_override("v_separation", 4)
+		container.add_child(grid)
+		for fname: String in filenames:
+			var tex: Texture2D = ImageLoader.load_image(fname)
+			var rect: TextureRect = _make_image_rect(tex, max_w / 2, max_h / 2)
+			grid.add_child(rect)
+
+
+func _make_image_rect(tex: Texture2D, max_w: int, max_h: int) -> Control:
+	if tex != null:
+		var rect: TextureRect = TextureRect.new()
+		rect.texture = tex
+		rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		rect.custom_minimum_size = Vector2(max_w, max_h)
+		rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		return rect
+	else:
+		# Placeholder — gray panel with "?" label
+		var panel := PanelContainer.new()
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.18, 0.18, 0.22, 1.0)
+		style.border_color = Color(0.35, 0.35, 0.4, 1.0)
+		style.set_border_width_all(2)
+		panel.add_theme_stylebox_override("panel", style)
+		panel.custom_minimum_size = Vector2(max_w, max_h)
+		panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		var label := Label.new()
+		label.text = "?"
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 36)
+		label.add_theme_color_override("font_color", Color(0.45, 0.45, 0.5, 1.0))
+		panel.add_child(label)
+		return panel

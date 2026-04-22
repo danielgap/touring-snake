@@ -72,11 +72,22 @@ var _minigame_desc: Label
 var _minigame_material: Label
 var _minigame_rules: Label
 var _minigame_meta: Label
+var _question_images_container: VBoxContainer
+var _minigame_images_container: VBoxContainer
+## Idle scoreboard nodes
+var _idle_scoreboard: VBoxContainer
+var _idle_logo_rect: TextureRect
+var _idle_show_name: Label
+var _idle_team_cards: Array[PanelContainer] = []
+var _idle_standby: Label
+var _idle_pulse_tweens: Array[Tween] = []
 
 ## ── Animation state ──────────────────────────────────────────────
 var _prev_phase: int = -1
 var _prev_question_text: String = ""
 var _prev_scores: Dictionary = {}
+var _prev_question_images: PackedStringArray = PackedStringArray()
+var _prev_minigame_images: PackedStringArray = PackedStringArray()
 var _active_tweens: Array[Tween] = []
 
 
@@ -151,8 +162,14 @@ func _apply_styles() -> void:
 	# Trivia card — shown only on REVEAL phase
 	_create_trivia_card()
 
+	# Question images container — dynamic TextureRects above question text
+	_create_question_images_container()
+
 	# Minigame card — shown only on MINIGAME phase
 	_create_minigame_card()
+
+	# Idle scoreboard — shown only on IDLE phase
+	_create_idle_scoreboard()
 
 
 func _make_glow_card(bg: Color, border: Color, border_w: int, glow_color: Color = Color.TRANSPARENT, glow_size: int = 0) -> StyleBoxFlat:
@@ -237,6 +254,107 @@ func _render_trivia(state: GameState) -> void:
 	_trivia_label.text = "💡 %s" % question.trivia
 
 
+func _create_question_images_container() -> void:
+	var question_card: PanelContainer = get_node_or_null("MarginContainer/RootVBox/CenterVBox/QuestionCard")
+	if question_card == null:
+		push_warning("DisplayController: QuestionCard not found for images container")
+		return
+	# Find the inner MarginContainer → VBox
+	var vbox: VBoxContainer = question_card.get_child(0) as VBoxContainer
+	if vbox == null:
+		return
+	_question_images_container = VBoxContainer.new()
+	_question_images_container.name = "QuestionImages"
+	_question_images_container.add_theme_constant_override("separation", 8)
+	# Insert at index 0 — above the question text
+	vbox.add_child(_question_images_container)
+	vbox.move_child(_question_images_container, 0)
+
+
+func _render_question_images(state: GameState) -> void:
+	if _question_images_container == null:
+		return
+	var images: PackedStringArray = state.current_question.images
+	var should_hide: bool = images.is_empty() or state.phase == Enums.GamePhase.MINIGAME
+	if not should_hide and images == _prev_question_images:
+		return
+	_prev_question_images = images
+	# Clear previous images
+	for child: Node in _question_images_container.get_children():
+		child.queue_free()
+	if should_hide:
+		_question_images_container.visible = false
+		_prev_question_images = PackedStringArray()
+		return
+	_question_images_container.visible = true
+	_build_image_nodes(images, _question_images_container, 400, 300)
+
+
+func _render_minigame_images(state: GameState) -> void:
+	if _minigame_images_container == null:
+		return
+	var should_hide: bool = state.phase != Enums.GamePhase.MINIGAME or state.current_minigame.id <= 0
+	var images: PackedStringArray = state.current_minigame.images if not should_hide else PackedStringArray()
+	if not should_hide and images.is_empty():
+		should_hide = true
+	if not should_hide and images == _prev_minigame_images:
+		return
+	_prev_minigame_images = images
+	for child: Node in _minigame_images_container.get_children():
+		child.queue_free()
+	if should_hide:
+		_minigame_images_container.visible = false
+		_prev_minigame_images = PackedStringArray()
+		return
+	_minigame_images_container.visible = true
+	_build_image_nodes(images, _minigame_images_container, 400, 300)
+
+
+func _build_image_nodes(filenames: PackedStringArray, container: VBoxContainer, max_w: int, max_h: int) -> void:
+	if filenames.size() == 1:
+		var tex: Texture2D = ImageLoader.load_image(filenames[0])
+		var rect: TextureRect = _make_image_rect(tex, max_w, max_h)
+		container.add_child(rect)
+	elif filenames.size() > 1:
+		var grid: GridContainer = GridContainer.new()
+		grid.columns = 2
+		grid.add_theme_constant_override("h_separation", 8)
+		grid.add_theme_constant_override("v_separation", 8)
+		container.add_child(grid)
+		for fname: String in filenames:
+			var tex: Texture2D = ImageLoader.load_image(fname)
+			var rect: TextureRect = _make_image_rect(tex, max_w / 2, max_h / 2)
+			grid.add_child(rect)
+
+
+func _make_image_rect(tex: Texture2D, max_w: int, max_h: int) -> Control:
+	if tex != null:
+		var rect: TextureRect = TextureRect.new()
+		rect.texture = tex
+		rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		rect.custom_minimum_size = Vector2(max_w, max_h)
+		rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		return rect
+	else:
+		# Placeholder — gray panel with "?" label
+		var panel := PanelContainer.new()
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.18, 0.18, 0.22, 1.0)
+		style.border_color = Color(0.35, 0.35, 0.4, 1.0)
+		style.set_border_width_all(2)
+		panel.add_theme_stylebox_override("panel", style)
+		panel.custom_minimum_size = Vector2(max_w, max_h)
+		panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		var label := Label.new()
+		label.text = "?"
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 48)
+		label.add_theme_color_override("font_color", Color(0.45, 0.45, 0.5, 1.0))
+		panel.add_child(label)
+		return panel
+
+
 func _create_minigame_card() -> void:
 	var center_vbox: VBoxContainer = get_node_or_null("MarginContainer/RootVBox/CenterVBox")
 	if center_vbox == null:
@@ -302,6 +420,11 @@ func _create_minigame_card() -> void:
 	_minigame_meta.text = ""
 	vbox.add_child(_minigame_meta)
 
+	_minigame_images_container = VBoxContainer.new()
+	_minigame_images_container.name = "MgImages"
+	_minigame_images_container.add_theme_constant_override("separation", 8)
+	vbox.add_child(_minigame_images_container)
+
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color("#1a1500")
 	style.border_color = PHASE_MINIGAME_COLOR
@@ -310,6 +433,209 @@ func _create_minigame_card() -> void:
 	style.shadow_color = Color(PHASE_MINIGAME_COLOR.r, PHASE_MINIGAME_COLOR.g, PHASE_MINIGAME_COLOR.b, 0.6)
 	style.shadow_size = 14
 	_minigame_card.add_theme_stylebox_override("panel", style)
+
+
+func _create_idle_scoreboard() -> void:
+	var center_vbox: VBoxContainer = get_node_or_null("MarginContainer/RootVBox/CenterVBox")
+	if center_vbox == null:
+		push_warning("DisplayController: CenterVBox not found for idle scoreboard")
+		return
+
+	_idle_scoreboard = VBoxContainer.new()
+	_idle_scoreboard.name = "IdleScoreboard"
+	_idle_scoreboard.visible = false
+	_idle_scoreboard.add_theme_constant_override("separation", 24)
+	_idle_scoreboard.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_idle_scoreboard.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	center_vbox.add_child(_idle_scoreboard)
+
+	# Logo TextureRect (max 200×200)
+	_idle_logo_rect = TextureRect.new()
+	_idle_logo_rect.name = "LogoRect"
+	_idle_logo_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_idle_logo_rect.custom_minimum_size = Vector2(200, 200)
+	_idle_logo_rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_idle_logo_rect.visible = false
+	_idle_scoreboard.add_child(_idle_logo_rect)
+
+	# Show name label
+	_idle_show_name = Label.new()
+	_idle_show_name.name = "ShowNameLabel"
+	_idle_show_name.add_theme_font_size_override("font_size", 42)
+	_idle_show_name.add_theme_color_override("font_color", TEXT_BRIGHT)
+	_idle_show_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_idle_show_name.text = ""
+	_idle_scoreboard.add_child(_idle_show_name)
+
+	# Teams HBox
+	var teams_hbox: HBoxContainer = HBoxContainer.new()
+	teams_hbox.name = "TeamsHBox"
+	teams_hbox.add_theme_constant_override("separation", 24)
+	teams_hbox.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_idle_scoreboard.add_child(teams_hbox)
+
+	# Create 3 team cards (show/hide based on team_count)
+	var team_colors: Array[Color] = [TEAM1_COLOR, TEAM2_COLOR, TEAM3_COLOR]
+	var team_bgs: Array[Color] = [TEAM1_BG, TEAM2_BG, TEAM3_BG]
+	for i in range(3):
+		var team_id: int = i + 1
+		var tc: Color = team_colors[i]
+		var tbg: Color = team_bgs[i]
+
+		var card: PanelContainer = PanelContainer.new()
+		card.name = "TeamCard%d" % team_id
+
+		var card_style: StyleBoxFlat = StyleBoxFlat.new()
+		card_style.bg_color = Color(tc.r * 0.25, tc.g * 0.25, tc.b * 0.25, 1.0)
+		card_style.border_color = tc
+		card_style.set_border_width_all(BORDER_THICK)
+		card_style.set_corner_radius_all(CORNER_RADIUS)
+		card_style.shadow_color = Color(tc.r, tc.g, tc.b, 0.6)
+		card_style.shadow_size = GLOW_SIZE
+		card_style.content_margin_left = 32
+		card_style.content_margin_right = 32
+		card_style.content_margin_top = 16
+		card_style.content_margin_bottom = 16
+		card.add_theme_stylebox_override("panel", card_style)
+
+		var card_vbox: VBoxContainer = VBoxContainer.new()
+		card_vbox.add_theme_constant_override("separation", 8)
+		card.add_child(card_vbox)
+
+		var team_name_label: Label = Label.new()
+		team_name_label.name = "TeamName"
+		team_name_label.add_theme_font_size_override("font_size", 24)
+		team_name_label.add_theme_color_override("font_color", tc)
+		team_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		team_name_label.text = ""
+		card_vbox.add_child(team_name_label)
+
+		var score_label: Label = Label.new()
+		score_label.name = "ScoreValue"
+		score_label.add_theme_font_size_override("font_size", 56)
+		score_label.add_theme_color_override("font_color", TEXT_BRIGHT)
+		score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		score_label.text = "0"
+		card_vbox.add_child(score_label)
+
+		teams_hbox.add_child(card)
+		_idle_team_cards.append(card)
+
+	# Standby label
+	_idle_standby = Label.new()
+	_idle_standby.name = "StandbyLabel"
+	_idle_standby.add_theme_font_size_override("font_size", 24)
+	_idle_standby.add_theme_color_override("font_color", PHASE_IDLE_COLOR)
+	_idle_standby.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_idle_standby.text = "STANDBY"
+	_idle_standby.visible = false
+	_idle_scoreboard.add_child(_idle_standby)
+
+
+func _render_idle_scoreboard(state: GameState) -> void:
+	if state.phase == Enums.GamePhase.IDLE and state.current_minigame.id <= 0:
+		# Show scoreboard, hide other cards AND top bar scores
+		_idle_scoreboard.visible = true
+		%QuestionCard.visible = false
+		%ScoreCard1.visible = false
+		%ScoreCard2.visible = false
+		%ScoreCard3.visible = false
+		%PhaseCard.visible = false
+		var options_grid: Node = get_node_or_null("MarginContainer/RootVBox/CenterVBox/OptionsGrid")
+		if options_grid != null:
+			options_grid.visible = false
+		if _trivia_card != null:
+			_trivia_card.visible = false
+		if _minigame_card != null:
+			_minigame_card.visible = false
+		if _question_images_container != null:
+			_question_images_container.visible = false
+		if _minigame_images_container != null:
+			_minigame_images_container.visible = false
+
+		# Update logo
+		var logo_path: String = ShowConfig.get_logo_path()
+		if logo_path.is_empty():
+			_idle_logo_rect.visible = false
+		else:
+			var tex: Texture2D = ImageLoader.load_image_absolute(logo_path)
+			if tex != null:
+				_idle_logo_rect.texture = tex
+				_idle_logo_rect.visible = true
+			else:
+				_idle_logo_rect.visible = false
+
+		# Update show name
+		_idle_show_name.text = ShowConfig.get_show_name()
+
+		# Update team cards
+		var count: int = ShowConfig.get_team_count()
+		for i in range(3):
+			var team_id: int = i + 1
+			var card: PanelContainer = _idle_team_cards[i]
+			card.visible = team_id <= count
+			if card.visible:
+				var card_vbox: VBoxContainer = card.get_child(0) as VBoxContainer
+				if card_vbox != null:
+					var team_name_label: Label = card_vbox.get_node_or_null("TeamName")
+					var score_label: Label = card_vbox.get_node_or_null("ScoreValue")
+					if team_name_label != null:
+						team_name_label.text = ShowConfig.get_team_name(team_id)
+					if score_label != null:
+						score_label.text = str(int(state.scores.get(team_id, 0)))
+
+		_start_idle_pulse()
+	else:
+		_hide_idle_scoreboard()
+
+
+func _hide_idle_scoreboard() -> void:
+	if _idle_scoreboard == null:
+		return
+	if _idle_scoreboard.visible:
+		_stop_idle_pulse()
+		_idle_scoreboard.visible = false
+		# Restore top bar visibility
+		%ScoreCard1.visible = true
+		_update_team_visibility()
+		%PhaseCard.visible = true
+		# Restore normal card visibility
+		%QuestionCard.visible = true
+		var options_grid: Node = get_node_or_null("MarginContainer/RootVBox/CenterVBox/OptionsGrid")
+		if options_grid != null:
+			options_grid.visible = true
+
+
+func _start_idle_pulse() -> void:
+	_stop_idle_pulse()
+	var count: int = ShowConfig.get_team_count()
+	for i in range(count):
+		if i >= _idle_team_cards.size():
+			break
+		var card: PanelContainer = _idle_team_cards[i]
+		var style: StyleBoxFlat = card.get_theme_stylebox("panel")
+		if style == null:
+			continue
+		var tw: Tween = create_tween()
+		tw.set_loops(0)
+		tw.tween_method(_set_card_shadow_alpha.bind(card), 0.4, 0.9, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tw.tween_method(_set_card_shadow_alpha.bind(card), 0.9, 0.4, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		_idle_pulse_tweens.append(tw)
+
+
+func _stop_idle_pulse() -> void:
+	for tw: Tween in _idle_pulse_tweens:
+		if tw.is_valid():
+			tw.kill()
+	_idle_pulse_tweens.clear()
+
+
+func _set_card_shadow_alpha(card: PanelContainer, alpha: float) -> void:
+	var style: StyleBoxFlat = card.get_theme_stylebox("panel")
+	if style == null:
+		return
+	var c: Color = style.shadow_color
+	style.shadow_color = Color(c.r, c.g, c.b, alpha)
 
 
 func _render_minigame_card(state: GameState) -> void:
@@ -361,6 +687,9 @@ func _render_state(state: GameState) -> void:
 	_render_lock_info(state)
 	_render_trivia(state)
 	_render_minigame_card(state)
+	_render_question_images(state)
+	_render_minigame_images(state)
+	_render_idle_scoreboard(state)
 
 	if phase_changed and _prev_phase >= 0:
 		_animate_phase_transition(state)
@@ -567,8 +896,8 @@ func _render_lock_info(state: GameState) -> void:
 			state.last_selected_option if not state.last_selected_option.is_empty() else "--",
 		]
 		lock_label.add_theme_color_override("font_color", _team_color(state.locked_team_id))
-	elif state.active_team_id > 0:
-		lock_label.text = "Turno · %s" % ShowConfig.get_team_name(state.active_team_id)
+	elif state.phase == Enums.GamePhase.QUESTION and state.answers_enabled and state.answer_authority_team_id > 0:
+		lock_label.text = "Turno · %s" % ShowConfig.get_team_name(state.answer_authority_team_id)
 		lock_label.add_theme_color_override("font_color", TEXT_DIM)
 	elif state.answers_enabled:
 		lock_label.text = "Pregunta abierta · Esperando respuesta..."
@@ -603,7 +932,7 @@ func _update_score_card_style(team_id: int, card: PanelContainer, dim_bg: Color,
 		border_color = bright
 		bg = Color(bright.r * 0.35, bright.g * 0.35, bright.b * 0.35, 1.0)
 		glow_intensity = 0.8
-	elif state.active_team_id == team_id:
+	elif state.phase == Enums.GamePhase.QUESTION and state.answers_enabled and state.answer_authority_team_id == team_id:
 		border_color = bright
 		bg = Color(bright.r * 0.28, bright.g * 0.28, bright.b * 0.28, 1.0)
 		glow_intensity = 0.6
