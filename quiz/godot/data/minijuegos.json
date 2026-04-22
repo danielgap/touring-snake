@@ -13,7 +13,8 @@
       "participantes": "1 por equipo",
       "reglas": "Las manos no pueden tocar el bolígrafo. El bolígrafo debe entrar completamente en la botella. Gana el primero en conseguirlo.",
       "tiempo": 60,
-      "dificultad": 2
+      "dificultad": 2,
+      "imagenes": ["minijuegos/minijuego_boligrafo_botella.jpg"]
     },
     {
       "id": 2,

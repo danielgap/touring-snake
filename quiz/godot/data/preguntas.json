@@ -333,7 +333,8 @@
     "correcta": "A",
     "dificultad": 2,
     "dato": "San Martín de Frómista (siglo XI) es considerada una de las mejores iglesias románicas de España. Financiada por Doña Mayor, esposa de Alfonso V.",
-    "tiempo": 15
+    "tiempo": 15,
+    "imagenes": ["preguntas/san_martin_fromista.jpg"]
   },
   {
     "id": 22,
@@ -365,7 +366,8 @@
     "correcta": "C",
     "dificultad": 2,
     "dato": "El Cristo del Otero mide 20 metros de altura sobre un pedestal de 6 metros. Se puede ver desde kilómetros de distancia.",
-    "tiempo": 15
+    "tiempo": 15,
+    "imagenes": ["preguntas/cristo_otero_1.jpg", "preguntas/cristo_otero_2.jpg", "preguntas/cristo_otero_3.jpg", "preguntas/cristo_otero_4.jpg"]
   },
   {
     "id": 24,

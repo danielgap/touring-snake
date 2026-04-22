@@ -11,6 +11,9 @@
   "points_incorrect": 0,
   "questions_file": "res://data/preguntas.json",
   "minigames_file": "res://data/minijuegos.json",
-  "mqtt_host": "127.0.0.1",
-  "mqtt_port": 1883
+  "mqtt_host": "192.168.1.156",
+  "mqtt_port": 1883,
+  "images_folder": "",
+  "logo_path": "",
+  "buzzer_mode_enabled": true
 }
