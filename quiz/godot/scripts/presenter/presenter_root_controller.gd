@@ -166,29 +166,9 @@ func _hide_removed_nodes() -> void:
 func _reparent_from_manual_section() -> void:
 	var base_path: String = "RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"
 	var manual_section: Node = get_node_or_null("%s/ManualSection" % base_path)
-	var idle_panel_node: Node = get_node_or_null(base_path)
-	if manual_section == null or idle_panel_node == null:
+	if manual_section == null:
 		return
-
-	# Reparent nodes we need OUT of ManualSection before hiding it
-	var nodes_to_reparent: PackedStringArray = [
-		"ManualContent/ManualVBox/RoundRow",
-		"ManualContent/ManualVBox/MgCategoryRow",
-		"ManualContent/ManualVBox/MgRow",
-		"ManualContent/ManualVBox/PreviewCard",
-		"ManualContent/ManualVBox/ManualActions",
-	]
-	for rel_path: String in nodes_to_reparent:
-		var node: Node = get_node_or_null("%s/ManualSection/%s" % [base_path, rel_path])
-		if node != null:
-			node.reparent(idle_panel_node)
-
-	# Hide QRow (question selector, not needed)
-	var q_row: Node = get_node_or_null("%s/ManualSection/ManualContent/ManualVBox/QRow" % base_path)
-	if q_row != null:
-		q_row.visible = false
-
-	# Now safe to hide the empty ManualSection
+	# Hide the entire manual section — no selectors needed (everything is random)
 	manual_section.visible = false
 
 
@@ -791,9 +771,7 @@ func _render_sidebar(state: GameState) -> void:
 
 func _render_idle_panel(state: GameState) -> void:
 	var has_questions: bool = ContentRepo.get_question_count() > 0
-	var has_round_questions: bool = _question_ids.size() > 0
 	var has_minigames: bool = ContentRepo.get_minigame_count() > 0
-	var has_selected_mg: bool = _mg_ids.size() > 0
 
 	var q_count: int = ContentRepo.get_question_count()
 	var rounds: PackedStringArray = ContentRepo.get_rounds()
@@ -804,15 +782,11 @@ func _render_idle_panel(state: GameState) -> void:
 	parts.append("%d minijuegos" % mg_count)
 	progress_label.text = " · ".join(parts)
 
-	next_question_btn.disabled = not has_round_questions
+	next_question_btn.disabled = not has_questions
 	mg_quick_btn.disabled = not has_minigames
 
-	round_selector.disabled = not has_questions
-	reset_used_btn.disabled = not has_questions
-	mg_launch_btn.disabled = not has_selected_mg
-	mg_category_row.visible = has_minigames
-	mg_row.visible = has_minigames
-	mg_launch_btn.visible = has_minigames
+	if reset_used_btn != null:
+		reset_used_btn.disabled = not has_questions
 
 
 func _render_question_panel(state: GameState) -> void:

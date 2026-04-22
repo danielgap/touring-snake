@@ -146,32 +146,21 @@ func load_selected_question() -> void:
 func load_random_question_from_selected_round() -> void:
 	if AppState.selected_role != Enums.AppRole.PRESENTER:
 		return
-	if not _ensure_presenter_selection():
+	var all_questions: Array[Question] = ContentRepo.questions
+	if all_questions.is_empty():
 		_publish_empty_presenter_state("No hay preguntas cargadas todavía.")
 		return
-	var questions_in_round: Array[Question] = ContentRepo.get_questions_for_round(_selected_round_name)
-	if questions_in_round.is_empty():
-		_publish_empty_presenter_state("La ronda seleccionada no tiene preguntas disponibles.")
-		return
 	var unused_questions: Array[Question] = []
-	for q: Question in questions_in_round:
+	for q: Question in all_questions:
 		if not is_question_used(q.id):
 			unused_questions.append(q)
 	if unused_questions.is_empty():
-		var next_round: String = _find_next_round_with_unused_questions(_selected_round_name)
-		if not next_round.is_empty():
-			_selected_round_name = next_round
-			questions_in_round = ContentRepo.get_questions_for_round(next_round)
-			for q: Question in questions_in_round:
-				if not is_question_used(q.id):
-					unused_questions.append(q)
-			if not unused_questions.is_empty():
-				emit_signal("round_auto_advanced", next_round)
-	if unused_questions.is_empty():
-		unused_questions = ContentRepo.get_questions_for_round(_selected_round_name)
+		# All questions used — reset and reuse all
+		unused_questions = all_questions
 	var selected_question: Question = _pick_random_question(unused_questions)
-	_update_presenter_selector(_selected_round_name, selected_question.id)
-	_apply_presenter_question(selected_question, "Pregunta aleatoria cargada de %s" % _selected_round_name)
+	var round_name: String = ContentRepo.get_rounds()[0] if ContentRepo.get_rounds().size() > 0 else ""
+	_update_presenter_selector(round_name, selected_question.id)
+	_apply_presenter_question(selected_question, "Pregunta aleatoria cargada")
 
 
 func skip_current_question() -> void:
