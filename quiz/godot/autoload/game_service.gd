@@ -5,8 +5,6 @@ signal answer_received(team_id: int, option: String)
 signal presenter_selector_changed(round_name: String, question_id: int)
 signal presenter_minigame_selector_changed(minigame_id: int)
 signal used_questions_changed()
-signal round_auto_advanced(round_name: String)
-
 const MQTT_HOST: String = "127.0.0.1"
 const MQTT_PORT: int = 1883
 const SNAPSHOT_QOS: int = 1
@@ -70,8 +68,9 @@ func _get_points_correct() -> int:
 
 
 func _get_points_incorrect() -> int:
+	# Always returns negative — positive config values mean "penalty of N points"
 	if ShowConfig:
-		return ShowConfig.get_points_incorrect()
+		return -abs(ShowConfig.get_points_incorrect())
 	return 0
 
 
@@ -95,7 +94,7 @@ func initialize_role(role: int, team_id: int = 0) -> void:
 
 
 func start_next_question() -> void:
-	load_random_question_from_selected_round()
+	load_random_question()
 
 
 func set_presenter_round(round_name: String) -> void:
@@ -143,7 +142,7 @@ func load_selected_question() -> void:
 	_apply_presenter_question(selected_question, "Pregunta seleccionada por el presentador")
 
 
-func load_random_question_from_selected_round() -> void:
+func load_random_question() -> void:
 	if AppState.selected_role != Enums.AppRole.PRESENTER:
 		return
 	var all_questions: Array[Question] = ContentRepo.questions
@@ -171,7 +170,7 @@ func skip_current_question() -> void:
 		_used_question_ids[state.current_question.id] = true
 		emit_signal("used_questions_changed")
 		_save_presenter_session()
-	load_random_question_from_selected_round()
+	load_random_question()
 
 
 func get_selected_round_name() -> String:
@@ -245,14 +244,6 @@ func reveal_current_answer() -> void:
 	AppState.apply_game_state(state)
 	_save_presenter_session()
 	_publish_state(state)
-
-
-func mark_locked_answer_correct() -> void:
-	_set_locked_answer_feedback(Enums.AnswerFeedbackStatus.CORRECT)
-
-
-func mark_locked_answer_incorrect() -> void:
-	_set_locked_answer_feedback(Enums.AnswerFeedbackStatus.INCORRECT)
 
 
 func reopen_current_question() -> void:
@@ -357,7 +348,7 @@ func adjust_score(team_id: int, delta: int) -> void:
 		return
 
 	var state: GameState = AppState.current_state.duplicate_state()
-	var total: int = int(state.scores.get(team_id, 0)) + delta
+	var total: int = maxi(0, int(state.scores.get(team_id, 0)) + delta)
 	state.scores[team_id] = total
 	AppState.apply_game_state(state)
 	MqttBus.publish_json(
@@ -514,9 +505,10 @@ func override_answer_correct() -> void:
 	if state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT:
 		var penalty: int = _get_points_incorrect()
 		if penalty != 0:
-			var reversed: int = maxi(0, int(state.scores.get(state.locked_team_id, 0)) - penalty)
-			state.scores[state.locked_team_id] = reversed
-			MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": reversed}, false, COMMAND_QOS)
+			# Use pre-judgment score to avoid phantom points from clamping
+			var original_score: int = state.score_before_judgment.get(state.locked_team_id, int(state.scores.get(state.locked_team_id, 0)))
+			state.scores[state.locked_team_id] = original_score
+			MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": original_score}, false, COMMAND_QOS)
 		# Remove from rebote exclusion
 		state.rebote_excluded_team_ids.erase(state.locked_team_id)
 	state.answer_feedback_status = Enums.AnswerFeedbackStatus.CORRECT
@@ -542,13 +534,14 @@ func override_answer_incorrect() -> void:
 	# If auto-judge previously awarded points (CORRECT), subtract them
 	if state.answer_feedback_status == Enums.AnswerFeedbackStatus.CORRECT:
 		var points_to_subtract: int = _get_points_correct()
-		var old_total: int = int(state.scores.get(state.locked_team_id, 0))
-		state.scores[state.locked_team_id] = maxi(0, old_total - points_to_subtract)
-		MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": state.scores[state.locked_team_id]}, false, COMMAND_QOS)
+		# Use pre-judgment score to avoid phantom points from clamping
+		var original_score: int = state.score_before_judgment.get(state.locked_team_id, int(state.scores.get(state.locked_team_id, 0)))
+		state.scores[state.locked_team_id] = original_score
+		MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": original_score}, false, COMMAND_QOS)
 	# Apply penalty for incorrect if configured
 	var penalty: int = _get_points_incorrect()
 	if penalty != 0:
-		var total_after_penalty: int = int(state.scores.get(state.locked_team_id, 0)) + penalty
+		var total_after_penalty: int = maxi(0, int(state.scores.get(state.locked_team_id, 0)) + penalty)
 		state.scores[state.locked_team_id] = total_after_penalty
 		MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": total_after_penalty}, false, COMMAND_QOS)
 	state.answer_feedback_status = Enums.AnswerFeedbackStatus.INCORRECT
@@ -623,11 +616,16 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 			if typeof(payload) == TYPE_DICTIONARY:
 				AppState.apply_game_state(MessageCodec.game_state_from_wire(payload))
 		MessageTopics.POINTS:
+			if AppState.selected_role == Enums.AppRole.PRESENTER:
+				return
 			if typeof(payload) != TYPE_DICTIONARY:
 				return
-			var state: GameState = AppState.current_state.duplicate_state()
 			var team_id: int = int(payload.get("equipo", 0))
-			state.scores[team_id] = int(payload.get("total", 0))
+			if not _is_valid_team_id(team_id):
+				push_warning("POINTS: equipo inválido (%d) — descartado" % team_id)
+				return
+			var state: GameState = AppState.current_state.duplicate_state()
+			state.scores[team_id] = maxi(0, int(payload.get("total", 0)))
 			AppState.apply_game_state(state)
 		MessageTopics.ANSWER:
 			if AppState.selected_role != Enums.AppRole.PRESENTER:
@@ -638,6 +636,9 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 			if state.phase != Enums.GamePhase.QUESTION or not state.answers_enabled:
 				return
 			var answering_team_id: int = int(payload.get("equipo", 0))
+			if not _is_valid_team_id(answering_team_id):
+				push_warning("ANSWER: equipo inválido (%d) — descartado" % answering_team_id)
+				return
 			if not state.can_team_answer(answering_team_id):
 				return
 			var selected_option: String = String(payload.get("opcion", "")).to_upper()
@@ -661,6 +662,8 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 			_set_answer_authority(state, 0)
 			state.locked_team_id = answering_team_id
 			state.last_selected_option = selected_option
+			# Snapshot scores before judgment for correct override reversal
+			state.score_before_judgment[answering_team_id] = int(state.scores.get(answering_team_id, 0))
 
 			if is_correct:
 				state.answer_feedback_status = Enums.AnswerFeedbackStatus.CORRECT
@@ -678,7 +681,7 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 				state.rebote_excluded_team_ids[answering_team_id] = true
 				var penalty: int = _get_points_incorrect()
 				if penalty != 0:
-					var total_after_penalty: int = int(state.scores.get(answering_team_id, 0)) + penalty
+					var total_after_penalty: int = maxi(0, int(state.scores.get(answering_team_id, 0)) + penalty)
 					state.scores[answering_team_id] = total_after_penalty
 					MqttBus.publish_json(MessageTopics.POINTS, {"equipo": answering_team_id, "total": total_after_penalty}, false, COMMAND_QOS)
 				state.status_text = "❌ Equipo %d respondió %s — INCORRECTA (correcta: %s)" % [answering_team_id, selected_option, correct_option]
@@ -687,6 +690,8 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 				_publish_state(state)
 				emit_signal("answer_received", answering_team_id, selected_option)
 		MessageTopics.TABLET_LOCK:
+			if AppState.selected_role == Enums.AppRole.PRESENTER:
+				return
 			if typeof(payload) != TYPE_BOOL:
 				return
 			var lock_state: GameState = AppState.current_state.duplicate_state()
@@ -914,23 +919,7 @@ func _sync_persisted_question_reference(state: GameState = AppState.current_stat
 	if repo_question.text.is_empty():
 		return
 	state.current_question = repo_question
-
-
-func _set_locked_answer_feedback(feedback_status: int) -> void:
-	if AppState.selected_role != Enums.AppRole.PRESENTER:
-		return
-	var state: GameState = AppState.current_state.duplicate_state()
-	if state.phase != Enums.GamePhase.LOCKED or state.locked_team_id <= 0:
-		return
-	state.answer_feedback_status = feedback_status
-	state.correction_applied = true
-	state.status_text = "Equipo %d marcado %s" % [
-		state.locked_team_id,
-		Enums.answer_feedback_name(feedback_status).to_lower(),
-	]
-	AppState.apply_game_state(state)
-	_save_presenter_session()
-	_publish_state(state)
+	# Caller is responsible for calling apply_game_state()
 
 
 func teams_available_for_rebote() -> int:
@@ -938,7 +927,7 @@ func teams_available_for_rebote() -> int:
 
 
 func _is_valid_team_id(team_id: int) -> bool:
-		return _get_team_ids().has(team_id)
+	return _get_team_ids().has(team_id)
 
 
 func _teams_available_for_rebote(state: GameState) -> int:
@@ -986,20 +975,3 @@ func _set_answer_authority(state: GameState, team_id: int) -> void:
 		state.rebote_excluded_team_ids.erase(team_id)
 	state.answer_authority_team_id = team_id
 	state.active_team_id = team_id
-
-
-func _find_next_round_with_unused_questions(current_round: String) -> String:
-	var rounds: PackedStringArray = ContentRepo.get_rounds()
-	if rounds.size() <= 1:
-		return ""
-	var start_index: int = rounds.find(current_round)
-	if start_index < 0:
-		return ""
-	for offset: int in range(1, rounds.size()):
-		var candidate_index: int = (start_index + offset) % rounds.size()
-		var candidate_round: String = rounds[candidate_index]
-		var questions: Array[Question] = ContentRepo.get_questions_for_round(candidate_round)
-		for q: Question in questions:
-			if not is_question_used(q.id):
-				return candidate_round
-	return ""

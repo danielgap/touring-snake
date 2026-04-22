@@ -165,6 +165,8 @@ func _on_answer_pressed(option: String) -> void:
 		reason = "locked_team=%d" % state.locked_team_id
 	elif not state.last_selected_option.is_empty():
 		reason = "already_answered=%s" % state.last_selected_option
+	elif state.answer_authority_team_id == 0:
+		reason = "no_authority"
 	if not can:
 		feedback_label.text = "NO ENVIADO (%s) · T%d · MQTT %s" % [reason, team_id, "●" if MqttBus.is_broker_connected() else "○"]
 		return
@@ -582,7 +584,10 @@ func _feedback_text(state: GameState, can_answer: bool) -> String:
 	if state.answer_authority_team_id == AppState.selected_team_id and can_answer:
 		return "SU TURNO — Respondan ahora."
 	if state.phase == Enums.GamePhase.QUESTION and state.answers_enabled and state.answer_authority_team_id == 0:
-		return "PULSEN EL PULSADOR para tomar el turno."
+		if ShowConfig.get_buzzer_mode_enabled():
+			return "PULSEN EL PULSADOR para tomar el turno."
+		else:
+			return "Esperando que el presentador asigne turno."
 	if can_answer:
 		return "RESPONDAN AHORA — La primera respuesta cierra la ronda."
 	if state.current_question.text.is_empty():
@@ -1139,6 +1144,11 @@ func _buzzer_ready_text(prefix: String = "⚡", action: String = "PULSAR") -> St
 
 
 func _render_buzzer(state: GameState) -> void:
+	# If virtual buzzer disabled in config, hide it — answer buttons follow normal visibility
+	if not ShowConfig.get_buzzer_mode_enabled():
+		_buzzer_button.visible = false
+		_stop_buzzer_pulse()
+		return
 	var team_id: int = AppState.selected_team_id
 	var answer_parent: Node = answer_a.get_parent()
 	var authority_team_id: int = state.answer_authority_team_id
