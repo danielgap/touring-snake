@@ -42,6 +42,14 @@ theme_override_colors/font_color = Color(0.902, 0.929, 0.953, 1)
 text = "QUIZ OFFLINE"
 horizontal_alignment = 1
 
+[node name="LogoRect" type="TextureRect" parent="CenterVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(150, 150)
+stretch_mode = 5
+size_flags_horizontal = 4
+visible = false
+
 [node name="SubtitleLabel" type="Label" parent="CenterVBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20

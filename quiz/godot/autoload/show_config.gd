@@ -7,6 +7,7 @@ extends Node
 signal config_changed()
 signal questions_file_changed(path: String)
 signal minigames_file_changed(path: String)
+signal images_folder_changed(path: String)
 
 const RES_CONFIG_PATH: String = "res://data/show_config.json"
 const USER_CONFIG_PATH: String = "user://show_config.json"
@@ -97,6 +98,9 @@ func _get_hardcoded_defaults() -> Dictionary:
 		"minigames_file": "res://data/minijuegos.json",
 		"mqtt_host": "127.0.0.1",
 		"mqtt_port": 1883,
+		"images_folder": "",
+		"logo_path": "",
+		"buzzer_mode_enabled": false,
 	}
 
 
@@ -162,6 +166,33 @@ func get_mqtt_host() -> String:
 
 func get_mqtt_port() -> int:
 	return int(_config.get("mqtt_port", 1883))
+
+
+func get_images_folder() -> String:
+	return String(_config.get("images_folder", ""))
+
+
+func set_images_folder(value: String) -> void:
+	var old: String = String(_config.get("images_folder", ""))
+	_config["images_folder"] = value
+	if old != value:
+		emit_signal("images_folder_changed", value)
+
+
+func get_logo_path() -> String:
+	return String(_config.get("logo_path", ""))
+
+
+func set_logo_path(value: String) -> void:
+	_config["logo_path"] = value
+
+
+func get_buzzer_mode_enabled() -> bool:
+	return bool(_config.get("buzzer_mode_enabled", false))
+
+
+func set_buzzer_mode_enabled(value: bool) -> void:
+	_config["buzzer_mode_enabled"] = value
 
 
 func get_raw_config() -> Dictionary:

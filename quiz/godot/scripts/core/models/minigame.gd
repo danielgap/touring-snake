@@ -11,6 +11,7 @@ var participantes: String = ""
 var reglas: String = ""
 var tiempo: int = 60
 var dificultad: int = 1
+var images: PackedStringArray = PackedStringArray([])
 
 
 func to_dict() -> Dictionary:
@@ -24,6 +25,7 @@ func to_dict() -> Dictionary:
 		"reglas": reglas,
 		"tiempo": tiempo,
 		"dificultad": dificultad,
+		"imagenes": Array(images),
 	}
 
 
@@ -41,4 +43,10 @@ static func from_dict(data: Dictionary) -> MiniGame:
 	if typeof(raw_material) == TYPE_ARRAY:
 		for item in raw_material:
 			mg.material.append(str(item))
+
+	var raw_images: Variant = data.get("imagenes", data.get("images", []))
+	if typeof(raw_images) == TYPE_ARRAY:
+		for img in raw_images:
+			mg.images.append(str(img))
+
 	return mg

@@ -141,6 +141,28 @@ max_value = 65535.0
 step = 1.0
 value = 1883.0
 
+[node name="BuzzerSeparator" type="HSeparator" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show"]
+layout_mode = 2
+
+[node name="BuzzerLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "Modo pulsador"
+
+[node name="BuzzerHelp" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.45, 0.48, 0.52, 1)
+text = "Activa el pulsador virtual en las tablets como alternativa a los pulsadores físicos ESP32"
+autowrap_mode = 2
+
+[node name="BuzzerCheck" type="CheckBox" parent="SettingsPanel/Margin/MainVBox/TabContainer/Show"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Activar modo pulsador"
+
 [node name="Equipos" type="VBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
@@ -246,6 +268,82 @@ theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
 text = "0 minijuegos cargados"
 
+[node name="ImgSeparator" type="HSeparator" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
+layout_mode = 2
+
+[node name="ImgHeader" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.545, 0.635, 0.345, 1)
+text = "🖼 Imágenes"
+
+[node name="ImagesFolderLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.545, 0.58, 0.62, 1)
+text = "Carpeta base de imágenes"
+
+[node name="ImagesFolderHelp" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.45, 0.48, 0.52, 1)
+text = "Estructura esperada dentro de la carpeta:
+  📁 preguntas/ — imágenes de preguntas
+  📁 minijuegos/ — imágenes de minijuegos"
+autowrap_mode = 2
+
+[node name="ImagesFolderRow" type="HBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ImagesFolderEdit" type="LineEdit" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido/ImagesFolderRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 48)
+placeholder_text = "C:\\QuizImages  (contiene /preguntas/ y /minijuegos/)"
+
+[node name="ImagesFolderBrowseBtn" type="Button" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido/ImagesFolderRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+theme_override_font_sizes/font_size = 18
+text = "Examinar"
+
+[node name="LogoSeparator" type="HSeparator" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
+layout_mode = 2
+
+[node name="LogoHeader" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.545, 0.635, 0.345, 1)
+text = "🖼 Logo del programa"
+
+[node name="LogoHelp" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.45, 0.48, 0.52, 1)
+text = "Imagen mostrada en el scoreboard durante espera (PNG, JPG, WEBP)"
+autowrap_mode = 2
+
+[node name="LogoPathRow" type="HBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="LogoPathEdit" type="LineEdit" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido/LogoPathRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 48)
+placeholder_text = "Ruta al logo (PNG, JPG, WEBP)"
+
+[node name="LogoPathBrowseBtn" type="Button" parent="SettingsPanel/Margin/MainVBox/TabContainer/Contenido/LogoPathRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+theme_override_font_sizes/font_size = 18
+text = "Examinar"
+
 [node name="BottomBar" type="HBoxContainer" parent="SettingsPanel/Margin/MainVBox"]
 layout_mode = 2
 theme_override_constants/separation = 14
@@ -288,3 +386,16 @@ file_mode = 0
 access = 2
 filters = PackedStringArray("*.json ; JSON Files")
 title = "Importar Minijuegos"
+
+[node name="ImagesFolderDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
+file_mode = 2
+access = 2
+title = "Seleccionar carpeta de imágenes"
+
+[node name="LogoFileDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.png ; PNG", "*.jpg ; JPEG", "*.jpeg ; JPEG", "*.webp ; WebP")
+title = "Seleccionar logo"

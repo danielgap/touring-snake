@@ -28,6 +28,11 @@ const BCM_CONNECTED = 20
 
 var brokerconnectmode = BCM_NOCONNECTION
 
+## Diagnostic counters
+var diag_frame_count: int = 0
+var diag_connect_attempts: int = 0
+var diag_last_error: String = ""
+
 var regexbrokerurl = RegEx.new()
 
 const DEFAULTBROKERPORT_TCP = 1883
@@ -54,6 +59,14 @@ var lw_topic = null
 var lw_msg = null
 var lw_qos = 0
 var lw_retain = false
+
+## Connection timeout and auto-reconnect
+var connect_timeout_ms: int = 10000  # 10 seconds to establish TCP
+var reconnect_delay_ms: int = 3000   # 3 seconds between retries
+var _connect_start_ticks: int = 0
+var _last_broker_url: String = ""
+var _reconnect_scheduled: bool = false
+var _reconnect_at_ticks: int = 0
 
 signal received_message(topic, message)
 signal broker_connected()
@@ -118,6 +131,8 @@ func receiveintobuffer():
 var pingticksnext0 = 0
 
 func _process(delta):
+	diag_frame_count += 1
+	_process_reconnect()
 	if brokerconnectmode == BCM_NOCONNECTION:
 		pass
 	elif brokerconnectmode == BCM_WAITING_WEBSOCKET_CONNECTION:
@@ -134,15 +149,24 @@ func _process(delta):
 				print("Websocket connection now open")
 			
 	elif brokerconnectmode == BCM_WAITING_SOCKET_CONNECTION:
-		socket.poll()
-		var socketstatus = socket.get_status()
-		if socketstatus == StreamPeerTCP.STATUS_ERROR:
+		# Timeout check — Android can hang in CONNECTING forever
+		if Time.get_ticks_msec() - _connect_start_ticks > connect_timeout_ms:
 			if verbose_level:
-				print("TCP socket error")
+				print("TCP connection timeout after %dms to %s" % [connect_timeout_ms, _last_broker_url])
+			diag_last_error = "timeout %dms" % connect_timeout_ms
 			brokerconnectmode = BCM_FAILED_CONNECTION
 			emit_signal("broker_connection_failed")
-		if socketstatus == StreamPeerTCP.STATUS_CONNECTED:
-			brokerconnectmode = BCM_WAITING_CONNMESSAGE
+		else:
+			socket.poll()
+			var socketstatus = socket.get_status()
+			if socketstatus == StreamPeerTCP.STATUS_ERROR:
+				if verbose_level:
+					print("TCP socket error")
+				diag_last_error = "socket_error"
+				brokerconnectmode = BCM_FAILED_CONNECTION
+				emit_signal("broker_connection_failed")
+			if socketstatus == StreamPeerTCP.STATUS_CONNECTED:
+				brokerconnectmode = BCM_WAITING_CONNMESSAGE
 
 	elif brokerconnectmode == BCM_WAITING_SSL_SOCKET_CONNECTION:
 		socket.poll()
@@ -186,6 +210,7 @@ func _process(delta):
 
 	elif brokerconnectmode == BCM_FAILED_CONNECTION:
 		cleanupsockets()
+		_schedule_reconnect()
 
 func _ready():
 	regexbrokerurl.compile('^(tcp://|wss://|ws://|ssl://)?([^:\\s]+)(:\\d+)?(/\\S*)?$')
@@ -281,6 +306,8 @@ func cleanupsockets(retval=false):
 
 func connect_to_broker(brokerurl):
 	assert (brokerconnectmode == BCM_NOCONNECTION)
+	diag_connect_attempts += 1
+	diag_last_error = ""
 	var brokermatch = regexbrokerurl.search(brokerurl)
 	if brokermatch == null:
 		print("ERROR: unrecognized brokerurl pattern:", brokerurl)
@@ -315,18 +342,28 @@ func connect_to_broker(brokerurl):
 			print("Connecting to %s:%s" % [brokerserver, brokerport])
 		var E = socket.connect_to_host(brokerserver, brokerport)
 		if E != 0:
-			print("ERROR: socketclient.connect_to_url Err: ", E)
-			return cleanupsockets(false)
+			print("ERROR: socketclient.connect_to_host Err: ", E)
+			diag_last_error = "connect_to_host=%d" % E
+			socket.disconnect_from_host()
+			socket = null
+			brokerconnectmode = BCM_NOCONNECTION
+			_schedule_reconnect()
+			return false
 		if isssl:
 			brokerconnectmode = BCM_WAITING_SSL_SOCKET_CONNECTION
 			common_name = brokerserver
 		else:
 			brokerconnectmode = BCM_WAITING_SOCKET_CONNECTION
-		
+
+	_last_broker_url = brokerurl
+	_connect_start_ticks = Time.get_ticks_msec()
+	_reconnect_scheduled = false
 	return true
 
 
 func disconnect_from_server():
+	_reconnect_scheduled = false
+	_last_broker_url = ""
 	if brokerconnectmode == BCM_CONNECTED:
 		senddata(PackedByteArray([0xE0, 0x00]))
 		emit_signal("broker_disconnected")
@@ -481,3 +518,46 @@ func trimreceivedbuffer(n):
 	else:
 		assert (n <= receivedbuffer.size())
 		receivedbuffer = receivedbuffer.slice(n)
+
+
+func _schedule_reconnect() -> void:
+	if _last_broker_url.is_empty():
+		return
+	_reconnect_scheduled = true
+	_reconnect_at_ticks = Time.get_ticks_msec() + reconnect_delay_ms
+	if verbose_level:
+		print("Reconnect scheduled in %dms" % reconnect_delay_ms)
+
+
+func _process_reconnect() -> void:
+	if not _reconnect_scheduled:
+		return
+	if Time.get_ticks_msec() < _reconnect_at_ticks:
+		return
+	_reconnect_scheduled = false
+	if verbose_level:
+		print("Auto-reconnecting to %s" % _last_broker_url)
+	connect_to_broker(_last_broker_url)
+
+
+## Public diagnostic — returns human-readable connection state
+func get_diag_info() -> String:
+	var mode_name: String = "UNKNOWN(%d)" % brokerconnectmode
+	match brokerconnectmode:
+		BCM_NOCONNECTION: mode_name = "IDLE"
+		BCM_WAITING_WEBSOCKET_CONNECTION: mode_name = "WS_CONNECTING"
+		BCM_WAITING_SOCKET_CONNECTION: mode_name = "TCP_CONNECTING"
+		BCM_WAITING_SSL_SOCKET_CONNECTION: mode_name = "SSL_CONNECTING"
+		BCM_FAILED_CONNECTION: mode_name = "FAILED"
+		BCM_WAITING_CONNMESSAGE: mode_name = "SENDING_CONNECT"
+		BCM_WAITING_CONNACK: mode_name = "WAITING_CONNACK"
+		BCM_CONNECTED: mode_name = "CONNECTED"
+	var socket_info: String = ""
+	if socket != null:
+		socket_info = " tcp_status=%d" % socket.get_status()
+	return "mode=%s attempts=%d frames=%d%s%s%s" % [
+		mode_name, diag_connect_attempts, diag_frame_count,
+		socket_info,
+		" err=%s" % diag_last_error if not diag_last_error.is_empty() else "",
+		" reconnecting" if _reconnect_scheduled else "",
+	]

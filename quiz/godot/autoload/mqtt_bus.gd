@@ -101,6 +101,12 @@ func is_broker_connected() -> bool:
 	return _connected
 
 
+func get_diag_info() -> String:
+	if _adapter != null and _adapter.has_method("get_diag_info"):
+		return _adapter.call("get_diag_info")
+	return "no adapter"
+
+
 func _connect_adapter_signal(signal_name: String, callable: Callable) -> void:
 	if not _adapter.has_signal(signal_name):
 		return

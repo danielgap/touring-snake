@@ -47,10 +47,24 @@ func _wire_config_values() -> void:
 		if not sub.is_empty():
 			subtitle_label.text = sub
 
-	# Team button text from config
-	team1_btn.text = ShowConfig.get_team_short(1)
-	team2_btn.text = ShowConfig.get_team_short(2)
-	team3_btn.text = ShowConfig.get_team_short(3)
+	# Team button text — show team number
+	team1_btn.text = "Equipo 1"
+	team2_btn.text = "Equipo 2"
+	team3_btn.text = "Equipo 3"
+
+	# Logo from config
+	var logo_rect: TextureRect = get_node_or_null("CenterVBox/LogoRect")
+	if logo_rect != null:
+		var logo_path: String = ShowConfig.get_logo_path()
+		if not logo_path.is_empty():
+			var tex: Texture2D = ImageLoader.load_image_absolute(logo_path)
+			if tex != null:
+				logo_rect.texture = tex
+				logo_rect.visible = true
+			else:
+				logo_rect.visible = false
+		else:
+			logo_rect.visible = false
 
 
 func _on_config_changed() -> void:

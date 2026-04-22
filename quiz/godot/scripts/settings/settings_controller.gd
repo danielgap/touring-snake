@@ -33,6 +33,13 @@ const MG_IMPORT_DEST: String = "user://minijuegos_imported.json"
 @onready var reset_btn: Button = %ResetBtn
 @onready var file_dialog: FileDialog = %FileDialog
 @onready var mg_file_dialog: FileDialog = %MgFileDialog
+@onready var images_folder_edit: LineEdit = %ImagesFolderEdit
+@onready var images_folder_browse_btn: Button = %ImagesFolderBrowseBtn
+@onready var images_folder_dialog: FileDialog = %ImagesFolderDialog
+@onready var logo_path_edit: LineEdit = %LogoPathEdit
+@onready var logo_path_browse_btn: Button = %LogoPathBrowseBtn
+@onready var logo_file_dialog: FileDialog = %LogoFileDialog
+@onready var buzzer_check: CheckBox = %BuzzerCheck
 
 
 func _ready() -> void:
@@ -77,6 +84,12 @@ func _load_config_to_ui() -> void:
 	mqtt_host_edit.text = ShowConfig.get_mqtt_host()
 	mqtt_port_spin.value = float(ShowConfig.get_mqtt_port())
 
+	images_folder_edit.text = ShowConfig.get_images_folder()
+
+	logo_path_edit.text = ShowConfig.get_logo_path()
+
+	buzzer_check.button_pressed = ShowConfig.get_buzzer_mode_enabled()
+
 	team_count_spin.set_block_signals(false)
 	_rebuild_teams_ui()
 
@@ -100,6 +113,9 @@ func _save_and_close() -> void:
 	ShowConfig.set_points_incorrect(int(points_incorrect_spin.value))
 	ShowConfig.set_mqtt_host(mqtt_host_edit.text)
 	ShowConfig.set_mqtt_port(int(mqtt_port_spin.value))
+	ShowConfig.set_images_folder(images_folder_edit.text)
+	ShowConfig.set_logo_path(logo_path_edit.text)
+	ShowConfig.set_buzzer_mode_enabled(buzzer_check.button_pressed)
 	ShowConfig.save_config()
 	hide_settings()
 
@@ -173,6 +189,30 @@ func _on_mg_file_selected(path: String) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════
+#  Images folder
+# ═══════════════════════════════════════════════════════════════════
+
+func _on_images_folder_browse() -> void:
+	images_folder_dialog.popup_centered()
+
+
+func _on_images_folder_selected(dir: String) -> void:
+	images_folder_edit.text = dir
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  Logo path
+# ═══════════════════════════════════════════════════════════════════
+
+func _on_logo_browse() -> void:
+	logo_file_dialog.popup_centered()
+
+
+func _on_logo_file_selected(path: String) -> void:
+	logo_path_edit.text = path
+
+
+# ═══════════════════════════════════════════════════════════════════
 #  Teams UI
 # ═══════════════════════════════════════════════════════════════════
 
@@ -234,6 +274,10 @@ func _connect_signals() -> void:
 	file_dialog.file_selected.connect(_on_file_selected)
 	mg_import_btn.pressed.connect(_on_import_minigames)
 	mg_file_dialog.file_selected.connect(_on_mg_file_selected)
+	images_folder_browse_btn.pressed.connect(_on_images_folder_browse)
+	images_folder_dialog.dir_selected.connect(_on_images_folder_selected)
+	logo_path_browse_btn.pressed.connect(_on_logo_browse)
+	logo_file_dialog.file_selected.connect(_on_logo_file_selected)
 	save_btn.pressed.connect(_save_and_close)
 	cancel_btn.pressed.connect(hide_settings)
 	reset_btn.pressed.connect(_on_reset_pressed)
@@ -254,7 +298,7 @@ func _apply_styles() -> void:
 
 	_style_tab_container()
 
-	for le: LineEdit in [show_name_edit, subtitle_edit, mqtt_host_edit]:
+	for le: LineEdit in [show_name_edit, subtitle_edit, mqtt_host_edit, images_folder_edit, logo_path_edit]:
 		le.add_theme_color_override("font_color", TEXT_COLOR)
 		le.add_theme_color_override("font_placeholder_color", MUTED_TEXT)
 		le.add_theme_color_override("caret_color", TEXT_COLOR)
@@ -272,6 +316,8 @@ func _apply_styles() -> void:
 	_apply_action_button(reset_btn, ACCENT_AMBER)
 	_apply_action_button(import_btn, ACCENT_BLUE)
 	_apply_action_button(mg_import_btn, ACCENT_AMBER)
+	_apply_action_button(images_folder_browse_btn, ACCENT_BLUE)
+	_apply_action_button(logo_path_browse_btn, ACCENT_BLUE)
 
 
 func _style_tab_container() -> void:

@@ -10,6 +10,7 @@ var correct_option: String = ""
 var trivia: String = ""
 var timeout_seconds: int = 15
 var difficulty: String = ""
+var images: PackedStringArray = PackedStringArray([])
 
 
 func to_dict() -> Dictionary:
@@ -23,6 +24,7 @@ func to_dict() -> Dictionary:
 		"dato_curioso": trivia,
 		"timeout": timeout_seconds,
 		"difficulty": difficulty,
+		"imagenes": Array(images),
 	}
 
 
@@ -34,6 +36,7 @@ func to_public_dict() -> Dictionary:
 		"text": text,
 		"options": Array(options),
 		"difficulty": difficulty,
+		"imagenes": Array(images),
 	}
 
 
@@ -52,5 +55,10 @@ static func from_dict(data: Dictionary) -> Question:
 	if typeof(raw_options) == TYPE_ARRAY:
 		for option in raw_options:
 			question.options.append(str(option))
+
+	var raw_images: Variant = data.get("imagenes", data.get("images", []))
+	if typeof(raw_images) == TYPE_ARRAY:
+		for img in raw_images:
+			question.images.append(str(img))
 
 	return question
