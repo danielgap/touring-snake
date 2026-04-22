@@ -67,13 +67,13 @@ const GLOW_SIZE := 6
 @onready var progress_label: Label = %ProgressLabel
 @onready var next_question_btn: Button = %NextQuestionBtn
 @onready var mg_quick_btn: Button = %MgQuickBtn
-@onready var manual_toggle: Button = %ManualToggle
-@onready var manual_content: ScrollContainer = %ManualContent
 @onready var round_selector: OptionButton = %RoundSelector
-@onready var question_selector: OptionButton = %QuestionSelector
-@onready var load_selected_btn: Button = %LoadSelectedBtn
 @onready var reset_used_btn: Button = %ResetUsedBtn
 @onready var preview_label: Label = %PreviewLabel
+@onready var manual_toggle: Button = %ManualToggle
+@onready var manual_content: ScrollContainer = %ManualContent
+@onready var question_selector: OptionButton = %QuestionSelector
+@onready var load_selected_btn: Button = %LoadSelectedBtn
 
 ## ── Idle panel — minigame selectors ──────────────────────────────
 @onready var mg_category_selector: OptionButton = %MgCategorySelector
@@ -90,6 +90,7 @@ const GLOW_SIZE := 6
 @onready var opt_d: Label = %OptD
 @onready var lock_info: Label = %LockInfo
 @onready var q_reveal_btn: Button = %QRevealBtn
+var skip_btn: Button
 
 ## ── Locked panel ─────────────────────────────────────────────────
 @onready var locked_q_text: Label = %LockedQText
@@ -126,7 +127,6 @@ var _mg_ids: Array[int] = []
 var _selector_syncing: bool = false
 var _mg_selector_syncing: bool = false
 var _showing_selector: bool = false
-var _manual_expanded: bool = false
 var _showing_mg_preview: bool = false
 var _correct_btn_style: StyleBoxFlat
 var _incorrect_btn_style: StyleBoxFlat
@@ -140,6 +140,7 @@ var _prev_minigame_images: PackedStringArray = PackedStringArray()
 
 
 func _ready() -> void:
+	_hide_removed_nodes()
 	_apply_styles()
 	_connect_signals()
 	_wire_config_values()
@@ -147,6 +148,48 @@ func _ready() -> void:
 	_sync_selector_controls()
 	_render_state(AppState.current_state)
 	_render_scores(AppState.current_state.scores)
+
+
+func _hide_removed_nodes() -> void:
+	if manual_toggle != null:
+		manual_toggle.visible = false
+	if question_selector != null:
+		question_selector.visible = false
+	if load_selected_btn != null:
+		load_selected_btn.visible = false
+	if clear_session_btn != null:
+		clear_session_btn.visible = false
+	_reparent_from_manual_section()
+	_create_skip_button()
+
+
+func _reparent_from_manual_section() -> void:
+	var base_path: String = "RootMargin/RootVBox/ContentArea/MainArea/IdlePanel"
+	var manual_section: Node = get_node_or_null("%s/ManualSection" % base_path)
+	var idle_panel_node: Node = get_node_or_null(base_path)
+	if manual_section == null or idle_panel_node == null:
+		return
+
+	# Reparent nodes we need OUT of ManualSection before hiding it
+	var nodes_to_reparent: PackedStringArray = [
+		"ManualContent/ManualVBox/RoundRow",
+		"ManualContent/ManualVBox/MgCategoryRow",
+		"ManualContent/ManualVBox/MgRow",
+		"ManualContent/ManualVBox/PreviewCard",
+		"ManualContent/ManualVBox/ManualActions",
+	]
+	for rel_path: String in nodes_to_reparent:
+		var node: Node = get_node_or_null("%s/ManualSection/%s" % [base_path, rel_path])
+		if node != null:
+			node.reparent(idle_panel_node)
+
+	# Hide QRow (question selector, not needed)
+	var q_row: Node = get_node_or_null("%s/ManualSection/ManualContent/ManualVBox/QRow" % base_path)
+	if q_row != null:
+		q_row.visible = false
+
+	# Now safe to hide the empty ManualSection
+	manual_section.visible = false
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -191,35 +234,35 @@ func _apply_styles() -> void:
 	# ── Reveal card — green success glow ────────────────────────────
 	%RevealCard.add_theme_stylebox_override("panel", _make_glow_card(Color("#0a1f10"), PHASE_REVEAL_COLOR, 2, PHASE_REVEAL_COLOR, 8))
 
-	# ── Correct/Incorrect — game-show buttons with glow ─────────────
-	_correct_btn_style = _make_game_button(Color("#059669"), Color("#10b981"), Color.WHITE, PHASE_REVEAL_COLOR)
-	_incorrect_btn_style = _make_game_button(Color("#dc2626"), Color("#ef4444"), Color.WHITE, PHASE_INCORRECT_COLOR)
+	# ── Correct/Incorrect — emergency correction (dimmer, less prominent) ──
+	_correct_btn_style = _make_console_button_style(Color("#059669"), Color("#10b981"))
+	_incorrect_btn_style = _make_console_button_style(Color("#dc2626"), Color("#ef4444"))
 	correct_btn.add_theme_stylebox_override("normal", _correct_btn_style)
-	correct_btn.add_theme_stylebox_override("hover", _make_game_button(Color("#10b981"), Color("#34d399"), Color.WHITE, Color("#34d399")))
+	correct_btn.add_theme_stylebox_override("hover", _make_console_button_style(Color("#10b981"), Color("#34d399")))
 	correct_btn.add_theme_stylebox_override("pressed", _correct_btn_style)
-	correct_btn.add_theme_color_override("font_color", Color.WHITE)
+	correct_btn.add_theme_color_override("font_color", Color("#10b981"))
 	correct_btn.add_theme_color_override("font_hover_color", Color.WHITE)
 
 	incorrect_btn.add_theme_stylebox_override("normal", _incorrect_btn_style)
-	incorrect_btn.add_theme_stylebox_override("hover", _make_game_button(Color("#ef4444"), Color("#f87171"), Color.WHITE, Color("#f87171")))
+	incorrect_btn.add_theme_stylebox_override("hover", _make_console_button_style(Color("#ef4444"), Color("#f87171")))
 	incorrect_btn.add_theme_stylebox_override("pressed", _incorrect_btn_style)
-	incorrect_btn.add_theme_color_override("font_color", Color.WHITE)
+	incorrect_btn.add_theme_color_override("font_color", Color("#ef4444"))
 	incorrect_btn.add_theme_color_override("font_hover_color", Color.WHITE)
 
 	# ── Action buttons — console style ──────────────────────────────
 	var all_buttons: Array[Button] = [
-		load_selected_btn, reset_used_btn,
+		reset_used_btn,
 		q_reveal_btn, reopen_btn, locked_reveal_btn, next_btn,
-		refresh_btn, reset_locks_btn, clear_session_btn,
+		refresh_btn, reset_locks_btn,
 		team1_lock_btn, team1_force_btn, team2_lock_btn, team2_force_btn,
 		team3_lock_btn, team3_force_btn,
 		team1_sub_btn, team1_add_btn, team2_sub_btn, team2_add_btn,
 		team3_sub_btn, team3_add_btn,
 		mg_launch_btn, mg_end_btn,
-		manual_toggle,
 	]
 	for btn: Button in all_buttons:
-		_apply_console_button(btn)
+		if btn != null:
+			_apply_console_button(btn)
 
 	# ── Main action buttons — game-show glow ────────────────────────
 	_apply_game_glow_button(next_question_btn, ACCENT_BLUE)
@@ -227,14 +270,10 @@ func _apply_styles() -> void:
 	_apply_game_glow_button(reveal_mg_btn, PHASE_MINIGAME_COLOR)
 
 	# ── Primary action buttons — colored accent ─────────────────────
-	_apply_accent_button(load_selected_btn, ACCENT_BLUE)
 	_apply_accent_button(next_btn, PHASE_REVEAL_COLOR)
 	_apply_accent_button(q_reveal_btn, Color("#a855f7"))
 	_apply_accent_button(mg_launch_btn, PHASE_MINIGAME_COLOR)
 	_apply_accent_button(mg_end_btn, PHASE_REVEAL_COLOR)
-
-	# ── Manual toggle — subtle text button ──────────────────────────
-	_apply_text_button(manual_toggle)
 
 	# ── Question images container (dynamic) ──────────────────────────
 	_create_question_images_container()
@@ -492,14 +531,13 @@ func _connect_signals() -> void:
 	mg_quick_btn.pressed.connect(GameService.load_random_minigame)
 	reveal_mg_btn.pressed.connect(GameService.load_random_minigame)
 
-	# Manual section toggle
-	manual_toggle.pressed.connect(_toggle_manual_section)
+	# Skip button
+	if skip_btn != null:
+		skip_btn.pressed.connect(GameService.skip_current_question)
 
 	# Question actions
 	refresh_btn.pressed.connect(ContentRepo.load_questions)
-	load_selected_btn.pressed.connect(GameService.load_selected_question)
 	reset_used_btn.pressed.connect(GameService.reset_used_questions)
-	clear_session_btn.pressed.connect(GameService.clear_persisted_presenter_session)
 
 	# Round actions
 	reopen_btn.pressed.connect(_on_reopen_or_rebote)
@@ -507,11 +545,8 @@ func _connect_signals() -> void:
 	q_reveal_btn.pressed.connect(GameService.reveal_current_answer)
 	locked_reveal_btn.pressed.connect(GameService.reveal_current_answer)
 
-	# Team arbitration
-
 	# Selectors
 	round_selector.item_selected.connect(_on_round_selected)
-	question_selector.item_selected.connect(_on_question_selected)
 
 	# Minigame selectors
 	mg_category_selector.item_selected.connect(_on_mg_category_selected)
@@ -551,6 +586,7 @@ func _connect_signals() -> void:
 	GameService.presenter_selector_changed.connect(_on_selector_changed)
 	GameService.used_questions_changed.connect(_on_used_questions_changed)
 	GameService.presenter_minigame_selector_changed.connect(_on_mg_selector_changed)
+	GameService.round_auto_advanced.connect(_on_round_auto_advanced)
 	ContentRepo.minigames_loaded.connect(_on_minigames_loaded)
 
 	# Settings panel
@@ -558,16 +594,6 @@ func _connect_signals() -> void:
 
 	# Config reactivity
 	ShowConfig.config_changed.connect(_on_config_changed)
-
-
-# ═══════════════════════════════════════════════════════════════════
-#  Manual section toggle
-# ═══════════════════════════════════════════════════════════════════
-
-func _toggle_manual_section() -> void:
-	_manual_expanded = not _manual_expanded
-	manual_content.visible = _manual_expanded
-	manual_toggle.text = "▼ Selección manual" if _manual_expanded else "▶ Selección manual"
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -769,7 +795,6 @@ func _render_idle_panel(state: GameState) -> void:
 	var has_minigames: bool = ContentRepo.get_minigame_count() > 0
 	var has_selected_mg: bool = _mg_ids.size() > 0
 
-	# Progress label
 	var q_count: int = ContentRepo.get_question_count()
 	var rounds: PackedStringArray = ContentRepo.get_rounds()
 	var mg_count: int = ContentRepo.get_minigame_count()
@@ -779,16 +804,11 @@ func _render_idle_panel(state: GameState) -> void:
 	parts.append("%d minijuegos" % mg_count)
 	progress_label.text = " · ".join(parts)
 
-	# Main action buttons
 	next_question_btn.disabled = not has_round_questions
 	mg_quick_btn.disabled = not has_minigames
 
-	# Manual selectors
 	round_selector.disabled = not has_questions
-	question_selector.disabled = not has_round_questions
-	load_selected_btn.disabled = not has_round_questions
 	reset_used_btn.disabled = not has_questions
-	clear_session_btn.disabled = not GameService.has_persisted_presenter_session()
 	mg_launch_btn.disabled = not has_selected_mg
 	mg_category_row.visible = has_minigames
 	mg_row.visible = has_minigames
@@ -804,6 +824,8 @@ func _render_question_panel(state: GameState) -> void:
 		opt_d.text = ""
 		lock_info.text = ""
 		q_reveal_btn.disabled = true
+		if skip_btn != null:
+			skip_btn.disabled = true
 		return
 
 	question_text.text = state.current_question.text
@@ -829,13 +851,17 @@ func _render_question_panel(state: GameState) -> void:
 	else:
 		lock_info.text = ""
 
-	# Reveal button
+	# Reveal button (unified — same guard as locked panel)
 	var needs_correction: bool = state.phase == Enums.GamePhase.LOCKED \
 		and state.locked_team_id > 0 \
 		and not state.correction_applied
 	q_reveal_btn.disabled = state.current_question.text.is_empty() \
 		or state.phase not in [Enums.GamePhase.QUESTION, Enums.GamePhase.LOCKED] \
 		or needs_correction
+
+	# Skip button
+	if skip_btn != null:
+		skip_btn.disabled = state.phase != Enums.GamePhase.QUESTION or state.current_question.text.is_empty()
 
 
 func _render_locked_panel(state: GameState) -> void:
@@ -857,8 +883,8 @@ func _render_locked_panel(state: GameState) -> void:
 
 	# Correction buttons — now manual override only
 	var can_override: bool = state.phase == Enums.GamePhase.LOCKED and state.locked_team_id > 0
-	correct_btn.text = "✅ Confirmar correcta"
-	incorrect_btn.text = "❌ Confirmar incorrecta"
+	correct_btn.text = "🔧 Corregir: Correcta"
+	incorrect_btn.text = "🔧 Corregir: Incorrecta"
 	correct_btn.visible = can_override
 	incorrect_btn.visible = can_override
 
@@ -916,7 +942,6 @@ func _render_reveal_panel(state: GameState) -> void:
 func _render_bottom_bar(state: GameState) -> void:
 	refresh_btn.disabled = false
 	reset_locks_btn.disabled = state.current_question.text.is_empty() or state.phase not in [Enums.GamePhase.QUESTION, Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL]
-	clear_session_btn.disabled = not GameService.has_persisted_presenter_session()
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -942,11 +967,8 @@ func _on_round_selected(index: int) -> void:
 	GameService.set_presenter_round(_round_values[index])
 
 
-func _on_question_selected(index: int) -> void:
-	if _selector_syncing or index < 0 or index >= _question_ids.size():
-		return
-	_showing_mg_preview = false
-	GameService.set_presenter_question(_question_ids[index])
+func _on_round_auto_advanced(round_name: String) -> void:
+	_sync_selector_controls()
 
 
 func _sync_selector_controls() -> void:
@@ -954,7 +976,6 @@ func _sync_selector_controls() -> void:
 	_round_values.clear()
 	_question_ids.clear()
 	round_selector.clear()
-	question_selector.clear()
 
 	var rounds: PackedStringArray = ContentRepo.get_rounds()
 	for round_name in rounds:
@@ -965,15 +986,6 @@ func _sync_selector_controls() -> void:
 	var selected_round_index: int = _find_round_index(selected_round)
 	if selected_round_index >= 0:
 		round_selector.select(selected_round_index)
-
-	var questions_in_round: Array[Question] = ContentRepo.get_questions_for_round(selected_round)
-	for question in questions_in_round:
-		_question_ids.append(question.id)
-		question_selector.add_item(_question_option_label(question))
-
-	var selected_question_index: int = _find_question_index(GameService.get_selected_question_id())
-	if selected_question_index >= 0:
-		question_selector.select(selected_question_index)
 
 	_selector_syncing = false
 	_render_preview()
@@ -996,20 +1008,6 @@ func _find_round_index(round_name: String) -> int:
 		if _round_values[index] == round_name:
 			return index
 	return -1
-
-
-func _find_question_index(question_id: int) -> int:
-	for index: int in range(_question_ids.size()):
-		if _question_ids[index] == question_id:
-			return index
-	return -1
-
-
-func _question_option_label(question: Question) -> String:
-	var summary: String = question.text.strip_edges()
-	if summary.length() > 40:
-		summary = "%s…" % summary.substr(0, 40)
-	return "Q%d · %s" % [question.id, summary]
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -1413,7 +1411,6 @@ func _make_image_rect(tex: Texture2D, max_w: int, max_h: int) -> Control:
 		rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		return rect
 	else:
-		# Placeholder — gray panel with "?" label
 		var panel := PanelContainer.new()
 		var style := StyleBoxFlat.new()
 		style.bg_color = Color(0.18, 0.18, 0.22, 1.0)
@@ -1430,3 +1427,31 @@ func _make_image_rect(tex: Texture2D, max_w: int, max_h: int) -> Control:
 		label.add_theme_color_override("font_color", Color(0.45, 0.45, 0.5, 1.0))
 		panel.add_child(label)
 		return panel
+
+
+func _make_console_button_style(bg: Color, border: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(bg.r * 0.2, bg.g * 0.2, bg.b * 0.2, 1.0)
+	style.border_color = Color(border.r * 0.5, border.g * 0.5, border.b * 0.5, 1.0)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(CORNER_RADIUS)
+	style.content_margin_top = 8
+	style.content_margin_bottom = 8
+	style.content_margin_left = 14
+	style.content_margin_right = 14
+	return style
+
+
+func _create_skip_button() -> void:
+	if question_panel == null:
+		return
+	skip_btn = Button.new()
+	skip_btn.name = "SkipBtn"
+	skip_btn.text = "⏭ Saltar pregunta"
+	skip_btn.custom_minimum_size = Vector2(0, 48)
+	skip_btn.set("theme_override_font_sizes/font_size", 18)
+	_apply_console_button(skip_btn)
+	_apply_accent_button(skip_btn, TEXT_DIM)
+	var q_actions: Node = question_panel.get_node_or_null("QActions")
+	if q_actions != null:
+		q_actions.add_child(skip_btn)

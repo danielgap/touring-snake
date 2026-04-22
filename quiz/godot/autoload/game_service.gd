@@ -5,6 +5,7 @@ signal answer_received(team_id: int, option: String)
 signal presenter_selector_changed(round_name: String, question_id: int)
 signal presenter_minigame_selector_changed(minigame_id: int)
 signal used_questions_changed()
+signal round_auto_advanced(round_name: String)
 
 const MQTT_HOST: String = "127.0.0.1"
 const MQTT_PORT: int = 1883
@@ -152,9 +153,36 @@ func load_random_question_from_selected_round() -> void:
 	if questions_in_round.is_empty():
 		_publish_empty_presenter_state("La ronda seleccionada no tiene preguntas disponibles.")
 		return
-	var selected_question: Question = _pick_random_question(questions_in_round)
+	var unused_questions: Array[Question] = []
+	for q: Question in questions_in_round:
+		if not is_question_used(q.id):
+			unused_questions.append(q)
+	if unused_questions.is_empty():
+		var next_round: String = _find_next_round_with_unused_questions(_selected_round_name)
+		if not next_round.is_empty():
+			_selected_round_name = next_round
+			questions_in_round = ContentRepo.get_questions_for_round(next_round)
+			for q: Question in questions_in_round:
+				if not is_question_used(q.id):
+					unused_questions.append(q)
+			if not unused_questions.is_empty():
+				emit_signal("round_auto_advanced", next_round)
+	if unused_questions.is_empty():
+		unused_questions = ContentRepo.get_questions_for_round(_selected_round_name)
+	var selected_question: Question = _pick_random_question(unused_questions)
 	_update_presenter_selector(_selected_round_name, selected_question.id)
 	_apply_presenter_question(selected_question, "Pregunta aleatoria cargada de %s" % _selected_round_name)
+
+
+func skip_current_question() -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	var state: GameState = AppState.current_state
+	if state.current_question.id > 0:
+		_used_question_ids[state.current_question.id] = true
+		emit_signal("used_questions_changed")
+		_save_presenter_session()
+	load_random_question_from_selected_round()
 
 
 func get_selected_round_name() -> String:
@@ -962,3 +990,20 @@ func _set_answer_authority(state: GameState, team_id: int) -> void:
 		state.rebote_excluded_team_ids.erase(team_id)
 	state.answer_authority_team_id = team_id
 	state.active_team_id = team_id
+
+
+func _find_next_round_with_unused_questions(current_round: String) -> String:
+	var rounds: PackedStringArray = ContentRepo.get_rounds()
+	if rounds.size() <= 1:
+		return ""
+	var start_index: int = rounds.find(current_round)
+	if start_index < 0:
+		return ""
+	for offset: int in range(1, rounds.size()):
+		var candidate_index: int = (start_index + offset) % rounds.size()
+		var candidate_round: String = rounds[candidate_index]
+		var questions: Array[Question] = ContentRepo.get_questions_for_round(candidate_round)
+		for q: Question in questions:
+			if not is_question_used(q.id):
+				return candidate_round
+	return ""
