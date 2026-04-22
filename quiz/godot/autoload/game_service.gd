@@ -227,13 +227,6 @@ func reveal_current_answer() -> void:
 		return
 	if AppState.current_state.current_question.text.is_empty():
 		return
-	if AppState.current_state.phase == Enums.GamePhase.LOCKED \
-		and AppState.current_state.locked_team_id > 0 \
-		and not AppState.current_state.correction_applied:
-		var blocked_state: GameState = AppState.current_state.duplicate_state()
-		blocked_state.status_text = "Primero marcá la respuesta tomada como correcta o incorrecta."
-		AppState.apply_game_state(blocked_state)
-		return
 
 	var state: GameState = AppState.current_state.duplicate_state()
 	state.phase = Enums.GamePhase.REVEAL
@@ -473,7 +466,7 @@ func activate_rebote() -> void:
 	if AppState.selected_role != Enums.AppRole.PRESENTER:
 		return
 	var state: GameState = AppState.current_state.duplicate_state()
-	if state.phase != Enums.GamePhase.LOCKED:
+	if state.phase not in [Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL]:
 		return
 	if state.answer_feedback_status != Enums.AnswerFeedbackStatus.INCORRECT:
 		return
@@ -488,66 +481,6 @@ func activate_rebote() -> void:
 	state.correction_applied = false
 	state.buzzer_winner_team_id = 0
 	state.status_text = "🔄 Rebote activado — equipos excluidos no pueden pulsar."
-	AppState.apply_game_state(state)
-	_save_presenter_session()
-	_publish_state(state)
-
-
-func override_answer_correct() -> void:
-	if AppState.selected_role != Enums.AppRole.PRESENTER:
-		return
-	var state: GameState = AppState.current_state.duplicate_state()
-	if state.phase != Enums.GamePhase.LOCKED or state.locked_team_id <= 0:
-		return
-	if state.answer_feedback_status == Enums.AnswerFeedbackStatus.CORRECT:
-		return
-	# If auto-judge previously applied penalty (INCORRECT), reverse it
-	if state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT:
-		var penalty: int = _get_points_incorrect()
-		if penalty != 0:
-			# Use pre-judgment score to avoid phantom points from clamping
-			var original_score: int = state.score_before_judgment.get(state.locked_team_id, int(state.scores.get(state.locked_team_id, 0)))
-			state.scores[state.locked_team_id] = original_score
-			MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": original_score}, false, COMMAND_QOS)
-		# Remove from rebote exclusion
-		state.rebote_excluded_team_ids.erase(state.locked_team_id)
-	state.answer_feedback_status = Enums.AnswerFeedbackStatus.CORRECT
-	state.correction_applied = true
-	var points: int = _get_points_correct()
-	var new_total: int = int(state.scores.get(state.locked_team_id, 0)) + points
-	state.scores[state.locked_team_id] = new_total
-	state.status_text = "✅ Override: Equipo %d marcado CORRECTO (+%d)" % [state.locked_team_id, points]
-	AppState.apply_game_state(state)
-	MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": new_total}, false, COMMAND_QOS)
-	_save_presenter_session()
-	_publish_state(state)
-
-
-func override_answer_incorrect() -> void:
-	if AppState.selected_role != Enums.AppRole.PRESENTER:
-		return
-	var state: GameState = AppState.current_state.duplicate_state()
-	if state.phase != Enums.GamePhase.LOCKED or state.locked_team_id <= 0:
-		return
-	if state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT:
-		return
-	# If auto-judge previously awarded points (CORRECT), subtract them
-	if state.answer_feedback_status == Enums.AnswerFeedbackStatus.CORRECT:
-		var points_to_subtract: int = _get_points_correct()
-		# Use pre-judgment score to avoid phantom points from clamping
-		var original_score: int = state.score_before_judgment.get(state.locked_team_id, int(state.scores.get(state.locked_team_id, 0)))
-		state.scores[state.locked_team_id] = original_score
-		MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": original_score}, false, COMMAND_QOS)
-	# Apply penalty for incorrect if configured
-	var penalty: int = _get_points_incorrect()
-	if penalty != 0:
-		var total_after_penalty: int = maxi(0, int(state.scores.get(state.locked_team_id, 0)) + penalty)
-		state.scores[state.locked_team_id] = total_after_penalty
-		MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": total_after_penalty}, false, COMMAND_QOS)
-	state.answer_feedback_status = Enums.AnswerFeedbackStatus.INCORRECT
-	state.correction_applied = true
-	state.rebote_excluded_team_ids[state.locked_team_id] = true
-	state.status_text = "❌ Override: Equipo %d marcado INCORRECTO" % state.locked_team_id
 	AppState.apply_game_state(state)
 	_save_presenter_session()
 	_publish_state(state)

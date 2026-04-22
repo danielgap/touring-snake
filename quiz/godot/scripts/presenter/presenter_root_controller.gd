@@ -507,7 +507,7 @@ func _update_team_visibility() -> void:
 
 func _connect_signals() -> void:
 	# Main action buttons
-	next_question_btn.pressed.connect(GameService.load_random_question_from_selected_round)
+	next_question_btn.pressed.connect(GameService.load_random_question)
 	mg_quick_btn.pressed.connect(GameService.load_random_minigame)
 	reveal_mg_btn.pressed.connect(GameService.load_random_minigame)
 
@@ -536,10 +536,6 @@ func _connect_signals() -> void:
 	mg_launch_btn.pressed.connect(GameService.load_selected_minigame)
 	mg_end_btn.pressed.connect(GameService.end_current_minigame)
 
-	# Rebote
-	correct_btn.pressed.connect(_on_correct_override)
-	incorrect_btn.pressed.connect(_on_incorrect_override)
-
 	# Next question (local UI only — shows selector)
 	next_btn.pressed.connect(_on_next_question)
 
@@ -566,7 +562,6 @@ func _connect_signals() -> void:
 	GameService.presenter_selector_changed.connect(_on_selector_changed)
 	GameService.used_questions_changed.connect(_on_used_questions_changed)
 	GameService.presenter_minigame_selector_changed.connect(_on_mg_selector_changed)
-	GameService.round_auto_advanced.connect(_on_round_auto_advanced)
 	ContentRepo.minigames_loaded.connect(_on_minigames_loaded)
 
 	# Settings panel
@@ -659,20 +654,12 @@ func _on_next_question() -> void:
 
 func _on_reopen_or_rebote() -> void:
 	var state: GameState = AppState.current_state
-	if state.phase == Enums.GamePhase.LOCKED \
+	if state.phase in [Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL] \
 		and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT \
 		and GameService.teams_available_for_rebote() > 0:
 		GameService.activate_rebote()
 	else:
 		GameService.reopen_current_question()
-
-
-func _on_correct_override() -> void:
-	GameService.override_answer_correct()
-
-
-func _on_incorrect_override() -> void:
-	GameService.override_answer_incorrect()
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -856,24 +843,18 @@ func _render_locked_panel(state: GameState) -> void:
 	else:
 		answered_label.text = "Sin respuesta tomada"
 
-	# Correction buttons — now manual override only
-	var can_override: bool = state.phase == Enums.GamePhase.LOCKED and state.locked_team_id > 0
-	correct_btn.text = "🔧 Corregir: Correcta"
-	incorrect_btn.text = "🔧 Corregir: Incorrecta"
-	correct_btn.visible = can_override
-	incorrect_btn.visible = can_override
+	# No correction buttons — auto-judge is trusted
+	correct_btn.visible = false
+	incorrect_btn.visible = false
 
 	# Rebote button — appears when answer was incorrect and teams remain
-	var rebote_available: bool = state.phase == Enums.GamePhase.LOCKED \
+	var rebote_available: bool = state.phase in [Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL] \
 		and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT \
 		and GameService.teams_available_for_rebote() > 0
 	reopen_btn.text = "🔄 Rebote" if rebote_available else "Reabrir ronda"
 	reopen_btn.disabled = state.current_question.text.is_empty() or state.phase not in [Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL]
 
-	var needs_correction: bool = state.phase == Enums.GamePhase.LOCKED \
-		and state.locked_team_id > 0 \
-		and not state.correction_applied
-	locked_reveal_btn.disabled = state.current_question.text.is_empty() or needs_correction
+	locked_reveal_btn.disabled = state.current_question.text.is_empty()
 
 
 func _render_reveal_panel(state: GameState) -> void:
@@ -940,10 +921,6 @@ func _on_round_selected(index: int) -> void:
 		return
 	_showing_mg_preview = false
 	GameService.set_presenter_round(_round_values[index])
-
-
-func _on_round_auto_advanced(round_name: String) -> void:
-	_sync_selector_controls()
 
 
 func _sync_selector_controls() -> void:

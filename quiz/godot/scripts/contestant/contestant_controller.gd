@@ -564,20 +564,28 @@ func _feedback_text(state: GameState, can_answer: bool) -> String:
 			_feedback_summary(state),
 		]
 	if state.locked_team_id == AppState.selected_team_id:
+		# During LOCKED, hide result — suspense for the presenter reveal
+		if state.phase == Enums.GamePhase.LOCKED:
+			return "Respuesta enviada: %s · Esperando resultado..." % (
+				state.last_selected_option if not state.last_selected_option.is_empty() else "seleccionada"
+			)
 		match state.answer_feedback_status:
 			Enums.AnswerFeedbackStatus.CORRECT:
-				return "CORRECTA — Su respuesta %s fue aceptada." % (
+				return "✅ CORRECTA — Su respuesta %s fue aceptada." % (
 					state.last_selected_option if not state.last_selected_option.is_empty() else "seleccionada"
 				)
 			Enums.AnswerFeedbackStatus.INCORRECT:
-				return "INCORRECTA — Su respuesta %s fue rechazada." % (
+				return "❌ INCORRECTA — Su respuesta %s fue rechazada." % (
 					state.last_selected_option if not state.last_selected_option.is_empty() else "seleccionada"
 				)
 			_:
-				return "Respuesta enviada: %s · Esperando fallo del presentador." % (
+				return "Respuesta enviada: %s · Esperando resultado..." % (
 					state.last_selected_option if not state.last_selected_option.is_empty() else "seleccionada"
 				)
 	if state.locked_team_id > 0:
+		# During LOCKED, hide result — presenter hasn't revealed yet
+		if state.phase == Enums.GamePhase.LOCKED:
+			return "Respondió %s · Esperando resultado..." % ShowConfig.get_team_name(state.locked_team_id)
 		return "Respondió %s · %s" % [ShowConfig.get_team_name(state.locked_team_id), _feedback_summary(state)]
 	if state.answer_authority_team_id > 0 and state.answer_authority_team_id != AppState.selected_team_id:
 		return "Turno reservado para %s." % ShowConfig.get_team_name(state.answer_authority_team_id)
