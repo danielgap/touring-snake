@@ -1201,14 +1201,14 @@ func _render_buzzer(state: GameState) -> void:
 			_stop_buzzer_pulse()
 		return
 
-	# IDLE phase with no minigame — show ready buzzer
+	# IDLE phase with no minigame — show team name, not clickable
 	if state.phase == Enums.GamePhase.IDLE and state.current_minigame.id <= 0:
 		_buzzer_button.visible = true
 		if team_id > 0:
-			_buzzer_button.disabled = false
-			_buzzer_button.text = _buzzer_ready_text("⚡", "LISTO")
-			_apply_buzzer_styles_active()
-			_start_buzzer_pulse()
+			_buzzer_button.disabled = true
+			_buzzer_button.text = ShowConfig.get_team_name(team_id).to_upper()
+			_apply_buzzer_styles_disabled()
+			_stop_buzzer_pulse()
 		else:
 			_buzzer_button.disabled = true
 			_buzzer_button.text = "SELECCIONÁ EQUIPO"
