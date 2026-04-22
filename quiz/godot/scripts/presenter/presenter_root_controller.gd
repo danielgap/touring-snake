@@ -987,6 +987,14 @@ func _sync_selector_controls() -> void:
 	if selected_round_index >= 0:
 		round_selector.select(selected_round_index)
 
+	# Populate _question_ids from selected round for has_round_questions check
+	_question_ids.clear()
+	if not selected_round.is_empty():
+		var questions: Array = ContentRepo.get_questions_for_round(selected_round)
+		for q: Question in questions:
+			if q is Question:
+				_question_ids.append(q.id)
+
 	_selector_syncing = false
 	_render_preview()
 	_render_idle_panel(AppState.current_state)
