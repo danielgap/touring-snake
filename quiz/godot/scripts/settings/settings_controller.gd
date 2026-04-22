@@ -225,19 +225,19 @@ func _rebuild_teams_ui() -> void:
 		var team_id: int = i + 1
 		var row: HBoxContainer = HBoxContainer.new()
 		row.set_meta("team_id", team_id)
-		row.add_theme_constant_override("separation", 8)
+		row.add_theme_constant_override("separation", 6)
 
 		var team_label: Label = Label.new()
-		team_label.text = "Equipo %d" % team_id
+		team_label.text = "Eq. %d" % team_id
 		team_label.add_theme_color_override("font_color", ShowConfig.get_team_color(team_id))
-		team_label.add_theme_font_size_override("font_size", 20)
-		team_label.custom_minimum_size = Vector2(90, 0)
+		team_label.add_theme_font_size_override("font_size", 15)
+		team_label.custom_minimum_size = Vector2(52, 0)
 		team_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
 		var name_edit: LineEdit = LineEdit.new()
 		name_edit.name = "NameEdit"
 		name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		name_edit.custom_minimum_size = Vector2(0, 48)
+		name_edit.custom_minimum_size = Vector2(0, 36)
 		name_edit.text = ShowConfig.get_team_name(team_id)
 		name_edit.placeholder_text = "Equipo %d" % team_id
 		name_edit.add_theme_color_override("font_color", TEXT_COLOR)
@@ -247,7 +247,7 @@ func _rebuild_teams_ui() -> void:
 
 		var color_btn: ColorPickerButton = ColorPickerButton.new()
 		color_btn.name = "ColorBtn"
-		color_btn.custom_minimum_size = Vector2(56, 48)
+		color_btn.custom_minimum_size = Vector2(44, 36)
 		color_btn.color = ShowConfig.get_team_color(team_id)
 
 		row.add_child(team_label)
@@ -332,39 +332,39 @@ func _style_tab_container() -> void:
 	tab_selected.bg_color = Color("#1e293b")
 	tab_selected.border_color = BORDER_COLOR
 	tab_selected.set_border_width_all(1)
-	tab_selected.set_corner_radius_all(8)
-	tab_selected.content_margin_left = 20.0
-	tab_selected.content_margin_right = 20.0
-	tab_selected.content_margin_top = 10.0
-	tab_selected.content_margin_bottom = 10.0
+	tab_selected.set_corner_radius_all(6)
+	tab_selected.content_margin_left = 14.0
+	tab_selected.content_margin_right = 14.0
+	tab_selected.content_margin_top = 6.0
+	tab_selected.content_margin_bottom = 6.0
 	tab_container.add_theme_stylebox_override("tab_selected", tab_selected)
 
 	var tab_unselected: StyleBoxFlat = StyleBoxFlat.new()
 	tab_unselected.bg_color = Color("#0b1019")
 	tab_unselected.border_color = Color("#0f1623")
 	tab_unselected.set_border_width_all(1)
-	tab_unselected.set_corner_radius_all(8)
-	tab_unselected.content_margin_left = 20.0
-	tab_unselected.content_margin_right = 20.0
-	tab_unselected.content_margin_top = 10.0
-	tab_unselected.content_margin_bottom = 10.0
+	tab_unselected.set_corner_radius_all(6)
+	tab_unselected.content_margin_left = 14.0
+	tab_unselected.content_margin_right = 14.0
+	tab_unselected.content_margin_top = 6.0
+	tab_unselected.content_margin_bottom = 6.0
 	tab_container.add_theme_stylebox_override("tab_unselected", tab_unselected)
 
 	var tab_hovered: StyleBoxFlat = StyleBoxFlat.new()
 	tab_hovered.bg_color = Color("#152238")
 	tab_hovered.border_color = ACCENT_BLUE
 	tab_hovered.set_border_width_all(1)
-	tab_hovered.set_corner_radius_all(8)
-	tab_hovered.content_margin_left = 20.0
-	tab_hovered.content_margin_right = 20.0
-	tab_hovered.content_margin_top = 10.0
-	tab_hovered.content_margin_bottom = 10.0
+	tab_hovered.set_corner_radius_all(6)
+	tab_hovered.content_margin_left = 14.0
+	tab_hovered.content_margin_right = 14.0
+	tab_hovered.content_margin_top = 6.0
+	tab_hovered.content_margin_bottom = 6.0
 	tab_container.add_theme_stylebox_override("tab_hovered", tab_hovered)
 
 	tab_container.add_theme_color_override("font_selected_color", TEXT_COLOR)
 	tab_container.add_theme_color_override("font_unselected_color", MUTED_TEXT)
 	tab_container.add_theme_color_override("font_hovered_color", TEXT_COLOR)
-	tab_container.add_theme_font_size_override("font_size", 20)
+	tab_container.add_theme_font_size_override("font_size", 16)
 
 
 func _apply_line_edit_bg(le: LineEdit) -> void:
@@ -389,10 +389,10 @@ func _apply_action_button(btn: Button, accent: Color) -> void:
 	normal.border_color = Color(accent.r * 0.4, accent.g * 0.4, accent.b * 0.4, 1.0)
 	normal.set_border_width_all(1)
 	normal.set_corner_radius_all(8)
-	normal.content_margin_top = 10.0
-	normal.content_margin_bottom = 10.0
-	normal.content_margin_left = 16.0
-	normal.content_margin_right = 16.0
+	normal.content_margin_top = 8.0
+	normal.content_margin_bottom = 8.0
+	normal.content_margin_left = 14.0
+	normal.content_margin_right = 14.0
 
 	var hover: StyleBoxFlat = normal.duplicate() as StyleBoxFlat
 	hover.bg_color = Color(accent.r * 0.3, accent.g * 0.3, accent.b * 0.3, 1.0)
