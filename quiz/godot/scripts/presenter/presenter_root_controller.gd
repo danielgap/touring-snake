@@ -754,14 +754,13 @@ func _render_sidebar(state: GameState) -> void:
 	team2_force_btn.disabled = not question_open or state.is_team_locked_out(2)
 	team3_force_btn.disabled = not question_open or state.is_team_locked_out(3)
 
-	# Score buttons
-	var scoring: bool = (not state.current_question.text.is_empty() and state.phase in [Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL]) or state.phase == Enums.GamePhase.MINIGAME
-	team1_sub_btn.disabled = not scoring
-	team1_add_btn.disabled = not scoring
-	team2_sub_btn.disabled = not scoring
-	team2_add_btn.disabled = not scoring
-	team3_sub_btn.disabled = not scoring
-	team3_add_btn.disabled = not scoring
+	# Score buttons — always available
+	team1_sub_btn.disabled = false
+	team1_add_btn.disabled = false
+	team2_sub_btn.disabled = false
+	team2_add_btn.disabled = false
+	team3_sub_btn.disabled = false
+	team3_add_btn.disabled = false
 
 
 func _render_idle_panel(state: GameState) -> void:
