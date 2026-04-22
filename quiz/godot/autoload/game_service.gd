@@ -12,7 +12,6 @@ const SNAPSHOT_QOS: int = 1
 const COMMAND_QOS: int = 1
 const SNAPSHOT_RETAIN: bool = true
 const PRESENTER_SESSION_SAVE_PATH: String = "user://presenter_session.json"
-const TEAM_IDS: Array[int] = [1, 2, 3]
 
 var _current_question_index: int = -1
 var _selected_round_name: String = ""
@@ -32,6 +31,21 @@ func _ready() -> void:
 	ContentRepo.questions_loaded.connect(_on_questions_loaded)
 	ContentRepo.content_missing.connect(_on_content_missing)
 	ContentRepo.minigames_loaded.connect(_on_minigames_loaded)
+
+
+func _get_team_ids() -> Array[int]:
+	var count: int = ShowConfig.get_team_count() if ShowConfig else 3
+	var ids: Array[int] = []
+	for i in range(1, count + 1):
+		ids.append(i)
+	return ids
+
+
+func _build_default_locks() -> Dictionary:
+	var locks: Dictionary = {}
+	for team_id in _get_team_ids():
+		locks[team_id] = false
+	return locks
 
 
 func _get_mqtt_host() -> String:
@@ -75,6 +89,7 @@ func initialize_role(role: int, team_id: int = 0) -> void:
 	MqttBus.subscribe_topic(MessageTopics.ANSWER, COMMAND_QOS)
 	MqttBus.subscribe_topic(MessageTopics.POINTS, COMMAND_QOS)
 	MqttBus.subscribe_topic(MessageTopics.TABLET_LOCK, COMMAND_QOS)
+	MqttBus.subscribe_topic(MessageTopics.BUZZER, COMMAND_QOS)
 	emit_signal("role_initialized", role)
 
 
@@ -207,6 +222,7 @@ func reveal_current_answer() -> void:
 	var state: GameState = AppState.current_state.duplicate_state()
 	state.phase = Enums.GamePhase.REVEAL
 	state.answers_enabled = false
+	_set_answer_authority(state, 0)
 	state.revealed_correct_option = state.current_question.correct_option
 	state.status_text = "Respuesta correcta mostrada en pantalla"
 	AppState.apply_game_state(state)
@@ -230,12 +246,14 @@ func reopen_current_question() -> void:
 	var state: GameState = AppState.current_state.duplicate_state()
 	state.phase = Enums.GamePhase.QUESTION
 	state.answers_enabled = true
-	state.active_team_id = 0
+	_set_answer_authority(state, 0)
 	state.locked_team_id = 0
 	state.revealed_correct_option = ""
 	state.last_selected_option = ""
 	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
 	state.correction_applied = false
+	state.buzzer_winner_team_id = 0
+	state.rebote_excluded_team_ids = {}
 	state.status_text = "Ronda reabierta. Se limpió la respuesta tomada."
 	AppState.apply_game_state(state)
 	_save_presenter_session()
@@ -246,13 +264,15 @@ func reset_team_locks() -> void:
 	if AppState.selected_role != Enums.AppRole.PRESENTER:
 		return
 	var state: GameState = AppState.current_state.duplicate_state()
-	for team_id in TEAM_IDS:
+	for team_id in _get_team_ids():
 		state.locked_out_team_ids[team_id] = false
-	state.active_team_id = 0
+	_set_answer_authority(state, 0)
 	state.locked_team_id = 0
 	state.last_selected_option = ""
 	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
 	state.correction_applied = false
+	state.buzzer_winner_team_id = 0
+	state.rebote_excluded_team_ids = {}
 	state.revealed_correct_option = ""
 	if not state.current_question.text.is_empty():
 		state.phase = Enums.GamePhase.QUESTION
@@ -275,8 +295,10 @@ func toggle_team_lock(team_id: int) -> void:
 	var state: GameState = AppState.current_state.duplicate_state()
 	var next_locked: bool = not state.is_team_locked_out(team_id)
 	state.locked_out_team_ids[team_id] = next_locked
-	if next_locked and state.active_team_id == team_id:
-		state.active_team_id = 0
+	if next_locked and state.answer_authority_team_id == team_id:
+		_set_answer_authority(state, 0)
+		if state.buzzer_winner_team_id == team_id:
+			state.buzzer_winner_team_id = 0
 	state.status_text = "Equipo %d %s por decisión del presentador." % [
 		team_id,
 		"bloqueado" if next_locked else "rehabilitado",
@@ -294,8 +316,10 @@ func force_active_team(team_id: int) -> void:
 	if AppState.current_state.current_question.text.is_empty() or AppState.current_state.phase != Enums.GamePhase.QUESTION:
 		return
 	var state: GameState = AppState.current_state.duplicate_state()
-	if state.active_team_id == team_id:
-		state.active_team_id = 0
+	if state.answer_authority_team_id == team_id:
+		_set_answer_authority(state, 0)
+		if state.buzzer_winner_team_id == team_id:
+			state.buzzer_winner_team_id = 0
 		state.status_text = "Turno manual liberado. Pregunta abierta para todos."
 		AppState.apply_game_state(state)
 		_save_presenter_session()
@@ -303,7 +327,7 @@ func force_active_team(team_id: int) -> void:
 		return
 	if state.is_team_locked_out(team_id):
 		state.locked_out_team_ids[team_id] = false
-	state.active_team_id = team_id
+	_set_answer_authority(state, team_id)
 	state.answers_enabled = true
 	state.status_text = "Turno manual reservado para el equipo %d." % team_id
 	AppState.apply_game_state(state)
@@ -357,14 +381,16 @@ func load_selected_minigame() -> void:
 	var state: GameState = AppState.current_state.duplicate_state()
 	state.phase = Enums.GamePhase.MINIGAME
 	state.current_minigame = mg
-	state.active_team_id = 0
+	_set_answer_authority(state, 0)
 	state.locked_team_id = 0
-	state.locked_out_team_ids = {1: false, 2: false, 3: false}
+	state.locked_out_team_ids = _build_default_locks()
 	state.answers_enabled = false
 	state.revealed_correct_option = ""
 	state.last_selected_option = ""
 	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
 	state.correction_applied = false
+	state.buzzer_winner_team_id = 0
+	state.rebote_excluded_team_ids = {}
 	state.status_text = "Minijuego activo: %s" % mg.nombre
 	_used_minigame_ids[mg.id] = true
 	AppState.apply_game_state(state)
@@ -391,14 +417,16 @@ func load_random_minigame() -> void:
 	var state: GameState = AppState.current_state.duplicate_state()
 	state.phase = Enums.GamePhase.MINIGAME
 	state.current_minigame = mg
-	state.active_team_id = 0
+	_set_answer_authority(state, 0)
 	state.locked_team_id = 0
-	state.locked_out_team_ids = {1: false, 2: false, 3: false}
+	state.locked_out_team_ids = _build_default_locks()
 	state.answers_enabled = false
 	state.revealed_correct_option = ""
 	state.last_selected_option = ""
 	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
 	state.correction_applied = false
+	state.buzzer_winner_team_id = 0
+	state.rebote_excluded_team_ids = {}
 	state.status_text = "Minijuego aleatorio: %s" % mg.nombre
 	_used_minigame_ids[mg.id] = true
 	AppState.apply_game_state(state)
@@ -416,7 +444,100 @@ func end_current_minigame() -> void:
 	var state: GameState = AppState.current_state.duplicate_state()
 	state.phase = Enums.GamePhase.IDLE
 	state.current_minigame = MiniGame.new()
+	state.current_question = Question.new()
+	state.answers_enabled = false
+	state.answer_authority_team_id = 0
+	state.active_team_id = 0
+	state.locked_team_id = 0
+	state.last_selected_option = ""
+	state.revealed_correct_option = ""
+	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
+	state.correction_applied = false
+	state.buzzer_winner_team_id = 0
+	state.rebote_excluded_team_ids = {}
 	state.status_text = "Minijuego finalizado"
+	AppState.apply_game_state(state)
+	_save_presenter_session()
+	_publish_state(state)
+
+
+func activate_rebote() -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	var state: GameState = AppState.current_state.duplicate_state()
+	if state.phase != Enums.GamePhase.LOCKED:
+		return
+	if state.answer_feedback_status != Enums.AnswerFeedbackStatus.INCORRECT:
+		return
+	if _teams_available_for_rebote(state) == 0:
+		return
+	state.phase = Enums.GamePhase.QUESTION
+	state.answers_enabled = true
+	_set_answer_authority(state, 0)
+	state.locked_team_id = 0
+	state.last_selected_option = ""
+	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
+	state.correction_applied = false
+	state.buzzer_winner_team_id = 0
+	state.status_text = "🔄 Rebote activado — equipos excluidos no pueden pulsar."
+	AppState.apply_game_state(state)
+	_save_presenter_session()
+	_publish_state(state)
+
+
+func override_answer_correct() -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	var state: GameState = AppState.current_state.duplicate_state()
+	if state.phase != Enums.GamePhase.LOCKED or state.locked_team_id <= 0:
+		return
+	if state.answer_feedback_status == Enums.AnswerFeedbackStatus.CORRECT:
+		return
+	# If auto-judge previously applied penalty (INCORRECT), reverse it
+	if state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT:
+		var penalty: int = _get_points_incorrect()
+		if penalty != 0:
+			var reversed: int = int(state.scores.get(state.locked_team_id, 0)) - penalty
+			state.scores[state.locked_team_id] = reversed
+			MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": reversed}, false, COMMAND_QOS)
+		# Remove from rebote exclusion
+		state.rebote_excluded_team_ids.erase(state.locked_team_id)
+	state.answer_feedback_status = Enums.AnswerFeedbackStatus.CORRECT
+	state.correction_applied = true
+	var points: int = _get_points_correct()
+	var new_total: int = int(state.scores.get(state.locked_team_id, 0)) + points
+	state.scores[state.locked_team_id] = new_total
+	state.status_text = "✅ Override: Equipo %d marcado CORRECTO (+%d)" % [state.locked_team_id, points]
+	AppState.apply_game_state(state)
+	MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": new_total}, false, COMMAND_QOS)
+	_save_presenter_session()
+	_publish_state(state)
+
+
+func override_answer_incorrect() -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	var state: GameState = AppState.current_state.duplicate_state()
+	if state.phase != Enums.GamePhase.LOCKED or state.locked_team_id <= 0:
+		return
+	if state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT:
+		return
+	# If auto-judge previously awarded points (CORRECT), subtract them
+	if state.answer_feedback_status == Enums.AnswerFeedbackStatus.CORRECT:
+		var points_to_subtract: int = _get_points_correct()
+		var old_total: int = int(state.scores.get(state.locked_team_id, 0))
+		state.scores[state.locked_team_id] = maxi(0, old_total - points_to_subtract)
+		MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": state.scores[state.locked_team_id]}, false, COMMAND_QOS)
+	# Apply penalty for incorrect if configured
+	var penalty: int = _get_points_incorrect()
+	if penalty != 0:
+		var total_after_penalty: int = int(state.scores.get(state.locked_team_id, 0)) + penalty
+		state.scores[state.locked_team_id] = total_after_penalty
+		MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": total_after_penalty}, false, COMMAND_QOS)
+	state.answer_feedback_status = Enums.AnswerFeedbackStatus.INCORRECT
+	state.correction_applied = true
+	state.rebote_excluded_team_ids[state.locked_team_id] = true
+	state.status_text = "❌ Override: Equipo %d marcado INCORRECTO" % state.locked_team_id
 	AppState.apply_game_state(state)
 	_save_presenter_session()
 	_publish_state(state)
@@ -446,6 +567,22 @@ func submit_answer(option: String) -> void:
 			"equipo": AppState.selected_team_id,
 			"opcion": option,
 		},
+		false,
+		COMMAND_QOS
+	)
+
+
+func submit_buzzer() -> void:
+	if AppState.selected_role != Enums.AppRole.CONTESTANT:
+		return
+	if AppState.selected_team_id <= 0:
+		return
+	if not _can_buzz():
+		return
+
+	MqttBus.publish_json(
+		MessageTopics.BUZZER,
+		{"equipo": AppState.selected_team_id},
 		false,
 		COMMAND_QOS
 	)
@@ -481,24 +618,50 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 			if typeof(payload) != TYPE_DICTIONARY:
 				return
 			var state: GameState = AppState.current_state.duplicate_state()
-			if state.phase != Enums.GamePhase.QUESTION or not state.answers_enabled or not state.last_selected_option.is_empty():
+			if state.phase != Enums.GamePhase.QUESTION or not state.answers_enabled:
 				return
-			state.locked_team_id = int(payload.get("equipo", 0))
-			if state.locked_team_id <= 0:
+			var answering_team_id: int = int(payload.get("equipo", 0))
+			if not state.can_team_answer(answering_team_id):
 				return
-			if not state.can_team_answer(state.locked_team_id):
+			var selected_option: String = String(payload.get("opcion", "")).to_upper()
+			if selected_option.is_empty():
 				return
+
+			# ── Auto-judge ─────────────────────────────────────────
+			var correct_option: String = state.current_question.correct_option.to_upper()
+			var is_correct: bool = (selected_option == correct_option)
+
 			state.phase = Enums.GamePhase.LOCKED
 			state.answers_enabled = false
-			state.active_team_id = state.locked_team_id
-			state.last_selected_option = String(payload.get("opcion", ""))
-			state.answer_feedback_status = Enums.AnswerFeedbackStatus.PENDING
-			state.correction_applied = false
-			state.status_text = "Equipo %d respondió primero. Pregunta cerrada hasta corrección." % state.locked_team_id
-			AppState.apply_game_state(state)
-			emit_signal("answer_received", state.locked_team_id, state.last_selected_option)
-			_save_presenter_session()
-			_publish_state(state)
+			_set_answer_authority(state, 0)
+			state.locked_team_id = answering_team_id
+			state.last_selected_option = selected_option
+			state.correction_applied = true
+
+			if is_correct:
+				state.answer_feedback_status = Enums.AnswerFeedbackStatus.CORRECT
+				var points: int = _get_points_correct()
+				var new_total: int = int(state.scores.get(answering_team_id, 0)) + points
+				state.scores[answering_team_id] = new_total
+				state.status_text = "✅ Equipo %d respondió %s — CORRECTA (+%d)" % [answering_team_id, selected_option, points]
+				AppState.apply_game_state(state)
+				MqttBus.publish_json(MessageTopics.POINTS, {"equipo": answering_team_id, "total": new_total}, false, COMMAND_QOS)
+				_save_presenter_session()
+				_publish_state(state)
+				emit_signal("answer_received", answering_team_id, selected_option)
+			else:
+				state.answer_feedback_status = Enums.AnswerFeedbackStatus.INCORRECT
+				state.rebote_excluded_team_ids[answering_team_id] = true
+				var penalty: int = _get_points_incorrect()
+				if penalty != 0:
+					var total_after_penalty: int = int(state.scores.get(answering_team_id, 0)) + penalty
+					state.scores[answering_team_id] = total_after_penalty
+					MqttBus.publish_json(MessageTopics.POINTS, {"equipo": answering_team_id, "total": total_after_penalty}, false, COMMAND_QOS)
+				state.status_text = "❌ Equipo %d respondió %s — INCORRECTA (correcta: %s)" % [answering_team_id, selected_option, correct_option]
+				AppState.apply_game_state(state)
+				_save_presenter_session()
+				_publish_state(state)
+				emit_signal("answer_received", answering_team_id, selected_option)
 		MessageTopics.TABLET_LOCK:
 			if typeof(payload) != TYPE_BOOL:
 				return
@@ -509,6 +672,8 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 			elif lock_state.phase == Enums.GamePhase.QUESTION:
 				lock_state.status_text = "Respuesta en tablets reabierta por comando externo."
 			AppState.apply_game_state(lock_state)
+		MessageTopics.BUZZER:
+			_on_buzzer_message(payload)
 
 
 func _on_questions_loaded(_count: int) -> void:
@@ -593,14 +758,16 @@ func _apply_presenter_question(question: Question, status_text: String) -> void:
 	var state: GameState = AppState.current_state.duplicate_state()
 	state.phase = Enums.GamePhase.QUESTION
 	state.current_question = question
-	state.active_team_id = 0
+	_set_answer_authority(state, 0)
 	state.locked_team_id = 0
-	state.locked_out_team_ids = {1: false, 2: false, 3: false}
+	state.locked_out_team_ids = _build_default_locks()
 	state.answers_enabled = true
 	state.revealed_correct_option = ""
 	state.last_selected_option = ""
 	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
 	state.correction_applied = false
+	state.buzzer_winner_team_id = 0
+	state.rebote_excluded_team_ids = {}
 	state.status_text = status_text
 	if question.id > 0:
 		_used_question_ids[question.id] = true
@@ -652,17 +819,19 @@ func _restore_presenter_session() -> void:
 				did_restore = true
 
 	_sync_persisted_question_reference(restored_state)
-	AppState.apply_game_state(restored_state)
-	_ensure_presenter_selection()
-	emit_signal("presenter_selector_changed", _selected_round_name, _selected_question_id)
-	emit_signal("used_questions_changed")
 
 	if did_restore:
 		if restored_state.status_text.is_empty():
 			restored_state.status_text = "Sesión local recuperada"
 		else:
 			restored_state.status_text = "Sesión local recuperada · %s" % restored_state.status_text
-		AppState.apply_game_state(restored_state)
+
+	AppState.apply_game_state(restored_state)
+	_ensure_presenter_selection()
+	emit_signal("presenter_selector_changed", _selected_round_name, _selected_question_id)
+	emit_signal("used_questions_changed")
+
+	if did_restore:
 		_publish_or_defer_presenter_state(restored_state)
 
 
@@ -740,5 +909,56 @@ func _set_locked_answer_feedback(feedback_status: int) -> void:
 	_publish_state(state)
 
 
+func teams_available_for_rebote() -> int:
+	return _teams_available_for_rebote(AppState.current_state)
+
+
 func _is_valid_team_id(team_id: int) -> bool:
-	return TEAM_IDS.has(team_id)
+		return _get_team_ids().has(team_id)
+
+
+func _teams_available_for_rebote(state: GameState) -> int:
+	var count: int = 0
+	for tid in _get_team_ids():
+		if not state.is_team_excluded_from_rebote(tid) and not state.is_team_locked_out(tid):
+			count += 1
+	return count
+
+
+func _can_buzz() -> bool:
+	return AppState.current_state.phase == Enums.GamePhase.QUESTION \
+		and AppState.current_state.answers_enabled \
+		and AppState.current_state.answer_authority_team_id == 0 \
+		and not AppState.current_state.is_team_locked_out(AppState.selected_team_id) \
+		and not AppState.current_state.is_team_excluded_from_rebote(AppState.selected_team_id) \
+		and AppState.current_state.locked_team_id == 0
+
+
+func _on_buzzer_message(payload: Variant) -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	if typeof(payload) != TYPE_DICTIONARY:
+		return
+	var state: GameState = AppState.current_state.duplicate_state()
+	if state.phase != Enums.GamePhase.QUESTION or not state.answers_enabled or state.answer_authority_team_id != 0:
+		return
+	var team_id: int = int(payload.get("equipo", 0))
+	if not _is_valid_team_id(team_id):
+		return
+	if state.is_team_locked_out(team_id):
+		return
+	if state.is_team_excluded_from_rebote(team_id):
+		return
+	state.buzzer_winner_team_id = team_id
+	_set_answer_authority(state, team_id)
+	state.status_text = "Equipo %d pulsó primero. Esperando respuesta." % team_id
+	AppState.apply_game_state(state)
+	_save_presenter_session()
+	_publish_state(state)
+
+
+func _set_answer_authority(state: GameState, team_id: int) -> void:
+	if team_id > 0:
+		state.rebote_excluded_team_ids.erase(team_id)
+	state.answer_authority_team_id = team_id
+	state.active_team_id = team_id
