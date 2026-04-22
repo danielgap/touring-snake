@@ -1,3 +1,6 @@
 .godot/
 *.out.log
 *.err.log
+*.uid
+android/build/
+build/

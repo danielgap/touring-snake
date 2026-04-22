@@ -156,7 +156,7 @@ func _hide_removed_nodes() -> void:
 	if load_selected_btn != null:
 		load_selected_btn.visible = false
 	if clear_session_btn != null:
-		clear_session_btn.visible = false
+		clear_session_btn.visible = true
 	_reparent_from_manual_section()
 	_create_skip_button()
 
@@ -509,6 +509,8 @@ func _connect_signals() -> void:
 	# Round actions
 	reopen_btn.pressed.connect(_on_reopen_or_rebote)
 	reset_locks_btn.pressed.connect(GameService.reset_team_locks)
+	if clear_session_btn != null:
+		clear_session_btn.pressed.connect(GameService.reset_game)
 	q_reveal_btn.pressed.connect(GameService.reveal_current_answer)
 	locked_reveal_btn.pressed.connect(GameService.reveal_current_answer)
 

@@ -295,6 +295,31 @@ func reset_team_locks() -> void:
 	_publish_state(state)
 
 
+func reset_game() -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	# Reset all state to fresh game
+	var fresh_state: GameState = GameState.new()
+	var count: int = ShowConfig.get_team_count() if ShowConfig else 3
+	for team_id in range(1, count + 1):
+		fresh_state.scores[team_id] = 0
+	fresh_state.phase = Enums.GamePhase.IDLE
+	fresh_state.status_text = "Partida reiniciada"
+	AppState.apply_game_state(fresh_state)
+	# Clear used questions
+	_used_question_ids.clear()
+	_used_minigame_ids.clear()
+	_current_question_index = -1
+	_selected_round_name = ""
+	_selected_question_id = 0
+	_selected_minigame_id = 0
+	emit_signal("presenter_selector_changed", _selected_round_name, _selected_question_id)
+	emit_signal("used_questions_changed")
+	# Delete session so next start is clean
+	_delete_presenter_session_file()
+	_publish_state(fresh_state)
+
+
 func toggle_team_lock(team_id: int) -> void:
 	if AppState.selected_role != Enums.AppRole.PRESENTER:
 		return
