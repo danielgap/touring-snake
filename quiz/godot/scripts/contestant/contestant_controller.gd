@@ -451,6 +451,14 @@ func _render_state(state: GameState) -> void:
 	# ── Idle scoreboard ───────────────────────────────────────────
 	_render_idle_scoreboard(state)
 
+	# ── Minigame content visibility ────────────────────────────────
+	if state.phase == Enums.GamePhase.MINIGAME and state.current_minigame.id > 0:
+		%QuestionCard.visible = false
+		feedback_card.visible = false
+	elif state.phase != Enums.GamePhase.IDLE:
+		%QuestionCard.visible = true
+		feedback_card.visible = true
+
 	# ── Animations on state transitions ────────────────────────────
 	if can_answer_changed:
 		if can_answer:
@@ -540,7 +548,7 @@ func _feedback_text(state: GameState, can_answer: bool) -> String:
 	if AppState.selected_team_id <= 0:
 		return "Elegí un equipo antes de responder."
 	if state.phase == Enums.GamePhase.MINIGAME:
-		return "Minijuego en curso · El presentador asignará puntaje manualmente."
+		return ""
 	if state.is_team_locked_out(AppState.selected_team_id):
 		return "Tablet bloqueada por el presentador."
 	if state.phase == Enums.GamePhase.REVEAL:
@@ -599,7 +607,7 @@ func _feedback_summary(state: GameState) -> String:
 # ═══════════════════════════════════════════════════════════════════
 
 func _create_minigame_card() -> void:
-	var root_vbox: VBoxContainer = get_node_or_null("MarginContainer/RootVBox")
+	var root_vbox: VBoxContainer = get_node_or_null("RootMargin/RootVBox")
 	if root_vbox == null:
 		push_warning("ContestantController: RootVBox not found for minigame card")
 		return
@@ -955,9 +963,9 @@ func _create_idle_scoreboard() -> void:
 	_idle_scoreboard.add_child(_idle_team_card)
 
 	# Add to scene after team_badge (top section)
-	var main_vbox: VBoxContainer = get_node_or_null("MarginContainer/RootVBox/MainVBox")
-	if main_vbox != null:
-		main_vbox.add_child(_idle_scoreboard)
+	var root_vbox: VBoxContainer = get_node_or_null("RootMargin/RootVBox")
+	if root_vbox != null:
+		root_vbox.add_child(_idle_scoreboard)
 
 	_idle_scoreboard.visible = false
 
