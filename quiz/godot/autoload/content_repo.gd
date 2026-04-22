@@ -16,12 +16,8 @@ var last_error: String = ""
 func _ready() -> void:
 	load_questions()
 	load_minigames()
-	# If ShowConfig overrides questions file, use that
+	# Connect to runtime config changes (initial load is handled by load_questions/load_minigames above)
 	if ShowConfig:
-		var configured_path: String = ShowConfig.get_questions_file()
-		if not configured_path.is_empty() and configured_path != QUESTIONS_PATH:
-			if FileAccess.file_exists(configured_path):
-				_load_questions_from(configured_path)
 		ShowConfig.questions_file_changed.connect(_on_questions_file_changed)
 		ShowConfig.minigames_file_changed.connect(_on_minigames_file_changed)
 

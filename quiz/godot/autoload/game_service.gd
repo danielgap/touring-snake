@@ -240,7 +240,7 @@ func reveal_current_answer() -> void:
 	state.phase = Enums.GamePhase.REVEAL
 	state.answers_enabled = false
 	_set_answer_authority(state, 0)
-	state.revealed_correct_option = state.current_question.correct_option
+	state.revealed_correct_option = state.current_question.correct_option.to_upper()
 	state.status_text = "Respuesta correcta mostrada en pantalla"
 	AppState.apply_game_state(state)
 	_save_presenter_session()
@@ -514,7 +514,7 @@ func override_answer_correct() -> void:
 	if state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT:
 		var penalty: int = _get_points_incorrect()
 		if penalty != 0:
-			var reversed: int = int(state.scores.get(state.locked_team_id, 0)) - penalty
+			var reversed: int = maxi(0, int(state.scores.get(state.locked_team_id, 0)) - penalty)
 			state.scores[state.locked_team_id] = reversed
 			MqttBus.publish_json(MessageTopics.POINTS, {"equipo": state.locked_team_id, "total": reversed}, false, COMMAND_QOS)
 		# Remove from rebote exclusion
@@ -646,14 +646,21 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 
 			# ── Auto-judge ─────────────────────────────────────────
 			var correct_option: String = state.current_question.correct_option.to_upper()
-			var is_correct: bool = (selected_option == correct_option)
+			var is_correct: bool = false
+			if correct_option.is_empty():
+				# Malformed question — skip auto-judge, let presenter decide
+				is_correct = false
+				state.correction_applied = false
+				state.status_text = "⚠️ Pregunta sin respuesta correcta definida — corregir manualmente"
+			else:
+				is_correct = (selected_option == correct_option)
+				state.correction_applied = true
 
 			state.phase = Enums.GamePhase.LOCKED
 			state.answers_enabled = false
 			_set_answer_authority(state, 0)
 			state.locked_team_id = answering_team_id
 			state.last_selected_option = selected_option
-			state.correction_applied = true
 
 			if is_correct:
 				state.answer_feedback_status = Enums.AnswerFeedbackStatus.CORRECT

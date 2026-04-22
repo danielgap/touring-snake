@@ -102,6 +102,7 @@ autowrap_mode = 3
 text = "Esperando pregunta del presentador..."
 
 [node name="AnswersGrid" type="GridContainer" parent="RootMargin/RootVBox"]
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 1.0

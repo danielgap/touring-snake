@@ -24,8 +24,8 @@ func _ready() -> void:
 
 
 func _on_role_selected(role: int, team_id: int) -> void:
-	_swap_role_scene(role)
 	GameService.initialize_role(role, team_id)
+	_swap_role_scene(role)
 	role_select.visible = false
 
 

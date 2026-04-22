@@ -35,7 +35,10 @@ func apply_game_state(game_state: GameState) -> void:
 
 
 func reset_scores() -> void:
-	current_state.scores = {1: 0, 2: 0, 3: 0}
+	current_state.scores = {}
+	var count: int = ShowConfig.get_team_count() if ShowConfig else 3
+	for team_id in range(1, count + 1):
+		current_state.scores[team_id] = 0
 	emit_signal("scores_changed", current_state.scores.duplicate(true))
 	emit_signal("game_state_changed", current_state)
 

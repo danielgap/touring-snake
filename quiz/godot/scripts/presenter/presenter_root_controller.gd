@@ -617,6 +617,11 @@ func _render_scores(scores: Dictionary) -> void:
 # ═══════════════════════════════════════════════════════════════════
 
 func _update_phase_panels(state: GameState) -> void:
+	# Reset selector override BEFORE visibility check — prevents 1-frame
+	# flash of idle panel when phase transitions away from REVEAL.
+	if state.phase != Enums.GamePhase.REVEAL:
+		_showing_selector = false
+
 	var show_idle := false
 	var show_question := false
 	var show_locked := false
@@ -645,10 +650,6 @@ func _update_phase_panels(state: GameState) -> void:
 	locked_panel.visible = show_locked
 	reveal_panel.visible = show_reveal
 	minigame_panel.visible = show_minigame
-
-	# Reset selector override when phase changes away from REVEAL
-	if state.phase != Enums.GamePhase.REVEAL:
-		_showing_selector = false
 
 
 func _on_next_question() -> void:
