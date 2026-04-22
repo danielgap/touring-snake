@@ -35,15 +35,15 @@ func apply_game_state(game_state: GameState) -> void:
 
 
 func reset_scores() -> void:
-	current_state.scores = {}
+	var state: GameState = current_state.duplicate_state()
+	state.scores = {}
 	var count: int = ShowConfig.get_team_count() if ShowConfig else 3
 	for team_id in range(1, count + 1):
-		current_state.scores[team_id] = 0
-	emit_signal("scores_changed", current_state.scores.duplicate(true))
-	emit_signal("game_state_changed", current_state)
+		state.scores[team_id] = 0
+	apply_game_state(state)
 
 
 func set_score(team_id: int, total: int) -> void:
-	current_state.scores[team_id] = total
-	emit_signal("scores_changed", current_state.scores.duplicate(true))
-	emit_signal("game_state_changed", current_state)
+	var state: GameState = current_state.duplicate_state()
+	state.scores[team_id] = maxi(0, total)
+	apply_game_state(state)

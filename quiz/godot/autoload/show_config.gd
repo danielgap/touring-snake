@@ -59,7 +59,9 @@ func reset_to_defaults() -> void:
 
 func _delete_user_config() -> void:
 	if FileAccess.file_exists(USER_CONFIG_PATH):
-		DirAccess.open("user://").remove("show_config.json")
+		var user_dir: DirAccess = DirAccess.open("user://")
+		if user_dir != null:
+			user_dir.remove("show_config.json")
 
 
 func _read_json_file(path: String) -> Dictionary:

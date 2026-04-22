@@ -351,16 +351,9 @@ func _render_state(state: GameState) -> void:
 		status_color = STATUS_WAITING
 	elif state.phase == Enums.GamePhase.LOCKED:
 		if state.locked_team_id == team_id:
-			match state.answer_feedback_status:
-				Enums.AnswerFeedbackStatus.CORRECT:
-					status_text = "CORRECTA"
-					status_color = STATUS_ACTIVE
-				Enums.AnswerFeedbackStatus.INCORRECT:
-					status_text = "INCORRECTA"
-					status_color = STATUS_LOCKED
-				_:
-					status_text = "ENVIADA"
-					status_color = STATUS_WAITING
+			# LOCKED: never leak result — always show neutral ENVIADA
+			status_text = "ENVIADA"
+			status_color = STATUS_WAITING
 		else:
 			status_text = "TOMADA"
 			status_color = STATUS_WAITING
@@ -424,12 +417,9 @@ func _render_state(state: GameState) -> void:
 		elif is_reveal:
 			# Dim other answers
 			_apply_answer_button(btn, Color("#0a0e16"), Color("#1a1f2e"))
-		elif is_locked_me and state.answer_feedback_status == Enums.AnswerFeedbackStatus.CORRECT and letter == my_answer:
-			# LOCKED + correct — green glow
-			_apply_answer_highlight(btn, STATUS_ACTIVE, Color(STATUS_ACTIVE.r * 0.2, STATUS_ACTIVE.g * 0.2, STATUS_ACTIVE.b * 0.2, 1.0))
-		elif is_locked_me and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT and letter == my_answer:
-			# LOCKED + incorrect — red border only
-			_apply_answer_border_highlight(btn, STATUS_LOCKED)
+		elif is_locked_me and letter == my_answer:
+			# LOCKED: neutral amber highlight — never leak correct/incorrect
+			_apply_answer_highlight(btn, STATUS_WAITING, Color(STATUS_WAITING.r * 0.2, STATUS_WAITING.g * 0.2, STATUS_WAITING.b * 0.2, 1.0))
 		elif is_locked_me:
 			# LOCKED + other answers — dim
 			_apply_answer_button(btn, Color("#0a0e16"), Color("#1a1f2e"))
@@ -501,19 +491,10 @@ func _update_feedback_style(state: GameState, can_answer: bool) -> void:
 		bg = Color(STATUS_LOCKED.r * 0.12, STATUS_LOCKED.g * 0.12, STATUS_LOCKED.b * 0.12, 1.0)
 		text_color = STATUS_LOCKED
 	elif state.phase == Enums.GamePhase.LOCKED and state.locked_team_id == team_id:
-		match state.answer_feedback_status:
-			Enums.AnswerFeedbackStatus.CORRECT:
-				border_color = STATUS_ACTIVE
-				bg = Color(STATUS_ACTIVE.r * 0.2, STATUS_ACTIVE.g * 0.2, STATUS_ACTIVE.b * 0.2, 1.0)
-				text_color = STATUS_ACTIVE
-			Enums.AnswerFeedbackStatus.INCORRECT:
-				border_color = STATUS_LOCKED
-				bg = Color(STATUS_LOCKED.r * 0.2, STATUS_LOCKED.g * 0.2, STATUS_LOCKED.b * 0.2, 1.0)
-				text_color = STATUS_LOCKED
-			_:
-				border_color = STATUS_WAITING
-				bg = Color(STATUS_WAITING.r * 0.12, STATUS_WAITING.g * 0.12, STATUS_WAITING.b * 0.12, 1.0)
-				text_color = STATUS_WAITING
+		# LOCKED: neutral amber — never leak result
+		border_color = STATUS_WAITING
+		bg = Color(STATUS_WAITING.r * 0.12, STATUS_WAITING.g * 0.12, STATUS_WAITING.b * 0.12, 1.0)
+		text_color = STATUS_WAITING
 	elif state.phase == Enums.GamePhase.REVEAL:
 		border_color = ACCENT_BLUE
 		bg = Color(ACCENT_BLUE.r * 0.12, ACCENT_BLUE.g * 0.12, ACCENT_BLUE.b * 0.12, 1.0)
@@ -522,12 +503,8 @@ func _update_feedback_style(state: GameState, can_answer: bool) -> void:
 	var style := _make_card(bg, border_color, 2)
 	if text_color != TEXT_DIM:
 		var glow_mult: float = 0.25
-		if state.phase == Enums.GamePhase.LOCKED and state.locked_team_id == team_id:
-			match state.answer_feedback_status:
-				Enums.AnswerFeedbackStatus.CORRECT, Enums.AnswerFeedbackStatus.INCORRECT:
-					glow_mult = 0.5
 		style.shadow_color = Color(border_color.r, border_color.g, border_color.b, glow_mult)
-		style.shadow_size = 8 if glow_mult > 0.3 else 4
+		style.shadow_size = 4
 	feedback_card.add_theme_stylebox_override("panel", style)
 	feedback_label.add_theme_color_override("font_color", text_color)
 

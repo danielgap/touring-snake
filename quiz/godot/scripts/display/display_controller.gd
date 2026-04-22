@@ -729,16 +729,9 @@ func _render_phase(state: GameState) -> void:
 				phase_label.text = "EN JUEGO"
 				phase_color = PHASE_QUESTION_COLOR
 		Enums.GamePhase.LOCKED:
-			match state.answer_feedback_status:
-				Enums.AnswerFeedbackStatus.CORRECT:
-					phase_label.text = "CORRECTA"
-					phase_color = PHASE_CORRECT_COLOR
-				Enums.AnswerFeedbackStatus.INCORRECT:
-					phase_label.text = "INCORRECTA"
-					phase_color = PHASE_INCORRECT_COLOR
-				_:
-					phase_label.text = "RESPUESTA"
-					phase_color = PHASE_LOCKED_COLOR
+			# LOCKED: never leak result to audience — show neutral text
+			phase_label.text = "RESPUESTA TOMADA"
+			phase_color = PHASE_LOCKED_COLOR
 		Enums.GamePhase.REVEAL:
 			phase_label.text = "REVELADA"
 			phase_color = PHASE_REVEAL_COLOR
@@ -866,6 +859,12 @@ func _render_feedback(state: GameState) -> void:
 	if state.locked_team_id <= 0:
 		feedback_label.text = "Aguardando respuesta..."
 		feedback_label.add_theme_color_override("font_color", TEXT_MUTED)
+		return
+
+	# LOCKED: never leak result to audience on projector
+	if state.phase == Enums.GamePhase.LOCKED:
+		feedback_label.text = "%s — RESPUESTA TOMADA" % ShowConfig.get_team_name(state.locked_team_id).to_upper()
+		feedback_label.add_theme_color_override("font_color", PHASE_LOCKED_COLOR)
 		return
 
 	match state.answer_feedback_status:

@@ -477,6 +477,7 @@ func activate_rebote() -> void:
 	_set_answer_authority(state, 0)
 	state.locked_team_id = 0
 	state.last_selected_option = ""
+	state.revealed_correct_option = ""
 	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
 	state.correction_applied = false
 	state.buzzer_winner_team_id = 0
@@ -595,8 +596,6 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 			_set_answer_authority(state, 0)
 			state.locked_team_id = answering_team_id
 			state.last_selected_option = selected_option
-			# Snapshot scores before judgment for correct override reversal
-			state.score_before_judgment[answering_team_id] = int(state.scores.get(answering_team_id, 0))
 
 			if is_correct:
 				state.answer_feedback_status = Enums.AnswerFeedbackStatus.CORRECT

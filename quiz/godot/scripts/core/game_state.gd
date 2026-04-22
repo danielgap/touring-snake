@@ -16,7 +16,6 @@ var answer_feedback_status: int = Enums.AnswerFeedbackStatus.NONE
 var correction_applied: bool = false
 var buzzer_winner_team_id: int = 0
 var rebote_excluded_team_ids: Dictionary = {}
-var score_before_judgment: Dictionary = {}
 var status_text: String = "Esperando inicialización"
 
 
@@ -37,7 +36,6 @@ func to_dict() -> Dictionary:
 		"correction_applied": correction_applied,
 		"buzzer_winner_team_id": buzzer_winner_team_id,
 		"rebote_excluded_team_ids": rebote_excluded_team_ids.duplicate(true),
-		"score_before_judgment": score_before_judgment.duplicate(true),
 		"status_text": status_text,
 	}
 
@@ -62,9 +60,6 @@ static func from_dict(data: Dictionary) -> GameState:
 	state.correction_applied = bool(data.get("correction_applied", false))
 	state.buzzer_winner_team_id = int(data.get("buzzer_winner_team_id", 0))
 	state.rebote_excluded_team_ids = _normalize_rebote_excluded(Dictionary(data.get("rebote_excluded_team_ids", {})))
-	var raw_sbj: Dictionary = Dictionary(data.get("score_before_judgment", {}))
-	for k: Variant in raw_sbj:
-		state.score_before_judgment[int(k)] = int(raw_sbj[k])
 	if authority_team_id > 0:
 		state.rebote_excluded_team_ids.erase(authority_team_id)
 	state.status_text = String(data.get("status_text", "Esperando inicialización"))

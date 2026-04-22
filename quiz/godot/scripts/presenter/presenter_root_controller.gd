@@ -91,6 +91,7 @@ const GLOW_SIZE := 6
 @onready var lock_info: Label = %LockInfo
 @onready var q_reveal_btn: Button = %QRevealBtn
 var skip_btn: Button
+var _reopen_reveal_btn: Button
 
 ## ── Locked panel ─────────────────────────────────────────────────
 @onready var locked_q_text: Label = %LockedQText
@@ -128,8 +129,6 @@ var _selector_syncing: bool = false
 var _mg_selector_syncing: bool = false
 var _showing_selector: bool = false
 var _showing_mg_preview: bool = false
-var _correct_btn_style: StyleBoxFlat
-var _incorrect_btn_style: StyleBoxFlat
 var _prev_phase: int = -1
 var _prev_scores: Dictionary = {}
 var _question_images_container: VBoxContainer
@@ -161,6 +160,7 @@ func _hide_removed_nodes() -> void:
 		clear_session_btn.visible = false
 	_reparent_from_manual_section()
 	_create_skip_button()
+	_create_reopen_reveal_button()
 
 
 func _reparent_from_manual_section() -> void:
@@ -214,20 +214,9 @@ func _apply_styles() -> void:
 	# ── Reveal card — green success glow ────────────────────────────
 	%RevealCard.add_theme_stylebox_override("panel", _make_glow_card(Color("#0a1f10"), PHASE_REVEAL_COLOR, 2, PHASE_REVEAL_COLOR, 8))
 
-	# ── Correct/Incorrect — emergency correction (dimmer, less prominent) ──
-	_correct_btn_style = _make_console_button_style(Color("#059669"), Color("#10b981"))
-	_incorrect_btn_style = _make_console_button_style(Color("#dc2626"), Color("#ef4444"))
-	correct_btn.add_theme_stylebox_override("normal", _correct_btn_style)
-	correct_btn.add_theme_stylebox_override("hover", _make_console_button_style(Color("#10b981"), Color("#34d399")))
-	correct_btn.add_theme_stylebox_override("pressed", _correct_btn_style)
-	correct_btn.add_theme_color_override("font_color", Color("#10b981"))
-	correct_btn.add_theme_color_override("font_hover_color", Color.WHITE)
-
-	incorrect_btn.add_theme_stylebox_override("normal", _incorrect_btn_style)
-	incorrect_btn.add_theme_stylebox_override("hover", _make_console_button_style(Color("#ef4444"), Color("#f87171")))
-	incorrect_btn.add_theme_stylebox_override("pressed", _incorrect_btn_style)
-	incorrect_btn.add_theme_color_override("font_color", Color("#ef4444"))
-	incorrect_btn.add_theme_color_override("font_hover_color", Color.WHITE)
+	# ── Correct/Incorrect buttons — hidden (auto-judge only)
+	correct_btn.visible = false
+	incorrect_btn.visible = false
 
 	# ── Action buttons — console style ──────────────────────────────
 	var all_buttons: Array[Button] = [
@@ -686,16 +675,9 @@ func _render_phase_label(state: GameState) -> void:
 				phase_label.text = "EN JUEGO%s" % round_suffix
 				phase_color = PHASE_QUESTION_COLOR
 		Enums.GamePhase.LOCKED:
-			match state.answer_feedback_status:
-				Enums.AnswerFeedbackStatus.CORRECT:
-					phase_label.text = "CORRECTA%s" % round_suffix
-					phase_color = PHASE_CORRECT_COLOR
-				Enums.AnswerFeedbackStatus.INCORRECT:
-					phase_label.text = "INCORRECTA%s" % round_suffix
-					phase_color = PHASE_INCORRECT_COLOR
-				_:
-					phase_label.text = "RESPUESTA%s" % round_suffix
-					phase_color = PHASE_LOCKED_COLOR
+			# LOCKED: show neutral label (result leaks to display/contestant if shown)
+			phase_label.text = "RESPUESTA%s" % round_suffix
+			phase_color = PHASE_LOCKED_COLOR
 		Enums.GamePhase.REVEAL:
 			phase_label.text = "REVELADA%s" % round_suffix
 			phase_color = PHASE_REVEAL_COLOR
@@ -813,13 +795,9 @@ func _render_question_panel(state: GameState) -> void:
 	else:
 		lock_info.text = ""
 
-	# Reveal button (unified — same guard as locked panel)
-	var needs_correction: bool = state.phase == Enums.GamePhase.LOCKED \
-		and state.locked_team_id > 0 \
-		and not state.correction_applied
+	# Reveal button — disabled when no question text or wrong phase
 	q_reveal_btn.disabled = state.current_question.text.is_empty() \
-		or state.phase not in [Enums.GamePhase.QUESTION, Enums.GamePhase.LOCKED] \
-		or needs_correction
+		or state.phase not in [Enums.GamePhase.QUESTION, Enums.GamePhase.LOCKED]
 
 	# Skip button
 	if skip_btn != null:
@@ -893,6 +871,14 @@ func _render_reveal_panel(state: GameState) -> void:
 
 	# Reveal minigame button
 	reveal_mg_btn.disabled = ContentRepo.get_minigame_count() == 0
+
+	# Rebote button in reveal panel — visible when answer was incorrect and teams remain
+	if _reopen_reveal_btn != null:
+		var rebote_available: bool = state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT \
+			and GameService.teams_available_for_rebote() > 0
+		_reopen_reveal_btn.visible = rebote_available
+		_reopen_reveal_btn.text = "🔄 Rebote" if rebote_available else "Reabrir ronda"
+		_reopen_reveal_btn.disabled = not rebote_available
 
 
 func _render_bottom_bar(state: GameState) -> void:
@@ -1415,3 +1401,18 @@ func _create_skip_button() -> void:
 	var q_actions: Node = question_panel.get_node_or_null("QActions")
 	if q_actions != null:
 		q_actions.add_child(skip_btn)
+
+
+func _create_reopen_reveal_button() -> void:
+	if reveal_panel == null:
+		return
+	_reopen_reveal_btn = Button.new()
+	_reopen_reveal_btn.name = "ReopenRevealBtn"
+	_reopen_reveal_btn.text = "🔄 Rebote"
+	_reopen_reveal_btn.custom_minimum_size = Vector2(0, 48)
+	_reopen_reveal_btn.set("theme_override_font_sizes/font_size", 18)
+	_apply_console_button(_reopen_reveal_btn)
+	_apply_accent_button(_reopen_reveal_btn, PHASE_LOCKED_COLOR)
+	_reopen_reveal_btn.visible = false
+	reveal_panel.add_child(_reopen_reveal_btn)
+	_reopen_reveal_btn.pressed.connect(_on_reopen_or_rebote)
