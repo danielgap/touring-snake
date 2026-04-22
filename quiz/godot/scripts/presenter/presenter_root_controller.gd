@@ -1024,7 +1024,6 @@ func _animate_panel_in(state: GameState) -> void:
 	if not target_panel:
 		return
 	target_panel.modulate.a = 0.0
-	target_panel.modulate.a = 0.0
 	var tw := create_tween()
 	tw.tween_property(target_panel, "modulate:a", 1.0, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 

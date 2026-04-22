@@ -395,14 +395,17 @@ func _render_state(state: GameState) -> void:
 	if correct_letter not in ["A", "B", "C", "D"]:
 		is_reveal = false
 
-	# During LOCKED: highlight own answer (green=correct, red=incorrect)
+	# During LOCKED: highlight own answer with neutral amber (no result leak)
 	var is_locked_me: bool = state.phase == Enums.GamePhase.LOCKED and state.locked_team_id == team_id
 	var my_answer: String = state.last_selected_option.to_upper() if is_locked_me else ""
 	if my_answer not in ["A", "B", "C", "D"]:
 		is_locked_me = false
 
 	# During REVEAL with incorrect answer: show my wrong + correct
-	var is_reveal_with_mine: bool = is_reveal and is_locked_me and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT
+	var is_reveal_with_mine: bool = is_reveal \
+		and state.locked_team_id == team_id \
+		and not state.last_selected_option.is_empty() \
+		and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT
 
 	var buttons: Dictionary = {"A": answer_a, "B": answer_b, "C": answer_c, "D": answer_d}
 

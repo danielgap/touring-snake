@@ -234,6 +234,14 @@ func reveal_current_answer() -> void:
 	_set_answer_authority(state, 0)
 	state.revealed_correct_option = state.current_question.correct_option.to_upper()
 	state.status_text = "Respuesta correcta mostrada en pantalla"
+	# Apply pending score deltas (deferred from auto-judge)
+	for team_id_key: Variant in state.pending_score_delta:
+		var tid: int = int(team_id_key)
+		var delta: int = int(state.pending_score_delta[team_id_key])
+		var new_total: int = maxi(0, int(state.scores.get(tid, 0)) + delta)
+		state.scores[tid] = new_total
+		MqttBus.publish_json(MessageTopics.POINTS, {"equipo": tid, "total": new_total}, false, COMMAND_QOS)
+	state.pending_score_delta = {}
 	AppState.apply_game_state(state)
 	_save_presenter_session()
 	_publish_state(state)
@@ -255,6 +263,7 @@ func reopen_current_question() -> void:
 	state.correction_applied = false
 	state.buzzer_winner_team_id = 0
 	state.rebote_excluded_team_ids = {}
+	state.pending_score_delta = {}
 	state.status_text = "Ronda reabierta. Se limpió la respuesta tomada."
 	AppState.apply_game_state(state)
 	_save_presenter_session()
@@ -481,6 +490,7 @@ func activate_rebote() -> void:
 	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
 	state.correction_applied = false
 	state.buzzer_winner_team_id = 0
+	state.pending_score_delta = {}
 	state.status_text = "🔄 Rebote activado — equipos excluidos no pueden pulsar."
 	AppState.apply_game_state(state)
 	_save_presenter_session()
@@ -600,11 +610,9 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 			if is_correct:
 				state.answer_feedback_status = Enums.AnswerFeedbackStatus.CORRECT
 				var points: int = _get_points_correct()
-				var new_total: int = int(state.scores.get(answering_team_id, 0)) + points
-				state.scores[answering_team_id] = new_total
+				state.pending_score_delta[answering_team_id] = points
 				state.status_text = "✅ Equipo %d respondió %s — CORRECTA (+%d)" % [answering_team_id, selected_option, points]
 				AppState.apply_game_state(state)
-				MqttBus.publish_json(MessageTopics.POINTS, {"equipo": answering_team_id, "total": new_total}, false, COMMAND_QOS)
 				_save_presenter_session()
 				_publish_state(state)
 				emit_signal("answer_received", answering_team_id, selected_option)
@@ -613,9 +621,7 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 				state.rebote_excluded_team_ids[answering_team_id] = true
 				var penalty: int = _get_points_incorrect()
 				if penalty != 0:
-					var total_after_penalty: int = maxi(0, int(state.scores.get(answering_team_id, 0)) + penalty)
-					state.scores[answering_team_id] = total_after_penalty
-					MqttBus.publish_json(MessageTopics.POINTS, {"equipo": answering_team_id, "total": total_after_penalty}, false, COMMAND_QOS)
+					state.pending_score_delta[answering_team_id] = penalty
 				state.status_text = "❌ Equipo %d respondió %s — INCORRECTA (correcta: %s)" % [answering_team_id, selected_option, correct_option]
 				AppState.apply_game_state(state)
 				_save_presenter_session()
@@ -729,6 +735,7 @@ func _apply_presenter_question(question: Question, status_text: String) -> void:
 	state.correction_applied = false
 	state.buzzer_winner_team_id = 0
 	state.rebote_excluded_team_ids = {}
+	state.pending_score_delta = {}
 	state.status_text = status_text
 	if question.id > 0:
 		_used_question_ids[question.id] = true
