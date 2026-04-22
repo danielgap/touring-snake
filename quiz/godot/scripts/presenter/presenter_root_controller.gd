@@ -673,6 +673,8 @@ func _on_incorrect_override() -> void:
 # ═══════════════════════════════════════════════════════════════════
 
 func _render_phase_label(state: GameState) -> void:
+	if phase_label == null:
+		return
 	var phase_color: Color = PHASE_IDLE_COLOR
 	var round_name: String = GameService.get_selected_round_name()
 	var round_suffix: String = ""
@@ -1286,8 +1288,8 @@ func _create_buzzer_indicator() -> void:
 
 			var p_label: Label = phase_pad.get_node_or_null("PhaseLabel")
 			if p_label != null:
-				phase_pad.remove_child(p_label)
-				phase_vbox.add_child(p_label)
+				p_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				p_label.reparent(phase_vbox)
 
 			phase_vbox.add_child(_buzzer_indicator)
 			phase_pad.add_child(phase_vbox)
