@@ -91,7 +91,6 @@ const GLOW_SIZE := 6
 @onready var lock_info: Label = %LockInfo
 @onready var q_reveal_btn: Button = %QRevealBtn
 var skip_btn: Button
-var _reopen_reveal_btn: Button
 
 ## ── Locked panel ─────────────────────────────────────────────────
 @onready var locked_q_text: Label = %LockedQText
@@ -160,7 +159,6 @@ func _hide_removed_nodes() -> void:
 		clear_session_btn.visible = false
 	_reparent_from_manual_section()
 	_create_skip_button()
-	_create_reopen_reveal_button()
 
 
 func _reparent_from_manual_section() -> void:
@@ -643,7 +641,7 @@ func _on_next_question() -> void:
 
 func _on_reopen_or_rebote() -> void:
 	var state: GameState = AppState.current_state
-	if state.phase in [Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL] \
+	if state.phase == Enums.GamePhase.LOCKED \
 		and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT \
 		and GameService.teams_available_for_rebote() > 0:
 		GameService.activate_rebote()
@@ -825,12 +823,12 @@ func _render_locked_panel(state: GameState) -> void:
 	correct_btn.visible = false
 	incorrect_btn.visible = false
 
-	# Rebote button — appears when answer was incorrect and teams remain
-	var rebote_available: bool = state.phase in [Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL] \
+	# Rebote button — only during LOCKED, BEFORE revealing the answer
+	var rebote_available: bool = state.phase == Enums.GamePhase.LOCKED \
 		and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT \
 		and GameService.teams_available_for_rebote() > 0
 	reopen_btn.text = "🔄 Rebote" if rebote_available else "Reabrir ronda"
-	reopen_btn.disabled = state.current_question.text.is_empty() or state.phase not in [Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL]
+	reopen_btn.disabled = state.current_question.text.is_empty() or state.phase != Enums.GamePhase.LOCKED
 
 	locked_reveal_btn.disabled = state.current_question.text.is_empty()
 
@@ -871,14 +869,6 @@ func _render_reveal_panel(state: GameState) -> void:
 
 	# Reveal minigame button
 	reveal_mg_btn.disabled = ContentRepo.get_minigame_count() == 0
-
-	# Rebote button in reveal panel — visible when answer was incorrect and teams remain
-	if _reopen_reveal_btn != null:
-		var rebote_available: bool = state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT \
-			and GameService.teams_available_for_rebote() > 0
-		_reopen_reveal_btn.visible = rebote_available
-		_reopen_reveal_btn.text = "🔄 Rebote" if rebote_available else "Reabrir ronda"
-		_reopen_reveal_btn.disabled = not rebote_available
 
 
 func _render_bottom_bar(state: GameState) -> void:
@@ -1402,16 +1392,3 @@ func _create_skip_button() -> void:
 		q_actions.add_child(skip_btn)
 
 
-func _create_reopen_reveal_button() -> void:
-	if reveal_panel == null:
-		return
-	_reopen_reveal_btn = Button.new()
-	_reopen_reveal_btn.name = "ReopenRevealBtn"
-	_reopen_reveal_btn.text = "🔄 Rebote"
-	_reopen_reveal_btn.custom_minimum_size = Vector2(0, 48)
-	_reopen_reveal_btn.set("theme_override_font_sizes/font_size", 18)
-	_apply_console_button(_reopen_reveal_btn)
-	_apply_accent_button(_reopen_reveal_btn, PHASE_LOCKED_COLOR)
-	_reopen_reveal_btn.visible = false
-	reveal_panel.add_child(_reopen_reveal_btn)
-	_reopen_reveal_btn.pressed.connect(_on_reopen_or_rebote)

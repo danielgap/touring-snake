@@ -475,7 +475,7 @@ func activate_rebote() -> void:
 	if AppState.selected_role != Enums.AppRole.PRESENTER:
 		return
 	var state: GameState = AppState.current_state.duplicate_state()
-	if state.phase not in [Enums.GamePhase.LOCKED, Enums.GamePhase.REVEAL]:
+	if state.phase != Enums.GamePhase.LOCKED:
 		return
 	if state.answer_feedback_status != Enums.AnswerFeedbackStatus.INCORRECT:
 		return
