@@ -1275,12 +1275,26 @@ func _create_buzzer_indicator() -> void:
 	_buzzer_indicator.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_buzzer_indicator.text = "MODO PULSADOR ACTIVO"
 	_buzzer_indicator.visible = false
-	# Add to the phase card area
+
 	var phase_card: PanelContainer = get_node_or_null("RootMargin/RootVBox/TopBar/PhaseCard")
 	if phase_card != null:
-		phase_card.add_child(_buzzer_indicator)
+		var phase_pad: MarginContainer = phase_card.get_node_or_null("PhasePad")
+		if phase_pad != null:
+			var phase_vbox := VBoxContainer.new()
+			phase_vbox.name = "PhaseVBox"
+			phase_vbox.add_theme_constant_override("separation", 4)
+
+			var p_label: Label = phase_pad.get_node_or_null("PhaseLabel")
+			if p_label != null:
+				phase_pad.remove_child(p_label)
+				phase_vbox.add_child(p_label)
+
+			phase_vbox.add_child(_buzzer_indicator)
+			phase_pad.add_child(phase_vbox)
+			phase_card.custom_minimum_size = Vector2(0, 100)
+		else:
+			phase_card.add_child(_buzzer_indicator)
 	else:
-		# Fallback: add to the top bar area
 		var top_bar: Node = get_node_or_null("RootMargin/RootVBox/TopBar")
 		if top_bar != null:
 			top_bar.add_child(_buzzer_indicator)
