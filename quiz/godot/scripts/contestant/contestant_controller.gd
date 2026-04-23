@@ -372,6 +372,14 @@ func _render_state(state: GameState) -> void:
 		question_label.text = ""
 	else:
 		question_label.text = state.current_question.text if not state.current_question.text.is_empty() else "Esperando pregunta del presentador..."
+		# Auto-fit font size based on text length
+		var text_len: int = state.current_question.text.length()
+		var q_font: int = 28
+		if text_len > 120:
+			q_font = 20
+		elif text_len > 80:
+			q_font = 24
+		question_label.add_theme_font_size_override("font_size", q_font)
 	if question_changed and not state.current_question.text.is_empty() and state.phase != Enums.GamePhase.MINIGAME:
 		_animate_question_in()
 
@@ -384,6 +392,18 @@ func _render_state(state: GameState) -> void:
 	answer_b.text = _button_text("B", options, 1)
 	answer_c.text = _button_text("C", options, 2)
 	answer_d.text = _button_text("D", options, 3)
+
+	# Auto-fit option font size based on longest option
+	var max_opt_len: int = 0
+	for opt: String in options:
+		max_opt_len = maxi(max_opt_len, opt.length())
+	var opt_font: int = 26
+	if max_opt_len > 40:
+		opt_font = 18
+	elif max_opt_len > 25:
+		opt_font = 22
+	for btn: Button in [answer_a, answer_b, answer_c, answer_d]:
+		btn.add_theme_font_size_override("font_size", opt_font)
 
 	answer_a.disabled = not can_answer
 	answer_b.disabled = not can_answer

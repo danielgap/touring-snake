@@ -680,9 +680,10 @@ theme_override_constants/separation = 10
 [node name="QRevealBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QActions"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 56)
-theme_override_font_sizes/font_size = 20
-text = "Mostrar correcta"
+custom_minimum_size = Vector2(0, 72)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+text = "👁 Mostrar correcta"
 
 [node name="MiniGamePanel" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea"]
 unique_name_in_owner = true
@@ -789,21 +790,23 @@ text = "INCORRECTA"
 
 [node name="LockedActions" type="HBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
 [node name="ReopenBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel/LockedActions"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 52)
-theme_override_font_sizes/font_size = 18
-text = "Reabrir ronda"
+custom_minimum_size = Vector2(0, 72)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+text = "🔄 Rebote"
 
 [node name="LockedRevealBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/LockedPanel/LockedActions"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 52)
-theme_override_font_sizes/font_size = 18
-text = "Mostrar correcta"
+custom_minimum_size = Vector2(0, 72)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+text = "👁 Mostrar correcta"
 
 [node name="RevealPanel" type="VBoxContainer" parent="RootMargin/RootVBox/ContentArea/MainArea"]
 unique_name_in_owner = true
@@ -850,21 +853,13 @@ autowrap_mode = 3
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="NextBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/RevealPanel/RevealActions"]
+[node name="DismissBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/RevealPanel/RevealActions"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 64)
+custom_minimum_size = Vector2(0, 72)
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 24
-text = "🎯 Siguiente pregunta"
-
-[node name="RevealMgBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/RevealPanel/RevealActions"]
-unique_name_in_owner = true
-layout_mode = 2
-custom_minimum_size = Vector2(0, 64)
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 22
-text = "🎮 Minijuego"
+text = "✅ Cerrar respuesta"
 
 [node name="BottomBar" type="HBoxContainer" parent="RootMargin/RootVBox"]
 layout_mode = 2

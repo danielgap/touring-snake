@@ -779,9 +779,18 @@ func _render_question(state: GameState, animate: bool = false) -> void:
 	if state.current_question.text.is_empty():
 		question_text.text = "En instantes..."
 		question_text.add_theme_color_override("font_color", TEXT_MUTED)
+		question_text.add_theme_font_size_override("font_size", 56)
 	else:
 		question_text.text = state.current_question.text
 		question_text.add_theme_color_override("font_color", TEXT_BRIGHT)
+		# Auto-fit font size based on text length
+		var text_len: int = state.current_question.text.length()
+		var q_font: int = 56
+		if text_len > 120:
+			q_font = 32
+		elif text_len > 80:
+			q_font = 40
+		question_text.add_theme_font_size_override("font_size", q_font)
 		if animate:
 			_animate_question_in()
 
@@ -800,12 +809,23 @@ func _render_options(state: GameState, phase_changed: bool = false) -> void:
 	var labels: Array[Label] = [opt_a, opt_b, opt_c, opt_d]
 	var cards: Array[PanelContainer] = [opt_card_a, opt_card_b, opt_card_c, opt_card_d]
 
-	# Fill option text
+	# Fill option text and auto-fit font size
+	var max_opt_len: int = 0
 	for i in range(4):
 		if i < options.size():
-			labels[i].text = "%s) %s" % [letters[i], options[i]]
+			var opt_text: String = "%s) %s" % [letters[i], options[i]]
+			labels[i].text = opt_text
+			max_opt_len = maxi(max_opt_len, options[i].length())
 		else:
 			labels[i].text = "%s) --" % letters[i]
+
+	var opt_font: int = 42
+	if max_opt_len > 50:
+		opt_font = 26
+	elif max_opt_len > 30:
+		opt_font = 32
+	for label: Label in labels:
+		label.add_theme_font_size_override("font_size", opt_font)
 
 	# Dynamic styling per option — projector needs BOLD differentiation
 	var selected_letter: String = state.last_selected_option.to_upper() if not state.last_selected_option.is_empty() else ""

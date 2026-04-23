@@ -247,6 +247,32 @@ func reveal_current_answer() -> void:
 	_publish_state(state)
 
 
+func dismiss_reveal() -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	if AppState.current_state.phase != Enums.GamePhase.REVEAL:
+		return
+	var state: GameState = AppState.current_state.duplicate_state()
+	state.phase = Enums.GamePhase.IDLE
+	state.current_question = Question.new()
+	state.current_minigame = MiniGame.new()
+	state.locked_team_id = 0
+	state.last_selected_option = ""
+	state.revealed_correct_option = ""
+	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
+	state.correction_applied = false
+	state.buzzer_winner_team_id = 0
+	state.pending_score_delta = {}
+	state.locked_out_team_ids = _build_default_locks()
+	_set_answer_authority(state, 0)
+	state.answers_enabled = false
+	state.rebote_excluded_team_ids = {}
+	state.status_text = "Respuesta cerrada — Elije siguiente pregunta"
+	AppState.apply_game_state(state)
+	_save_presenter_session()
+	_publish_state(state)
+
+
 func reopen_current_question() -> void:
 	if AppState.selected_role != Enums.AppRole.PRESENTER:
 		return

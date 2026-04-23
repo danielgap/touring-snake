@@ -103,8 +103,7 @@ var skip_btn: Button
 ## ── Reveal panel ─────────────────────────────────────────────────
 @onready var reveal_answer: Label = %RevealAnswer
 @onready var result_label: Label = %ResultLabel
-@onready var next_btn: Button = %NextBtn
-@onready var reveal_mg_btn: Button = %RevealMgBtn
+@onready var dismiss_btn: Button = %DismissBtn
 
 ## ── MiniGame panel ───────────────────────────────────────────────
 @onready var mg_active_title: Label = %MgActiveTitle
@@ -219,7 +218,7 @@ func _apply_styles() -> void:
 	# ── Action buttons — console style ──────────────────────────────
 	var all_buttons: Array[Button] = [
 		reset_used_btn,
-		q_reveal_btn, reopen_btn, locked_reveal_btn, next_btn,
+		q_reveal_btn, reopen_btn, locked_reveal_btn, dismiss_btn,
 		refresh_btn, reset_locks_btn,
 		team1_lock_btn, team1_force_btn, team2_lock_btn, team2_force_btn,
 		team3_lock_btn, team3_force_btn,
@@ -234,10 +233,7 @@ func _apply_styles() -> void:
 	# ── Main action buttons — game-show glow ────────────────────────
 	_apply_game_glow_button(next_question_btn, ACCENT_BLUE)
 	_apply_game_glow_button(mg_quick_btn, PHASE_MINIGAME_COLOR)
-	_apply_game_glow_button(reveal_mg_btn, PHASE_MINIGAME_COLOR)
-
-	# ── Primary action buttons — colored accent ─────────────────────
-	_apply_accent_button(next_btn, PHASE_REVEAL_COLOR)
+	_apply_game_glow_button(dismiss_btn, PHASE_REVEAL_COLOR)
 	_apply_accent_button(q_reveal_btn, Color("#a855f7"))
 	_apply_accent_button(mg_launch_btn, PHASE_MINIGAME_COLOR)
 	_apply_accent_button(mg_end_btn, PHASE_REVEAL_COLOR)
@@ -496,7 +492,7 @@ func _connect_signals() -> void:
 	# Main action buttons
 	next_question_btn.pressed.connect(GameService.load_random_question)
 	mg_quick_btn.pressed.connect(GameService.load_random_minigame)
-	reveal_mg_btn.pressed.connect(GameService.load_random_minigame)
+	dismiss_btn.pressed.connect(_on_dismiss_reveal)
 
 	# Skip button
 	if skip_btn != null:
@@ -524,9 +520,6 @@ func _connect_signals() -> void:
 	# Minigame actions
 	mg_launch_btn.pressed.connect(GameService.load_selected_minigame)
 	mg_end_btn.pressed.connect(GameService.end_current_minigame)
-
-	# Next question (local UI only — shows selector)
-	next_btn.pressed.connect(_on_next_question)
 
 	# Team arbitration
 	team1_lock_btn.pressed.connect(func() -> void: GameService.toggle_team_lock(1))
@@ -636,9 +629,8 @@ func _update_phase_panels(state: GameState) -> void:
 	minigame_panel.visible = show_minigame
 
 
-func _on_next_question() -> void:
-	_showing_selector = true
-	_update_phase_panels(AppState.current_state)
+func _on_dismiss_reveal() -> void:
+	GameService.dismiss_reveal()
 
 
 func _on_reopen_or_rebote() -> void:
@@ -865,7 +857,8 @@ func _render_reveal_panel(state: GameState) -> void:
 			result_label.add_theme_color_override("font_color", TEXT_BRIGHT)
 
 	# Reveal minigame button
-	reveal_mg_btn.disabled = ContentRepo.get_minigame_count() == 0
+	# Dismiss button always enabled during reveal
+	dismiss_btn.disabled = false
 
 
 func _render_bottom_bar(state: GameState) -> void:
