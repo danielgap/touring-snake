@@ -324,13 +324,13 @@ func _render_state(state: GameState) -> void:
 	var question_changed: bool = _prev_question_text != state.current_question.text
 
 	# ── Status badge ───────────────────────────────────────────────
-	var status_text: String = "ESPERANDO"
+	var status_text: String = "EN ESPERA"
 	var status_color: Color = STATUS_READY
 	if team_id <= 0:
 		status_text = "SIN EQUIPO"
 		status_color = STATUS_READY
 	elif state.phase == Enums.GamePhase.IDLE:
-		status_text = "ESPERANDO"
+		status_text = "EN ESPERA"
 		status_color = STATUS_READY
 	elif state.phase == Enums.GamePhase.MINIGAME:
 		status_text = "MINIJUEGO"
@@ -339,7 +339,7 @@ func _render_state(state: GameState) -> void:
 		status_text = "BLOQUEADO"
 		status_color = STATUS_LOCKED
 	elif state.phase == Enums.GamePhase.REVEAL:
-		status_text = "REVELADA"
+		status_text = "SOLUCIÓN"
 		status_color = ACCENT_BLUE
 	elif can_answer:
 		status_text = "TU TURNO"
@@ -348,7 +348,7 @@ func _render_state(state: GameState) -> void:
 		status_text = "FUERA DE REBOTE"
 		status_color = STATUS_LOCKED
 	elif state.phase == Enums.GamePhase.QUESTION:
-		status_text = "EN JUEGO"
+		status_text = "EN DIRECTO"
 		status_color = STATUS_WAITING
 	elif state.phase == Enums.GamePhase.LOCKED:
 		if state.locked_team_id == team_id:
@@ -356,7 +356,7 @@ func _render_state(state: GameState) -> void:
 			status_text = "ENVIADA"
 			status_color = STATUS_WAITING
 		else:
-			status_text = "TOMADA"
+			status_text = "RECIBIDA"
 			status_color = STATUS_WAITING
 
 	status_label.text = status_text
@@ -577,12 +577,12 @@ func _feedback_text(state: GameState, can_answer: bool) -> String:
 		if ShowConfig.get_buzzer_mode_enabled():
 			return "PULSEN EL PULSADOR para tomar el turno."
 		else:
-			return "Esperando que el presentador asigne turno."
+			return "Esperando que el presentador abra la pregunta."
 	if can_answer:
 		return "RESPONDAN AHORA — La primera respuesta cierra la ronda."
 	if state.current_question.text.is_empty():
 		return "Esperando pregunta del presentador."
-	return "Esperen habilitación del presentador."
+	return "Esperando a que el presentador abra la pregunta."
 
 
 func _feedback_summary(state: GameState) -> String:
@@ -1176,13 +1176,13 @@ func _render_buzzer(state: GameState) -> void:
 			else:
 				_buzzer_button.disabled = true
 				if team_id <= 0:
-					_buzzer_button.text = "SELECCIONÁ EQUIPO"
+					_buzzer_button.text = "SELECCIONA EQUIPO"
 				elif excluded:
 					_buzzer_button.text = "FUERA DE REBOTE"
 				elif locked:
 					_buzzer_button.text = "BLOQUEADO"
 				else:
-					_buzzer_button.text = "ESPERANDO..."
+					_buzzer_button.text = "EN ESPERA..."
 				_apply_buzzer_styles_disabled()
 				_stop_buzzer_pulse()
 		elif authority_team_id == team_id:
@@ -1200,7 +1200,7 @@ func _render_buzzer(state: GameState) -> void:
 			elif authority_team_id > 0:
 				_buzzer_button.text = "TURNO RESERVADO"
 			else:
-				_buzzer_button.text = "ESPERANDO..."
+				_buzzer_button.text = "EN ESPERA..."
 			_apply_buzzer_styles_disabled()
 			_stop_buzzer_pulse()
 		return
@@ -1215,7 +1215,7 @@ func _render_buzzer(state: GameState) -> void:
 			_stop_buzzer_pulse()
 		else:
 			_buzzer_button.disabled = true
-			_buzzer_button.text = "SELECCIONÁ EQUIPO"
+			_buzzer_button.text = "SELECCIONA EQUIPO"
 			_apply_buzzer_styles_disabled()
 			_stop_buzzer_pulse()
 		return

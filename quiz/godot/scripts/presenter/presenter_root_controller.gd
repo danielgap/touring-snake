@@ -438,20 +438,20 @@ func _wire_config_values() -> void:
 	%T3Name.text = ShowConfig.get_team_name(3)
 
 	# Score row team short names
-	%T1SName.text = ShowConfig.get_team_short(1)
-	%T2SName.text = ShowConfig.get_team_short(2)
-	%T3SName.text = ShowConfig.get_team_short(3)
+	%T1SName.text = ShowConfig.get_team_name(1)
+	%T2SName.text = ShowConfig.get_team_name(2)
+	%T3SName.text = ShowConfig.get_team_name(3)
 
 	# Score card names (top bar)
 	var t1_score_name: Label = get_node_or_null("RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard1/ScorePad1/ScoreVBox1/Team1Name")
 	var t2_score_name: Label = get_node_or_null("RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard2/ScorePad2/ScoreVBox2/Team2Name")
 	var t3_score_name: Label = get_node_or_null("RootMargin/RootVBox/TopBar/ScoreBar/ScoreCard3/ScorePad3/ScoreVBox3/Team3Name")
 	if t1_score_name != null:
-		t1_score_name.text = ShowConfig.get_team_short(1)
+		t1_score_name.text = ShowConfig.get_team_name(1)
 	if t2_score_name != null:
-		t2_score_name.text = ShowConfig.get_team_short(2)
+		t2_score_name.text = ShowConfig.get_team_name(2)
 	if t3_score_name != null:
-		t3_score_name.text = ShowConfig.get_team_short(3)
+		t3_score_name.text = ShowConfig.get_team_name(3)
 
 	# Score button text with configurable points
 	var pts: int = ShowConfig.get_points_correct()
@@ -659,33 +659,28 @@ func _render_phase_label(state: GameState) -> void:
 	if phase_label == null:
 		return
 	var phase_color: Color = PHASE_IDLE_COLOR
-	var round_name: String = GameService.get_selected_round_name()
-	var round_suffix: String = ""
-	if not round_name.is_empty() and state.phase != Enums.GamePhase.IDLE:
-		round_suffix = " · " + round_name.to_upper()
 	match state.phase:
 		Enums.GamePhase.IDLE:
-			phase_label.text = "STANDBY"
+			phase_label.text = "EN ESPERA"
 			phase_color = PHASE_IDLE_COLOR
 		Enums.GamePhase.QUESTION:
 			if state.answers_enabled:
-				phase_label.text = "AL AIRE%s" % round_suffix
+				phase_label.text = "EN DIRECTO"
 				phase_color = PHASE_QUESTION_COLOR
 			else:
-				phase_label.text = "EN JUEGO%s" % round_suffix
+				phase_label.text = "PREGUNTA"
 				phase_color = PHASE_QUESTION_COLOR
 		Enums.GamePhase.LOCKED:
-			# LOCKED: show neutral label (result leaks to display/contestant if shown)
-			phase_label.text = "RESPUESTA%s" % round_suffix
+			phase_label.text = "RESPONDIDA"
 			phase_color = PHASE_LOCKED_COLOR
 		Enums.GamePhase.REVEAL:
-			phase_label.text = "REVELADA%s" % round_suffix
+			phase_label.text = "SOLUCIÓN"
 			phase_color = PHASE_REVEAL_COLOR
 		Enums.GamePhase.MINIGAME:
 			phase_label.text = "MINIJUEGO"
 			phase_color = PHASE_MINIGAME_COLOR
 		_:
-			phase_label.text = "STANDBY"
+			phase_label.text = "EN ESPERA"
 			phase_color = PHASE_IDLE_COLOR
 
 	# Dynamic phase card — border + glow matches phase

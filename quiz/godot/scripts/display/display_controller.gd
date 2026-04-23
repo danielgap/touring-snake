@@ -30,7 +30,7 @@ const TEAM2_BG := Color("#4a3814")           # clearly amber-tinted
 const TEAM3_BG := Color("#4a2020")           # clearly red-tinted
 
 const PHASE_IDLE_COLOR := Color("#7a8a9e")   # bright gray — readable on washed-out BG
-const PHASE_QUESTION_COLOR := Color("#67d4f8") # very bright cyan — AL AIRE needs to pop
+const PHASE_QUESTION_COLOR := Color("#67d4f8") # very bright cyan — EN DIRECTO needs to pop
 const PHASE_LOCKED_COLOR := Color("#fcd34d") # bright amber
 const PHASE_REVEAL_COLOR := Color("#6ee7a0") # bright mint green — survives washout as clear green
 const PHASE_CORRECT_COLOR := Color("#6ee7a0")
@@ -529,7 +529,7 @@ func _create_idle_scoreboard() -> void:
 	_idle_standby.add_theme_font_size_override("font_size", 24)
 	_idle_standby.add_theme_color_override("font_color", PHASE_IDLE_COLOR)
 	_idle_standby.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_idle_standby.text = "STANDBY"
+	_idle_standby.text = "EN ESPERA"
 	_idle_standby.visible = false
 	_idle_scoreboard.add_child(_idle_standby)
 
@@ -726,27 +726,27 @@ func _render_phase(state: GameState) -> void:
 	var phase_color: Color = PHASE_IDLE_COLOR
 	match state.phase:
 		Enums.GamePhase.IDLE:
-			phase_label.text = "STANDBY"
+			phase_label.text = "EN ESPERA"
 			phase_color = PHASE_IDLE_COLOR
 		Enums.GamePhase.QUESTION:
 			if state.answers_enabled:
-				phase_label.text = "AL AIRE"
+				phase_label.text = "EN DIRECTO"
 				phase_color = PHASE_QUESTION_COLOR
 			else:
-				phase_label.text = "EN JUEGO"
+				phase_label.text = "PREGUNTA"
 				phase_color = PHASE_QUESTION_COLOR
 		Enums.GamePhase.LOCKED:
 			# LOCKED: never leak result to audience — show neutral text
-			phase_label.text = "RESPUESTA TOMADA"
+			phase_label.text = "RESPUESTA RECIBIDA"
 			phase_color = PHASE_LOCKED_COLOR
 		Enums.GamePhase.REVEAL:
-			phase_label.text = "REVELADA"
+			phase_label.text = "SOLUCIÓN"
 			phase_color = PHASE_REVEAL_COLOR
 		Enums.GamePhase.MINIGAME:
 			phase_label.text = "MINIJUEGO"
 			phase_color = PHASE_MINIGAME_COLOR
 		_:
-			phase_label.text = "STANDBY"
+			phase_label.text = "EN ESPERA"
 			phase_color = PHASE_IDLE_COLOR
 
 	# Dynamic phase card — bright border + massive glow for HY300
@@ -869,13 +869,13 @@ func _render_feedback(state: GameState) -> void:
 		return
 
 	if state.locked_team_id <= 0:
-		feedback_label.text = "Aguardando respuesta..."
+		feedback_label.text = "Esperando pulsador..."
 		feedback_label.add_theme_color_override("font_color", TEXT_MUTED)
 		return
 
 	# LOCKED: never leak result to audience on projector
 	if state.phase == Enums.GamePhase.LOCKED:
-		feedback_label.text = "%s — RESPUESTA TOMADA" % ShowConfig.get_team_name(state.locked_team_id).to_upper()
+		feedback_label.text = "%s — RESPUESTA RECIBIDA" % ShowConfig.get_team_name(state.locked_team_id).to_upper()
 		feedback_label.add_theme_color_override("font_color", PHASE_LOCKED_COLOR)
 		return
 
@@ -911,7 +911,7 @@ func _render_lock_info(state: GameState) -> void:
 		lock_label.text = "Turno · %s" % ShowConfig.get_team_name(state.answer_authority_team_id)
 		lock_label.add_theme_color_override("font_color", TEXT_DIM)
 	elif state.answers_enabled:
-		lock_label.text = "Pregunta abierta · Esperando respuesta..."
+		lock_label.text = "Pregunta abierta · Esperando pulsador..."
 		lock_label.add_theme_color_override("font_color", TEXT_DIM)
 	else:
 		lock_label.text = ""

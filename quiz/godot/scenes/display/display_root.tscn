@@ -48,7 +48,7 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 38
-text = "STANDBY"
+text = "EN ESPERA"
 horizontal_alignment = 1
 
 [node name="HSpacer1" type="Control" parent="MarginContainer/RootVBox/TopBar"]

@@ -47,10 +47,10 @@ func _wire_config_values() -> void:
 		if not sub.is_empty():
 			subtitle_label.text = sub
 
-	# Team button text — show team number
-	team1_btn.text = "Equipo 1"
-	team2_btn.text = "Equipo 2"
-	team3_btn.text = "Equipo 3"
+	# Team button text — from config
+	team1_btn.text = ShowConfig.get_team_name(1)
+	team2_btn.text = ShowConfig.get_team_name(2)
+	team3_btn.text = ShowConfig.get_team_name(3)
 
 	# Logo from config
 	var logo_rect: TextureRect = get_node_or_null("CenterVBox/LogoRect")
