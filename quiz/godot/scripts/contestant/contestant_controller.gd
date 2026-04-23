@@ -314,6 +314,9 @@ func _render_team(team_id: int) -> void:
 
 func _on_config_changed() -> void:
 	_render_team(AppState.selected_team_id)
+	# Re-render idle scoreboard (show name, team names may have changed)
+	if AppState.current_state.phase == Enums.GamePhase.IDLE:
+		_render_idle_scoreboard(AppState.current_state)
 
 
 func _render_state(state: GameState) -> void:

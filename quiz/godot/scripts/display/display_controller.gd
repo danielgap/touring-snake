@@ -116,6 +116,9 @@ func _wire_config_values() -> void:
 func _on_config_changed() -> void:
 	_wire_config_values()
 	_update_team_visibility()
+	# Re-render idle scoreboard (show name, team names may have changed)
+	if AppState.current_state.phase == Enums.GamePhase.IDLE:
+		_render_idle_scoreboard(AppState.current_state)
 
 
 func _update_team_visibility() -> void:
