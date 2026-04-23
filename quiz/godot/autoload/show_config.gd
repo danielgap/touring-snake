@@ -86,7 +86,7 @@ func _merge_dict(base: Dictionary, overlay: Dictionary) -> void:
 
 func _get_hardcoded_defaults() -> Dictionary:
 	return {
-		"show_name": "Quiz Offline",
+		"show_name": "Palencia Quiz Battle",
 		"subtitle": "",
 		"team_count": 3,
 		"teams": [
@@ -111,7 +111,7 @@ func _get_hardcoded_defaults() -> Dictionary:
 # ═══════════════════════════════════════════════════════════════════
 
 func get_show_name() -> String:
-	return String(_config.get("show_name", "Quiz Offline"))
+	return String(_config.get("show_name", "Palencia Quiz Battle"))
 
 
 func get_subtitle() -> String:

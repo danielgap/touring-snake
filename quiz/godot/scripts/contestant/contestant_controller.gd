@@ -548,7 +548,7 @@ func _feedback_text(state: GameState, can_answer: bool) -> String:
 	if state.locked_team_id == AppState.selected_team_id:
 		# During LOCKED, hide result — suspense for the presenter reveal
 		if state.phase == Enums.GamePhase.LOCKED:
-			return "Respuesta enviada: %s · Esperando resultado..." % (
+			return "Opción %s · Esperando resultado..." % (
 				state.last_selected_option if not state.last_selected_option.is_empty() else "seleccionada"
 			)
 		match state.answer_feedback_status:
@@ -561,7 +561,7 @@ func _feedback_text(state: GameState, can_answer: bool) -> String:
 					state.last_selected_option if not state.last_selected_option.is_empty() else "seleccionada"
 				)
 			_:
-				return "Respuesta enviada: %s · Esperando resultado..." % (
+				return "Opción %s · Esperando resultado..." % (
 					state.last_selected_option if not state.last_selected_option.is_empty() else "seleccionada"
 				)
 	if state.locked_team_id > 0:
@@ -572,17 +572,17 @@ func _feedback_text(state: GameState, can_answer: bool) -> String:
 	if state.answer_authority_team_id > 0 and state.answer_authority_team_id != AppState.selected_team_id:
 		return "Turno reservado para %s." % ShowConfig.get_team_name(state.answer_authority_team_id)
 	if state.answer_authority_team_id == AppState.selected_team_id and can_answer:
-		return "SU TURNO — Respondan ahora."
+		return "Respondan ahora — La primera respuesta cierra la ronda."
 	if state.phase == Enums.GamePhase.QUESTION and state.answers_enabled and state.answer_authority_team_id == 0:
+		if state.is_team_excluded_from_rebote(AppState.selected_team_id):
+			return "Excluido del rebote esta ronda."
 		if ShowConfig.get_buzzer_mode_enabled():
 			return "PULSEN EL PULSADOR para tomar el turno."
 		else:
-			return "Esperando que el presentador abra la pregunta."
-	if can_answer:
-		return "RESPONDAN AHORA — La primera respuesta cierra la ronda."
+			return "Esperando turno."
 	if state.current_question.text.is_empty():
 		return "Esperando pregunta del presentador."
-	return "Esperando a que el presentador abra la pregunta."
+	return "Esperando turno."
 
 
 func _feedback_summary(state: GameState) -> String:

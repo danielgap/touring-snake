@@ -774,9 +774,9 @@ func _render_question_panel(state: GameState) -> void:
 	opt_c.text = "C) %s" % (options[2] if options.size() > 2 else "--")
 	opt_d.text = "D) %s" % (options[3] if options.size() > 3 else "--")
 
-	# Lock info
+	# Lock info — only show info NOT already in buzzer_indicator
 	if state.buzzer_winner_team_id > 0 and state.locked_team_id == 0 and state.answer_authority_team_id == state.buzzer_winner_team_id:
-		lock_info.text = "⚡ %s pulsó primero — Esperando respuesta..." % ShowConfig.get_team_name(state.buzzer_winner_team_id)
+		lock_info.text = ""  # buzzer_indicator already shows who pulsed
 	elif state.locked_team_id > 0:
 		lock_info.text = "%s eligió %s · %s" % [
 			ShowConfig.get_team_name(state.locked_team_id),
@@ -784,9 +784,9 @@ func _render_question_panel(state: GameState) -> void:
 			Enums.answer_feedback_name(state.answer_feedback_status),
 		]
 	elif state.answers_enabled and state.answer_authority_team_id > 0:
-		lock_info.text = "Turno reservado · %s" % ShowConfig.get_team_name(state.answer_authority_team_id)
+		lock_info.text = ""  # buzzer_indicator already shows turn
 	elif state.answers_enabled:
-		lock_info.text = "Pregunta abierta · Esperando pulsador..."
+		lock_info.text = ""  # buzzer_indicator already shows "Esperando pulsador..."
 	else:
 		lock_info.text = ""
 
@@ -1249,7 +1249,7 @@ func _update_buzzer_indicator(state: GameState) -> void:
 		_buzzer_indicator.add_theme_color_override("font_color", PHASE_REVEAL_COLOR)
 	elif state.phase == Enums.GamePhase.LOCKED and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT:
 		_buzzer_indicator.visible = true
-		_buzzer_indicator.text = "❌ INCORRECTA · Rebote disponible"
+		_buzzer_indicator.text = "🔄 Rebote disponible"
 		_buzzer_indicator.add_theme_color_override("font_color", PHASE_INCORRECT_COLOR)
 	else:
 		_buzzer_indicator.visible = false

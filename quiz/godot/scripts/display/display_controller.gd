@@ -768,6 +768,7 @@ func _render_minigame_visibility(state: GameState) -> void:
 		options_grid.visible = false
 	if _trivia_card != null:
 		_trivia_card.visible = false
+	_bottom_bar.visible = false
 
 
 func _render_question(state: GameState, animate: bool = false) -> void:
@@ -868,17 +869,33 @@ func _render_feedback(state: GameState) -> void:
 		feedback_label.text = ""
 		return
 
+	# MINIGAME — no feedback needed
+	if state.phase == Enums.GamePhase.MINIGAME:
+		feedback_label.text = ""
+		return
+
+	# QUESTION with no lock yet
 	if state.locked_team_id <= 0:
-		feedback_label.text = "Esperando pulsador..."
-		feedback_label.add_theme_color_override("font_color", TEXT_MUTED)
+		if state.phase == Enums.GamePhase.QUESTION and state.answers_enabled:
+			if state.answer_authority_team_id > 0:
+				# Someone has turn — lock_label shows "Turno · Equipo X"
+				feedback_label.text = ""
+			elif ShowConfig.get_buzzer_mode_enabled():
+				feedback_label.text = "Esperando pulsador..."
+				feedback_label.add_theme_color_override("font_color", TEXT_MUTED)
+			else:
+				feedback_label.text = "Esperando respuesta..."
+				feedback_label.add_theme_color_override("font_color", TEXT_MUTED)
+		else:
+			feedback_label.text = ""
 		return
 
-	# LOCKED: never leak result to audience on projector
+	# LOCKED: never leak result to audience on projector — PhaseCard already says RESPUESTA RECIBIDA
 	if state.phase == Enums.GamePhase.LOCKED:
-		feedback_label.text = "%s — RESPUESTA RECIBIDA" % ShowConfig.get_team_name(state.locked_team_id).to_upper()
-		feedback_label.add_theme_color_override("font_color", PHASE_LOCKED_COLOR)
+		feedback_label.text = ""
 		return
 
+	# REVEAL — show result (options already highlight correct/incorrect)
 	match state.answer_feedback_status:
 		Enums.AnswerFeedbackStatus.CORRECT:
 			feedback_label.text = "%s — CORRECTA" % ShowConfig.get_team_name(state.locked_team_id).to_upper()
@@ -890,28 +907,24 @@ func _render_feedback(state: GameState) -> void:
 			feedback_label.text = "%s — Pendiente" % ShowConfig.get_team_name(state.locked_team_id)
 			feedback_label.add_theme_color_override("font_color", PHASE_LOCKED_COLOR)
 		_:
-			feedback_label.text = "Esperando decisión..."
+			feedback_label.text = ""
 			feedback_label.add_theme_color_override("font_color", TEXT_DIM)
 
 
 func _render_lock_info(state: GameState) -> void:
+	# REVEAL — options already show correct/incorrect, feedback_label shows result
 	if state.phase == Enums.GamePhase.REVEAL:
-		lock_label.text = "Correcta: %s · Respondió: %s" % [
-			state.revealed_correct_option if not state.revealed_correct_option.is_empty() else "--",
-			_locked_team_text(state),
-		]
-		lock_label.add_theme_color_override("font_color", TEXT_DIM)
-	elif state.locked_team_id > 0:
+		lock_label.text = ""
+		return
+	# LOCKED — show who chose what (PhaseCard already says RESPUESTA RECIBIDA)
+	if state.locked_team_id > 0:
 		lock_label.text = "%s eligió %s" % [
 			ShowConfig.get_team_name(state.locked_team_id),
 			state.last_selected_option if not state.last_selected_option.is_empty() else "--",
 		]
 		lock_label.add_theme_color_override("font_color", _team_color(state.locked_team_id))
-	elif state.phase == Enums.GamePhase.QUESTION and state.answers_enabled and state.answer_authority_team_id > 0:
+	elif state.phase == Enums.GamePhase.QUESTION and state.answer_authority_team_id > 0:
 		lock_label.text = "Turno · %s" % ShowConfig.get_team_name(state.answer_authority_team_id)
-		lock_label.add_theme_color_override("font_color", TEXT_DIM)
-	elif state.answers_enabled:
-		lock_label.text = "Pregunta abierta · Esperando pulsador..."
 		lock_label.add_theme_color_override("font_color", TEXT_DIM)
 	else:
 		lock_label.text = ""
