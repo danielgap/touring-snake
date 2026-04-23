@@ -225,6 +225,7 @@ func apply_remote_config(remote: Dictionary) -> void:
 	if typeof(remote) != TYPE_DICTIONARY:
 		return
 	var changed: bool = false
+	var old_team_count: int = get_team_count()
 	var expected_types: Dictionary = {
 		"show_name": TYPE_STRING,
 		"subtitle": TYPE_STRING,
@@ -245,11 +246,25 @@ func apply_remote_config(remote: Dictionary) -> void:
 		if expected != TYPE_NIL and typeof(value) != expected:
 			push_warning("ShowConfig: remote config key '%s' has wrong type %d (expected %d) — skipped" % [key, typeof(value), expected])
 			continue
+		# Range validation for numeric fields
+		if key == "team_count":
+			value = clampi(int(value), 2, 3)
+		elif key == "points_correct":
+			value = clampi(int(value), 0, 9999)
+		elif key == "points_incorrect":
+			value = clampi(int(value), 0, 9999)
+		# Diff check — skip unchanged values
+		if _config.has(key) and _config[key] == value:
+			continue
 		_config[key] = value
 		changed = true
+	# Sync teams array to match team_count (guards against partial payloads)
+	sync_teams_to_count()
 	if changed:
 		save_config()
-		emit_signal("team_count_changed", get_team_count())
+		var new_team_count: int = get_team_count()
+		if new_team_count != old_team_count:
+			emit_signal("team_count_changed", new_team_count)
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -285,11 +300,11 @@ func set_team_color(team_id: int, color: Color) -> void:
 
 
 func set_points_correct(value: int) -> void:
-	_config["points_correct"] = value
+	_config["points_correct"] = clampi(value, 0, 9999)
 
 
 func set_points_incorrect(value: int) -> void:
-	_config["points_incorrect"] = value
+	_config["points_incorrect"] = clampi(value, 0, 9999)
 
 
 func set_questions_file(path: String) -> void:
