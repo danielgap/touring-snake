@@ -598,6 +598,8 @@ func _feedback_text(state: GameState, can_answer: bool) -> String:
 		return "Turno reservado para %s." % ShowConfig.get_team_name(state.answer_authority_team_id)
 	if state.answer_authority_team_id == AppState.selected_team_id and can_answer:
 		return "Respondan ahora — La primera respuesta cierra la ronda."
+	if state.phase == Enums.GamePhase.QUESTION and not state.answers_enabled and state.answer_authority_team_id == 0:
+		return "Esperando al presentador..."
 	if state.phase == Enums.GamePhase.QUESTION and state.answers_enabled and state.answer_authority_team_id == 0:
 		if state.is_team_excluded_from_rebote(AppState.selected_team_id):
 			return "Excluido del rebote esta ronda."
@@ -1191,34 +1193,38 @@ func _render_buzzer(state: GameState) -> void:
 		_stop_buzzer_pulse()
 		return
 
-	# QUESTION phase — buzzer always active
+	# QUESTION phase — buzzer only visible when answers_enabled
 	if state.phase == Enums.GamePhase.QUESTION:
 		if authority_team_id == 0:
-			# No winner yet — show buzzer, hide answers
-			_buzzer_button.visible = true
-			answer_parent.visible = false
-			var excluded: bool = state.is_team_excluded_from_rebote(team_id)
-			var locked: bool = state.is_team_locked_out(team_id)
-			if team_id > 0 and not excluded and not locked and state.answers_enabled:
-				_buzzer_button.disabled = false
-				if not state.rebote_excluded_team_ids.is_empty():
-					_buzzer_button.text = _buzzer_ready_text("🔄 REBOTE", "PULSAR")
-				else:
-					_buzzer_button.text = _buzzer_ready_text("⚡", "PULSAR")
-				_apply_buzzer_styles_active()
-				_start_buzzer_pulse()
-			else:
-				_buzzer_button.disabled = true
-				if team_id <= 0:
-					_buzzer_button.text = "SELECCIONA EQUIPO"
-				elif excluded:
-					_buzzer_button.text = "FUERA DE REBOTE"
-				elif locked:
-					_buzzer_button.text = "BLOQUEADO"
-				else:
-					_buzzer_button.text = "EN ESPERA..."
-				_apply_buzzer_styles_disabled()
+			if not state.answers_enabled:
+				# Presenter hasn't enabled buzzer yet — hide it entirely
+				_buzzer_button.visible = false
+				answer_parent.visible = false
 				_stop_buzzer_pulse()
+			else:
+				# Buzzer enabled — show it, hide answers
+				_buzzer_button.visible = true
+				answer_parent.visible = false
+				var excluded: bool = state.is_team_excluded_from_rebote(team_id)
+				var locked: bool = state.is_team_locked_out(team_id)
+				if team_id > 0 and not excluded and not locked:
+					_buzzer_button.disabled = false
+					if not state.rebote_excluded_team_ids.is_empty():
+						_buzzer_button.text = _buzzer_ready_text("🔄 REBOTE", "PULSAR")
+					else:
+						_buzzer_button.text = _buzzer_ready_text("⚡", "PULSAR")
+					_apply_buzzer_styles_active()
+					_start_buzzer_pulse()
+				else:
+					_buzzer_button.disabled = true
+					if team_id <= 0:
+						_buzzer_button.text = "SELECCIONA EQUIPO"
+					elif excluded:
+						_buzzer_button.text = "FUERA DE REBOTE"
+					elif locked:
+						_buzzer_button.text = "BLOQUEADO"
+					_apply_buzzer_styles_disabled()
+					_stop_buzzer_pulse()
 		elif authority_team_id == team_id:
 			# This team has the turn — show A/B/C/D, hide buzzer
 			_buzzer_button.visible = false

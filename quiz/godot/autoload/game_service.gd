@@ -821,7 +821,7 @@ func _apply_presenter_question(question: Question, status_text: String) -> void:
 	_set_answer_authority(state, 0)
 	state.locked_team_id = 0
 	state.locked_out_team_ids = _build_default_locks()
-	state.answers_enabled = true
+	state.answers_enabled = false
 	state.revealed_correct_option = ""
 	state.last_selected_option = ""
 	state.answer_feedback_status = Enums.AnswerFeedbackStatus.NONE
@@ -835,6 +835,18 @@ func _apply_presenter_question(question: Question, status_text: String) -> void:
 	_current_question_index = _selected_question_id
 	AppState.apply_game_state(state)
 	emit_signal("used_questions_changed")
+	_save_presenter_session()
+	_publish_state(state)
+
+
+func enable_buzzer() -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	var state: GameState = AppState.current_state.duplicate_state()
+	if state.phase != Enums.GamePhase.QUESTION or state.answers_enabled:
+		return
+	state.answers_enabled = true
+	AppState.apply_game_state(state)
 	_save_presenter_session()
 	_publish_state(state)
 

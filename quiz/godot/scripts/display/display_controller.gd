@@ -909,7 +909,10 @@ func _render_feedback(state: GameState) -> void:
 
 	# QUESTION with no lock yet
 	if state.locked_team_id <= 0:
-		if state.phase == Enums.GamePhase.QUESTION and state.answers_enabled:
+		if state.phase == Enums.GamePhase.QUESTION and not state.answers_enabled:
+			feedback_label.text = "Leyendo pregunta..."
+			feedback_label.add_theme_color_override("font_color", TEXT_MUTED)
+		elif state.phase == Enums.GamePhase.QUESTION and state.answers_enabled:
 			if state.answer_authority_team_id > 0:
 				# Someone has turn — lock_label shows "Turno · Equipo X"
 				feedback_label.text = ""

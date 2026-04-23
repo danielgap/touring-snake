@@ -677,6 +677,14 @@ autowrap_mode = 3
 layout_mode = 2
 theme_override_constants/separation = 10
 
+[node name="EnableBuzzerBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QActions"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 72)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+text = "⚡ Habilitar pulsador"
+
 [node name="QRevealBtn" type="Button" parent="RootMargin/RootVBox/ContentArea/MainArea/QuestionPanel/QActions"]
 unique_name_in_owner = true
 layout_mode = 2

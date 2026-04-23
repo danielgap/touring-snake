@@ -90,6 +90,7 @@ const GLOW_SIZE := 6
 @onready var opt_d: Label = %OptD
 @onready var lock_info: Label = %LockInfo
 @onready var q_reveal_btn: Button = %QRevealBtn
+@onready var enable_buzzer_btn: Button = %EnableBuzzerBtn
 var skip_btn: Button
 
 ## ── Locked panel ─────────────────────────────────────────────────
@@ -217,6 +218,7 @@ func _apply_styles() -> void:
 
 	# ── Action buttons — console style ──────────────────────────────
 	var all_buttons: Array[Button] = [
+		enable_buzzer_btn,
 		reset_used_btn,
 		q_reveal_btn, reopen_btn, locked_reveal_btn, dismiss_btn,
 		refresh_btn, reset_locks_btn,
@@ -235,6 +237,7 @@ func _apply_styles() -> void:
 	_apply_game_glow_button(mg_quick_btn, PHASE_MINIGAME_COLOR)
 	_apply_game_glow_button(dismiss_btn, PHASE_REVEAL_COLOR)
 	_apply_accent_button(q_reveal_btn, Color("#a855f7"))
+	_apply_game_glow_button(enable_buzzer_btn, ACCENT_BLUE)
 	_apply_accent_button(mg_launch_btn, PHASE_MINIGAME_COLOR)
 	_apply_accent_button(mg_end_btn, PHASE_REVEAL_COLOR)
 
@@ -508,6 +511,7 @@ func _connect_signals() -> void:
 	if clear_session_btn != null:
 		clear_session_btn.pressed.connect(GameService.reset_game)
 	q_reveal_btn.pressed.connect(GameService.reveal_current_answer)
+	enable_buzzer_btn.pressed.connect(GameService.enable_buzzer)
 	locked_reveal_btn.pressed.connect(GameService.reveal_current_answer)
 
 	# Selectors
@@ -779,12 +783,17 @@ func _render_question_panel(state: GameState) -> void:
 		lock_info.text = ""  # buzzer_indicator already shows turn
 	elif state.answers_enabled:
 		lock_info.text = ""  # buzzer_indicator already shows "Esperando pulsador..."
-	else:
-		lock_info.text = ""
+	elif not state.answers_enabled:
+		lock_info.text = "Pulsador deshabilitado — pulsa ⚡ Habilitar pulsador cuando estés listo"
 
 	# Reveal button — disabled when no question text or wrong phase
 	q_reveal_btn.disabled = state.current_question.text.is_empty() \
 		or state.phase not in [Enums.GamePhase.QUESTION, Enums.GamePhase.LOCKED]
+
+	# Enable buzzer button — only visible during QUESTION before buzzer is enabled
+	enable_buzzer_btn.visible = state.phase == Enums.GamePhase.QUESTION \
+		and not state.answers_enabled \
+		and not state.current_question.text.is_empty()
 
 	# Skip button
 	if skip_btn != null:
