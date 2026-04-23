@@ -1068,7 +1068,7 @@ func _start_idle_pulse() -> void:
 	if style == null:
 		return
 	var tw: Tween = create_tween()
-	tw.set_loops(0)
+	tw.set_loops(999999)
 	tw.tween_property(style, "shadow_color:a", 0.9, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tw.tween_property(style, "shadow_color:a", 0.4, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_idle_pulse_tweens.append(tw)
@@ -1267,7 +1267,7 @@ func _start_buzzer_pulse() -> void:
 	if style == null:
 		return
 	var tw: Tween = create_tween()
-	tw.set_loops(0)
+	tw.set_loops(999999)
 	tw.tween_property(style, "shadow_size", 24.0, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tw.tween_property(style, "shadow_size", 8.0, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_buzzer_pulse_tweens.append(tw)

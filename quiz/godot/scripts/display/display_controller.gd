@@ -636,7 +636,7 @@ func _start_idle_pulse() -> void:
 		if style == null:
 			continue
 		var tw: Tween = create_tween()
-		tw.set_loops(0)
+		tw.set_loops(999999)
 		tw.tween_method(_set_card_shadow_alpha.bind(card), 0.4, 0.9, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		tw.tween_method(_set_card_shadow_alpha.bind(card), 0.9, 0.4, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		_idle_pulse_tweens.append(tw)
@@ -649,7 +649,7 @@ func _stop_idle_pulse() -> void:
 	_idle_pulse_tweens.clear()
 
 
-func _set_card_shadow_alpha(card: PanelContainer, alpha: float) -> void:
+func _set_card_shadow_alpha(alpha: float, card: PanelContainer) -> void:
 	var style: StyleBoxFlat = card.get_theme_stylebox("panel")
 	if style == null:
 		return
