@@ -218,7 +218,6 @@ func _apply_styles() -> void:
 
 	# ── Action buttons — console style ──────────────────────────────
 	var all_buttons: Array[Button] = [
-		enable_buzzer_btn,
 		reset_used_btn,
 		q_reveal_btn, reopen_btn, locked_reveal_btn, dismiss_btn,
 		refresh_btn, reset_locks_btn,
@@ -1237,10 +1236,16 @@ func _update_buzzer_indicator(state: GameState) -> void:
 	if _buzzer_indicator == null:
 		return
 	if state.phase == Enums.GamePhase.QUESTION and state.answer_authority_team_id == 0:
-		var is_rebote: bool = not state.rebote_excluded_team_ids.is_empty()
-		_buzzer_indicator.visible = true
-		_buzzer_indicator.text = "🔄 REBOTE — Esperando pulsador" if is_rebote else "Esperando pulsador..."
-		_buzzer_indicator.add_theme_color_override("font_color", PHASE_LOCKED_COLOR if is_rebote else PHASE_QUESTION_COLOR)
+		if not state.answers_enabled:
+			_buzzer_indicator.visible = true
+			_buzzer_indicator.text = "Pulsador deshabilitado"
+			_buzzer_indicator.add_theme_color_override("font_color", TEXT_MUTED)
+		else:
+			var is_rebote: bool = not state.rebote_excluded_team_ids.is_empty()
+			var pulsador_text: String = "Esperando pulsador..." if ShowConfig.get_buzzer_mode_enabled() else "Esperando respuesta..."
+			_buzzer_indicator.visible = true
+			_buzzer_indicator.text = "🔄 REBOTE — " + pulsador_text if is_rebote else pulsador_text
+			_buzzer_indicator.add_theme_color_override("font_color", PHASE_LOCKED_COLOR if is_rebote else PHASE_QUESTION_COLOR)
 	elif state.answers_enabled and state.buzzer_winner_team_id > 0 and state.phase == Enums.GamePhase.QUESTION and state.answer_authority_team_id == state.buzzer_winner_team_id:
 		_buzzer_indicator.visible = true
 		_buzzer_indicator.text = "⚡ %s pulsó primero" % ShowConfig.get_team_name(state.buzzer_winner_team_id)

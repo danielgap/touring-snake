@@ -320,7 +320,6 @@ func reset_team_locks() -> void:
 	state.revealed_correct_option = ""
 	if not state.current_question.text.is_empty():
 		state.phase = Enums.GamePhase.QUESTION
-		state.answers_enabled = true
 		state.status_text = "Jugada reiniciada. Todos los equipos pueden volver a responder."
 	else:
 		state.status_text = "Bloqueos de equipos reiniciados."
@@ -809,6 +808,8 @@ func _publish_empty_presenter_state(message: String) -> void:
 	state.answer_feedback_status = 0
 	state.correction_applied = false
 	state.pending_score_delta = {}
+	state.answers_enabled = false
+	state.buzzer_winner_team_id = 0
 	AppState.apply_game_state(state)
 	_save_presenter_session()
 	_publish_state(state)
