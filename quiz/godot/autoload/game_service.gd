@@ -798,12 +798,20 @@ func _update_presenter_selector(round_name: String, question_id: int) -> void:
 
 
 func _publish_empty_presenter_state(message: String) -> void:
-	var empty_state: GameState = GameState.new()
-	empty_state.phase = Enums.GamePhase.IDLE
-	empty_state.status_text = message
-	AppState.apply_game_state(empty_state)
+	var state: GameState = AppState.current_state.duplicate_state()
+	state.phase = Enums.GamePhase.IDLE
+	state.status_text = message
+	state.current_question = Question.new()
+	state.current_minigame = MiniGame.new()
+	state.locked_team_id = 0
+	state.revealed_correct_option = ""
+	state.last_selected_option = ""
+	state.answer_feedback_status = 0
+	state.correction_applied = false
+	state.pending_score_delta = {}
+	AppState.apply_game_state(state)
 	_save_presenter_session()
-	_publish_state(empty_state)
+	_publish_state(state)
 
 
 func _apply_presenter_question(question: Question, status_text: String) -> void:
