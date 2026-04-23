@@ -5,6 +5,7 @@ extends Node
 ## Saves always go to user://show_config.json (survives re-exports)
 
 signal config_changed()
+signal team_count_changed(count: int)
 signal questions_file_changed(path: String)
 signal minigames_file_changed(path: String)
 signal images_folder_changed(path: String)
@@ -199,6 +200,56 @@ func set_buzzer_mode_enabled(value: bool) -> void:
 
 func get_raw_config() -> Dictionary:
 	return _config.duplicate(true)
+
+
+## Config keys that are broadcast from presenter to all devices.
+const BROADCAST_KEYS: PackedStringArray = [
+	"show_name", "subtitle", "team_count", "teams",
+	"points_correct", "points_incorrect", "buzzer_mode_enabled",
+]
+
+
+## Returns only the config values that should be broadcast to other devices.
+func get_broadcast_config() -> Dictionary:
+	var result: Dictionary = {}
+	for key: String in BROADCAST_KEYS:
+		if _config.has(key):
+			result[key] = _config[key]
+	return result
+
+
+## Applies config received from presenter via MQTT.
+## Only overwrites broadcastable keys — never touches local paths (mqtt_host, files).
+## Validates types to prevent malformed payloads from corrupting config.
+func apply_remote_config(remote: Dictionary) -> void:
+	if typeof(remote) != TYPE_DICTIONARY:
+		return
+	var changed: bool = false
+	var expected_types: Dictionary = {
+		"show_name": TYPE_STRING,
+		"subtitle": TYPE_STRING,
+		"team_count": TYPE_FLOAT,  # JSON numbers arrive as float in Godot
+		"teams": TYPE_ARRAY,
+		"points_correct": TYPE_FLOAT,
+		"points_incorrect": TYPE_FLOAT,
+		"buzzer_mode_enabled": TYPE_BOOL,
+	}
+	for key: String in BROADCAST_KEYS:
+		if not remote.has(key):
+			continue
+		var expected: int = expected_types.get(key, TYPE_NIL)
+		var value: Variant = remote[key]
+		# Accept int where float is expected (JSON deserialization variance)
+		if expected == TYPE_FLOAT and typeof(value) == TYPE_INT:
+			value = float(value)
+		if expected != TYPE_NIL and typeof(value) != expected:
+			push_warning("ShowConfig: remote config key '%s' has wrong type %d (expected %d) — skipped" % [key, typeof(value), expected])
+			continue
+		_config[key] = value
+		changed = true
+	if changed:
+		save_config()
+		emit_signal("team_count_changed", get_team_count())
 
 
 # ═══════════════════════════════════════════════════════════════════

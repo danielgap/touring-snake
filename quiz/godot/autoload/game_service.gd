@@ -21,6 +21,7 @@ var _used_minigame_ids: Dictionary = {}
 var _random: RandomNumberGenerator = RandomNumberGenerator.new()
 var _can_persist_presenter_session: bool = false
 var _pending_presenter_snapshot_publish: bool = false
+var _pending_config_publish: bool = false
 
 
 func _ready() -> void:
@@ -90,6 +91,10 @@ func initialize_role(role: int, team_id: int = 0) -> void:
 	MqttBus.subscribe_topic(MessageTopics.POINTS, COMMAND_QOS)
 	MqttBus.subscribe_topic(MessageTopics.TABLET_LOCK, COMMAND_QOS)
 	MqttBus.subscribe_topic(MessageTopics.BUZZER, COMMAND_QOS)
+	MqttBus.subscribe_topic(MessageTopics.CONFIG, COMMAND_QOS)
+	# Presenter broadcasts config to all devices on startup
+	if role == Enums.AppRole.PRESENTER:
+		publish_config()
 	emit_signal("role_initialized", role)
 
 
@@ -577,6 +582,20 @@ func submit_answer(option: String) -> void:
 	)
 
 
+func publish_config() -> void:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
+		return
+	if not MqttBus.is_broker_connected():
+		_pending_config_publish = true
+		return
+	MqttBus.publish_json(
+		MessageTopics.CONFIG,
+		ShowConfig.get_broadcast_config(),
+		SNAPSHOT_RETAIN,
+		SNAPSHOT_QOS
+	)
+
+
 func submit_buzzer() -> void:
 	if AppState.selected_role != Enums.AppRole.CONTESTANT:
 		return
@@ -692,6 +711,11 @@ func _on_mqtt_message_received(topic: String, payload: Variant) -> void:
 			AppState.apply_game_state(lock_state)
 		MessageTopics.BUZZER:
 			_on_buzzer_message(payload)
+		MessageTopics.CONFIG:
+			if AppState.selected_role == Enums.AppRole.PRESENTER:
+				return
+			if typeof(payload) == TYPE_DICTIONARY:
+				ShowConfig.apply_remote_config(payload)
 
 
 func _on_questions_loaded(_count: int) -> void:
@@ -897,9 +921,18 @@ func _publish_or_defer_presenter_state(state: GameState) -> void:
 
 
 func _on_mqtt_connected() -> void:
-	if AppState.selected_role != Enums.AppRole.PRESENTER or not _pending_presenter_snapshot_publish:
+	if AppState.selected_role != Enums.AppRole.PRESENTER:
 		return
-	_publish_state(AppState.current_state)
+	if _pending_presenter_snapshot_publish:
+		_publish_state(AppState.current_state)
+	if _pending_config_publish:
+		_pending_config_publish = false
+		MqttBus.publish_json(
+			MessageTopics.CONFIG,
+			ShowConfig.get_broadcast_config(),
+			SNAPSHOT_RETAIN,
+			SNAPSHOT_QOS
+		)
 
 
 func _sync_persisted_question_reference(state: GameState = AppState.current_state) -> void:
