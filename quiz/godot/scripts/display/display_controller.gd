@@ -63,6 +63,7 @@ const GLOW_ALPHA := 0.75                       # strong — perceived as ~0.25 a
 @onready var team_locks_label: Label = %TeamLocksLabel
 @onready var feedback_label: Label = %FeedbackLabel
 @onready var lock_label: Label = %LockLabel
+@onready var _bottom_bar: HBoxContainer = %BottomBar
 ## Dynamic nodes
 var _trivia_card: PanelContainer
 var _trivia_label: Label
@@ -107,9 +108,9 @@ func _ready() -> void:
 # ═══════════════════════════════════════════════════════════════════
 
 func _wire_config_values() -> void:
-	%T1Name.text = ShowConfig.get_team_short(1)
-	%T2Name.text = ShowConfig.get_team_short(2)
-	%T3Name.text = ShowConfig.get_team_short(3)
+	%T1Name.text = ShowConfig.get_team_name(1)
+	%T2Name.text = ShowConfig.get_team_name(2)
+	%T3Name.text = ShowConfig.get_team_name(3)
 
 
 func _on_config_changed() -> void:
@@ -154,7 +155,8 @@ func _apply_styles() -> void:
 	_style_option_card(opt_card_c, CARD_BG_DIM, CARD_BORDER, BORDER_NORMAL)
 	_style_option_card(opt_card_d, CARD_BG_DIM, CARD_BORDER, BORDER_NORMAL)
 
-	# Bottom bar — readable dim text
+	# Bottom bar — hide TeamLocksLabel (always redundant, score cards show team state)
+	team_locks_label.visible = false
 	team_locks_label.add_theme_color_override("font_color", TEXT_DIM)
 	feedback_label.add_theme_color_override("font_color", TEXT_DIM)
 	lock_label.add_theme_color_override("font_color", TEXT_DIM)
@@ -541,6 +543,8 @@ func _render_idle_scoreboard(state: GameState) -> void:
 		%ScoreCard2.visible = false
 		%ScoreCard3.visible = false
 		%PhaseCard.visible = false
+		# Hide BottomBar during IDLE — statuses are redundant
+		_bottom_bar.visible = false
 		var options_grid: Node = get_node_or_null("MarginContainer/RootVBox/CenterVBox/OptionsGrid")
 		if options_grid != null:
 			options_grid.visible = false
@@ -604,6 +608,8 @@ func _hide_idle_scoreboard() -> void:
 		var options_grid: Node = get_node_or_null("MarginContainer/RootVBox/CenterVBox/OptionsGrid")
 		if options_grid != null:
 			options_grid.visible = true
+		# Restore BottomBar visibility for non-IDLE phases
+		_bottom_bar.visible = true
 
 
 func _start_idle_pulse() -> void:
@@ -682,7 +688,6 @@ func _render_state(state: GameState) -> void:
 	_render_question(state, question_changed)
 	_render_options(state, phase_changed)
 	_render_score_cards(state)
-	_render_team_locks(state)
 	_render_feedback(state)
 	_render_lock_info(state)
 	_render_trivia(state)
@@ -690,6 +695,8 @@ func _render_state(state: GameState) -> void:
 	_render_question_images(state)
 	_render_minigame_images(state)
 	_render_idle_scoreboard(state)
+	# Minigame visibility runs LAST — it overrides idle scoreboard restore
+	_render_minigame_visibility(state)
 
 	if phase_changed and _prev_phase >= 0:
 		_animate_phase_transition(state)
@@ -750,6 +757,17 @@ func _render_phase(state: GameState) -> void:
 		phase_style.bg_color = Color(phase_color.r * 0.25, phase_color.g * 0.25, phase_color.b * 0.25, 1.0)
 		phase_style.shadow_color = Color(phase_color.r, phase_color.g, phase_color.b, 0.85)
 		phase_style.shadow_size = GLOW_SIZE + 8
+
+
+func _render_minigame_visibility(state: GameState) -> void:
+	if state.phase != Enums.GamePhase.MINIGAME or state.current_minigame.id <= 0:
+		return  # Only HIDE during minigame — never restore (other functions handle that)
+	%QuestionCard.visible = false
+	var options_grid: Node = get_node_or_null("MarginContainer/RootVBox/CenterVBox/OptionsGrid")
+	if options_grid != null:
+		options_grid.visible = false
+	if _trivia_card != null:
+		_trivia_card.visible = false
 
 
 func _render_question(state: GameState, animate: bool = false) -> void:
@@ -838,24 +856,18 @@ func _render_score_cards(state: GameState) -> void:
 		_update_score_card_style(3, %ScoreCard3, TEAM3_BG, TEAM3_COLOR, state)
 
 
-func _render_team_locks(state: GameState) -> void:
-	var parts: PackedStringArray = []
-	var count: int = ShowConfig.get_team_count()
-	for team_id in range(1, count + 1):
-		var lock_state: int = state.team_lock_state(team_id)
-		var status_text: String = "listo"
-		match lock_state:
-			Enums.TeamLockState.LOCKED_OUT:
-				status_text = "BLOQUEADO"
-			Enums.TeamLockState.ACTIVE:
-				status_text = "EN TURNO"
-			Enums.TeamLockState.FROZEN:
-				status_text = "EN PAUSA"
-		parts.append("%s: %s" % [ShowConfig.get_team_short(team_id), status_text])
-	team_locks_label.text = "  ·  ".join(parts)
+# TeamLocksLabel permanently hidden — score cards show team state
+# Kept as stub in case team lock display is needed in the future
+func _render_team_locks(_state: GameState) -> void:
+	pass
 
 
 func _render_feedback(state: GameState) -> void:
+	# During IDLE, no feedback needed — bottom bar is hidden anyway
+	if state.phase == Enums.GamePhase.IDLE:
+		feedback_label.text = ""
+		return
+
 	if state.locked_team_id <= 0:
 		feedback_label.text = "Aguardando respuesta..."
 		feedback_label.add_theme_color_override("font_color", TEXT_MUTED)

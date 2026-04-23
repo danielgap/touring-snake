@@ -37,6 +37,7 @@ layout_mode = 2
 theme_override_constants/separation = 16
 
 [node name="HeaderBar" type="HBoxContainer" parent="RootMargin/RootVBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 12
 

@@ -15,6 +15,7 @@ const TEXT_DIM := Color("#94a3b8")
 const ACCENT_BLUE := Color("#0ea5e9")
 
 ## ── Nodes ─────────────────────────────────────────────────────────
+@onready var _header_bar: HBoxContainer = %HeaderBar
 @onready var team_badge: PanelContainer = %TeamBadge
 @onready var team_name: Label = %TeamName
 @onready var status_badge: PanelContainer = %StatusBadge
@@ -449,6 +450,7 @@ func _render_state(state: GameState) -> void:
 	# ── Minigame content visibility ────────────────────────────────
 	if state.phase == Enums.GamePhase.MINIGAME and state.current_minigame.id > 0:
 		%QuestionCard.visible = false
+		answer_a.get_parent().visible = false  # AnswerButtons row
 		feedback_card.visible = false
 	elif state.phase != Enums.GamePhase.IDLE:
 		%QuestionCard.visible = true
@@ -967,7 +969,8 @@ func _render_idle_scoreboard(state: GameState) -> void:
 	if state.phase == Enums.GamePhase.IDLE and state.current_minigame.id <= 0:
 		_idle_scoreboard.visible = true
 
-		# Hide other content
+		# Hide other content — header, question, answers, feedback all redundant in IDLE
+		_header_bar.visible = false
 		%QuestionCard.visible = false
 		answer_a.get_parent().visible = false  # AnswerButtons row
 		feedback_card.visible = false
@@ -1017,7 +1020,8 @@ func _hide_idle_scoreboard() -> void:
 	if _idle_scoreboard.visible:
 		_stop_idle_pulse()
 		_idle_scoreboard.visible = false
-		# Restore content managed directly by the current game state render.
+		# Restore header and content
+		_header_bar.visible = true
 		%QuestionCard.visible = true
 		feedback_card.visible = true
 
