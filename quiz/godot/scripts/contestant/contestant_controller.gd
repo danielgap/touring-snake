@@ -54,6 +54,7 @@ var _idle_team_card: PanelContainer
 var _idle_team_name_label: Label
 var _idle_team_score_label: Label
 var _idle_pulse_tweens: Array[Tween] = []
+var _idle_logo_path_cache: String = ""
 
 ## ── Buzzer mode ────────────────────────────────────────────────────
 var _buzzer_button: Button
@@ -317,6 +318,7 @@ func _on_config_changed() -> void:
 	# Re-render idle scoreboard (show name, team names may have changed)
 	if AppState.current_state.phase == Enums.GamePhase.IDLE:
 		_render_idle_scoreboard(AppState.current_state)
+		_render_buzzer(AppState.current_state)
 
 
 func _render_state(state: GameState) -> void:
@@ -1004,17 +1006,19 @@ func _render_idle_scoreboard(state: GameState) -> void:
 		if _minigame_images_container != null:
 			_minigame_images_container.visible = false
 
-		# Logo
+		# Logo — cached to avoid disk read on every config change
 		var logo_path: String = ShowConfig.get_logo_path()
-		if not logo_path.is_empty():
-			var tex: Texture2D = ImageLoader.load_image_absolute(logo_path)
-			if tex != null:
-				_idle_logo_rect.texture = tex
-				_idle_logo_rect.visible = true
+		if logo_path != _idle_logo_path_cache:
+			_idle_logo_path_cache = logo_path
+			if not logo_path.is_empty():
+				var tex: Texture2D = ImageLoader.load_image_absolute(logo_path)
+				if tex != null:
+					_idle_logo_rect.texture = tex
+					_idle_logo_rect.visible = true
+				else:
+					_idle_logo_rect.visible = false
 			else:
 				_idle_logo_rect.visible = false
-		else:
-			_idle_logo_rect.visible = false
 
 		# Show name
 		_idle_show_name.text = ShowConfig.get_show_name()
@@ -1032,7 +1036,14 @@ func _render_idle_scoreboard(state: GameState) -> void:
 				style.shadow_color = Color(tc.r, tc.g, tc.b, 0.6)
 		_idle_team_card.visible = tid > 0
 
-		_start_idle_pulse()
+		# Pulse — only start if not already pulsing (avoids restart on config change)
+		var _has_active_pulse: bool = false
+		for tw: Tween in _idle_pulse_tweens:
+			if tw.is_valid():
+				_has_active_pulse = true
+				break
+		if not _has_active_pulse:
+			_start_idle_pulse()
 	else:
 		_hide_idle_scoreboard()
 

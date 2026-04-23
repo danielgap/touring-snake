@@ -82,6 +82,7 @@ var _idle_show_name: Label
 var _idle_team_cards: Array[PanelContainer] = []
 var _idle_standby: Label
 var _idle_pulse_tweens: Array[Tween] = []
+var _idle_logo_path_cache: String = ""
 
 ## ── Animation state ──────────────────────────────────────────────
 var _prev_phase: int = -1
@@ -560,17 +561,19 @@ func _render_idle_scoreboard(state: GameState) -> void:
 		if _minigame_images_container != null:
 			_minigame_images_container.visible = false
 
-		# Update logo
+		# Update logo — cached to avoid disk read on every config change
 		var logo_path: String = ShowConfig.get_logo_path()
-		if logo_path.is_empty():
-			_idle_logo_rect.visible = false
-		else:
-			var tex: Texture2D = ImageLoader.load_image_absolute(logo_path)
-			if tex != null:
-				_idle_logo_rect.texture = tex
-				_idle_logo_rect.visible = true
-			else:
+		if logo_path != _idle_logo_path_cache:
+			_idle_logo_path_cache = logo_path
+			if logo_path.is_empty():
 				_idle_logo_rect.visible = false
+			else:
+				var tex: Texture2D = ImageLoader.load_image_absolute(logo_path)
+				if tex != null:
+					_idle_logo_rect.texture = tex
+					_idle_logo_rect.visible = true
+				else:
+					_idle_logo_rect.visible = false
 
 		# Update show name
 		_idle_show_name.text = ShowConfig.get_show_name()
@@ -591,7 +594,14 @@ func _render_idle_scoreboard(state: GameState) -> void:
 					if score_label != null:
 						score_label.text = str(int(state.scores.get(team_id, 0)))
 
-		_start_idle_pulse()
+		# Pulse — only start if not already pulsing (avoids restart on config change)
+		var _has_active_pulse: bool = false
+		for tw: Tween in _idle_pulse_tweens:
+			if tw.is_valid():
+				_has_active_pulse = true
+				break
+		if not _has_active_pulse:
+			_start_idle_pulse()
 	else:
 		_hide_idle_scoreboard()
 
