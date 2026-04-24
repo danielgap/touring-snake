@@ -120,6 +120,11 @@ func _on_config_changed() -> void:
 	# Re-render idle scoreboard (show name, team names may have changed)
 	if AppState.current_state.phase == Enums.GamePhase.IDLE:
 		_render_idle_scoreboard(AppState.current_state)
+	# Re-render minigame card and images when config changes during MINIGAME phase
+	if AppState.current_state.phase == Enums.GamePhase.MINIGAME:
+		_render_minigame_card(AppState.current_state)
+		_prev_minigame_images = PackedStringArray()
+		_render_minigame_images(AppState.current_state)
 
 
 func _update_team_visibility() -> void:
@@ -299,7 +304,7 @@ func _render_question_images(state: GameState) -> void:
 func _render_minigame_images(state: GameState) -> void:
 	if _minigame_images_container == null:
 		return
-	var should_hide: bool = state.phase != Enums.GamePhase.MINIGAME or state.current_minigame.id <= 0
+	var should_hide: bool = state.phase != Enums.GamePhase.MINIGAME or state.current_minigame.id <= 0 or not ShowConfig.get_minigame_show_details()
 	var images: PackedStringArray = state.current_minigame.images if not should_hide else PackedStringArray()
 	if not should_hide and images.is_empty():
 		should_hide = true
@@ -664,8 +669,25 @@ func _render_minigame_card(state: GameState) -> void:
 		_minigame_card.visible = false
 		return
 	_minigame_card.visible = true
+
+	if not ShowConfig.get_minigame_show_details():
+		# Simple mode — just big "MINIJUEGO" text, hide all details
+		_minigame_title.text = "🎮 MINIJUEGO"
+		_minigame_title.add_theme_font_size_override("font_size", 72)
+		_minigame_desc.text = ""
+		_minigame_material.text = ""
+		_minigame_rules.text = ""
+		_minigame_meta.text = ""
+		if _minigame_images_container != null:
+			_minigame_images_container.visible = false
+		return
+
+	# Full details mode
+	if _minigame_images_container != null:
+		_minigame_images_container.visible = true
 	var mg: MiniGame = state.current_minigame
 	_minigame_title.text = "🎮 %s" % mg.nombre
+	_minigame_title.add_theme_font_size_override("font_size", 40)
 	_minigame_desc.text = mg.descripcion
 
 	if not mg.material.is_empty():
@@ -877,8 +899,8 @@ func _render_option_reveal(i: int, letter: String, card: PanelContainer, label: 
 		_style_option_card(card, Color("#451414"), PHASE_INCORRECT_COLOR, BORDER_THICK, PHASE_INCORRECT_COLOR, 20)
 		label.add_theme_color_override("font_color", TEXT_BRIGHT)
 	else:
-		# Not relevant — dim
-		_style_option_card(card, CARD_BG_DIM, CARD_BORDER, BORDER_NORMAL)
+		# Not relevant — dim BUT same border width to avoid layout shift
+		_style_option_card(card, CARD_BG_DIM, CARD_BORDER, BORDER_THICK)
 		label.add_theme_color_override("font_color", TEXT_DIM)
 
 
@@ -1028,14 +1050,11 @@ func _make_tween() -> Tween:
 	return tw
 
 
-## Question text — fade in + scale up when new question arrives
+## Question text — fade in when new question arrives (no scale to avoid layout shift)
 func _animate_question_in() -> void:
 	%QuestionCard.modulate.a = 0.0
-	%QuestionCard.scale = Vector2(0.95, 0.95)
 	var tw := _make_tween()
-	tw.set_parallel(true)
 	tw.tween_property(%QuestionCard, "modulate:a", 1.0, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.tween_property(%QuestionCard, "scale", Vector2(1.0, 1.0), 0.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 ## Option cards — staggered fade in when question phase starts
@@ -1053,53 +1072,47 @@ func _animate_options_stagger_in() -> void:
 	var cards: Array[PanelContainer] = [opt_card_a, opt_card_b, opt_card_c, opt_card_d]
 	for i in range(4):
 		cards[i].modulate.a = 0.0
-		cards[i].scale = Vector2(0.9, 0.9)
 	var tw := _make_tween()
 	for i in range(4):
 		tw.set_parallel(false)
 		tw.tween_interval(0.08 * i)
 		tw.set_parallel(true)
 		tw.tween_property(cards[i], "modulate:a", 1.0, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tw.tween_property(cards[i], "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tw.set_parallel(false)
 
 
-## Selected option — pulse + scale bump
+## Selected option — brightness flash (no scale to avoid layout shift)
 func _animate_option_selected(state: GameState) -> void:
 	var selected_letter: String = state.last_selected_option.to_upper()
 	var cards_map: Dictionary = {"A": opt_card_a, "B": opt_card_b, "C": opt_card_c, "D": opt_card_d}
 	var card: PanelContainer = cards_map.get(selected_letter)
 	if not card:
 		return
-	# Pulse: scale up then back
-	card.scale = Vector2(1.08, 1.08)
+	card.modulate.a = 0.4
 	var tw := _make_tween()
-	tw.tween_property(card, "scale", Vector2(1.0, 1.0), 0.4).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(card, "modulate.a", 1.0, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
-## Reveal — correct option gets a dramatic pulse, wrong gets a shake
+## Reveal — correct option gets a brightness pulse, wrong gets a flash (NO size/position changes)
 func _animate_reveal(state: GameState) -> void:
 	var selected_letter: String = state.last_selected_option.to_upper()
 	var correct_letter: String = state.revealed_correct_option.to_upper()
 	var cards_map: Dictionary = {"A": opt_card_a, "B": opt_card_b, "C": opt_card_c, "D": opt_card_d}
 
-	# Correct answer — big scale pulse
+	# Correct answer — brightness pulse (modulate only, no scale = no layout shift)
 	var correct_card: PanelContainer = cards_map.get(correct_letter)
 	if correct_card:
-		correct_card.scale = Vector2(0.9, 0.9)
+		correct_card.modulate.a = 0.3
 		var tw := _make_tween()
-		tw.tween_property(correct_card, "scale", Vector2(1.06, 1.06), 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tw.tween_property(correct_card, "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		tw.tween_property(correct_card, "modulate.a", 1.0, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
-	# Wrong answer — horizontal shake
+	# Wrong answer — quick flash (modulate only, no position change)
 	if selected_letter != correct_letter:
 		var wrong_card: PanelContainer = cards_map.get(selected_letter)
 		if wrong_card:
+			wrong_card.modulate.a = 0.3
 			var tw2 := _make_tween()
-			tw2.tween_property(wrong_card, "position:x", wrong_card.position.x + 8, 0.05)
-			tw2.tween_property(wrong_card, "position:x", wrong_card.position.x - 8, 0.05)
-			tw2.tween_property(wrong_card, "position:x", wrong_card.position.x + 4, 0.05)
-			tw2.tween_property(wrong_card, "position:x", wrong_card.position.x, 0.05)
+			tw2.tween_property(wrong_card, "modulate.a", 1.0, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 	# Phase card flash — brighten then settle
 	%PhaseCard.modulate.a = 0.5
@@ -1107,7 +1120,7 @@ func _animate_reveal(state: GameState) -> void:
 	tw3.tween_property(%PhaseCard, "modulate:a", 1.0, 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
-## Score pulse — scale up and back when score changes
+## Score pulse — brightness flash when score changes (no scale to avoid layout shift)
 func _animate_score_pulse(team_id: int) -> void:
 	var score_label: Label
 	match team_id:
@@ -1115,6 +1128,6 @@ func _animate_score_pulse(team_id: int) -> void:
 		2: score_label = t2_score
 		3: score_label = t3_score
 		_: return
-	score_label.scale = Vector2(1.4, 1.4)
+	score_label.modulate.a = 0.3
 	var tw := _make_tween()
-	tw.tween_property(score_label, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(score_label, "modulate.a", 1.0, 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

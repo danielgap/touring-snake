@@ -152,7 +152,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 custom_minimum_size = Vector2(0, 36)
-placeholder_text = "127.0.0.1"
+placeholder_text = "192.168.1.156"
 
 [node name="MqttPortSpin" type="SpinBox" parent="SettingsPanel/Margin/MainVBox/TabContainer/ShowScroll/Show/MqttRow"]
 unique_name_in_owner = true
@@ -184,6 +184,27 @@ theme_override_colors/font_color = Color(0.45, 0.48, 0.52, 1)
 text = "Pulsador virtual en tablets (alternativa a ESP32)"
 autowrap_mode = 2
 
+[node name="MgDetailsSeparator" type="HSeparator" parent="SettingsPanel/Margin/MainVBox/TabContainer/ShowScroll/Show"]
+layout_mode = 2
+
+[node name="MgDetailsRow" type="HBoxContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer/ShowScroll/Show"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MgDetailsCheck" type="CheckBox" parent="SettingsPanel/Margin/MainVBox/TabContainer/ShowScroll/Show/MgDetailsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Mostrar detalles del minijuego"
+
+[node name="MgDetailsHelp" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/ShowScroll/Show/MgDetailsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.45, 0.48, 0.52, 1)
+text = "Desactivado: solo muestra \"MINIJUEGO\" en pantalla"
+autowrap_mode = 2
+
 [node name="EquiposScroll" type="ScrollContainer" parent="SettingsPanel/Margin/MainVBox/TabContainer"]
 layout_mode = 2
 horizontal_scroll_mode = 0
@@ -209,7 +230,7 @@ custom_minimum_size = Vector2(0, 36)
 min_value = 2.0
 max_value = 3.0
 step = 1.0
-value = 3.0
+value = 2.0
 
 [node name="TeamsLabel" type="Label" parent="SettingsPanel/Margin/MainVBox/TabContainer/EquiposScroll/Equipos"]
 layout_mode = 2

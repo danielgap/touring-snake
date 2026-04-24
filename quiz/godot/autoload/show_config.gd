@@ -89,21 +89,21 @@ func _get_hardcoded_defaults() -> Dictionary:
 	return {
 		"show_name": "Palencia Quiz Battle",
 		"subtitle": "",
-		"team_count": 3,
+		"team_count": 2,
 		"teams": [
 			{"id": 1, "name": "Equipo 1", "color": "#3b82f6"},
 			{"id": 2, "name": "Equipo 2", "color": "#f59e0b"},
-			{"id": 3, "name": "Equipo 3", "color": "#ef4444"},
 		],
 		"points_correct": 100,
 		"points_incorrect": 0,
 		"questions_file": "res://data/preguntas.json",
 		"minigames_file": "res://data/minijuegos.json",
-		"mqtt_host": "127.0.0.1",
+		"mqtt_host": "192.168.1.156",
 		"mqtt_port": 1883,
 		"images_folder": "",
 		"logo_path": "",
 		"buzzer_mode_enabled": false,
+		"minigame_show_details": false,
 	}
 
 
@@ -120,7 +120,7 @@ func get_subtitle() -> String:
 
 
 func get_team_count() -> int:
-	return int(_config.get("team_count", 3))
+	return int(_config.get("team_count", 2))
 
 
 func get_team_name(team_id: int) -> String:
@@ -164,7 +164,7 @@ func get_minigames_file() -> String:
 
 
 func get_mqtt_host() -> String:
-	return String(_config.get("mqtt_host", "127.0.0.1"))
+	return String(_config.get("mqtt_host", "192.168.1.156"))
 
 
 func get_mqtt_port() -> int:
@@ -198,6 +198,14 @@ func set_buzzer_mode_enabled(value: bool) -> void:
 	_config["buzzer_mode_enabled"] = value
 
 
+func get_minigame_show_details() -> bool:
+	return bool(_config.get("minigame_show_details", false))
+
+
+func set_minigame_show_details(value: bool) -> void:
+	_config["minigame_show_details"] = value
+
+
 func get_raw_config() -> Dictionary:
 	return _config.duplicate(true)
 
@@ -206,6 +214,7 @@ func get_raw_config() -> Dictionary:
 const BROADCAST_KEYS: PackedStringArray = [
 	"show_name", "subtitle", "team_count", "teams",
 	"points_correct", "points_incorrect", "buzzer_mode_enabled",
+	"minigame_show_details",
 ]
 
 
@@ -234,6 +243,7 @@ func apply_remote_config(remote: Dictionary) -> void:
 		"points_correct": TYPE_FLOAT,
 		"points_incorrect": TYPE_FLOAT,
 		"buzzer_mode_enabled": TYPE_BOOL,
+		"minigame_show_details": TYPE_BOOL,
 	}
 	for key: String in BROADCAST_KEYS:
 		if not remote.has(key):

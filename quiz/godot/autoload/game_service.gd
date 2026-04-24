@@ -5,7 +5,7 @@ signal answer_received(team_id: int, option: String)
 signal presenter_selector_changed(round_name: String, question_id: int)
 signal presenter_minigame_selector_changed(minigame_id: int)
 signal used_questions_changed()
-const MQTT_HOST: String = "127.0.0.1"
+const MQTT_HOST: String = "192.168.1.156"
 const MQTT_PORT: int = 1883
 const SNAPSHOT_QOS: int = 1
 const COMMAND_QOS: int = 1

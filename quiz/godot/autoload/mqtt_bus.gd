@@ -6,7 +6,7 @@ signal connection_error(reason: String)
 signal adapter_missing()
 signal message_received(topic: String, payload: Variant)
 
-const DEFAULT_HOST: String = "127.0.0.1"
+const DEFAULT_HOST: String = "192.168.1.156"
 const DEFAULT_PORT: int = 1883
 
 var _adapter: Node = null

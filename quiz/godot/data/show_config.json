@@ -1,11 +1,10 @@
 {
   "show_name": "Quiz Offline",
   "subtitle": "",
-  "team_count": 3,
+  "team_count": 2,
   "teams": [
     {"id": 1, "name": "Equipo 1", "color": "#3b82f6"},
-    {"id": 2, "name": "Equipo 2", "color": "#f59e0b"},
-    {"id": 3, "name": "Equipo 3", "color": "#ef4444"}
+    {"id": 2, "name": "Equipo 2", "color": "#f59e0b"}
   ],
   "points_correct": 100,
   "points_incorrect": 0,
@@ -15,5 +14,6 @@
   "mqtt_port": 1883,
   "images_folder": "",
   "logo_path": "",
-  "buzzer_mode_enabled": true
+  "buzzer_mode_enabled": false,
+  "minigame_show_details": false
 }
