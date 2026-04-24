@@ -32,6 +32,24 @@ func _ready() -> void:
 	team3_btn.pressed.connect(func() -> void: _on_team_pressed(3))
 	display_button.pressed.connect(_on_display_pressed)
 	ShowConfig.config_changed.connect(_on_config_changed)
+	_setup_focus_navigation()
+
+
+func _setup_focus_navigation() -> void:
+	# D-pad navigation: left/right between 3 cards
+	# Presenter ← → Team1 ← → Team2 ← → Team3 ← → Display
+	presenter_button.focus_neighbor_left = display_button.get_path()
+	presenter_button.focus_neighbor_right = team1_btn.get_path()
+	team1_btn.focus_neighbor_left = presenter_button.get_path()
+	team1_btn.focus_neighbor_right = team2_btn.get_path()
+	team2_btn.focus_neighbor_left = team1_btn.get_path()
+	team2_btn.focus_neighbor_right = team3_btn.get_path()
+	team3_btn.focus_neighbor_left = team2_btn.get_path()
+	team3_btn.focus_neighbor_right = display_button.get_path()
+	display_button.focus_neighbor_left = team3_btn.get_path()
+	display_button.focus_neighbor_right = presenter_button.get_path()
+	# Auto-focus first button for D-pad / remote control
+	presenter_button.grab_focus()
 
 
 func _wire_config_values() -> void:
@@ -134,8 +152,10 @@ func _apply_entry_button(btn: Button, accent: Color) -> void:
 	btn.add_theme_stylebox_override("normal", normal)
 	btn.add_theme_stylebox_override("hover", hover)
 	btn.add_theme_stylebox_override("pressed", hover)
+	btn.add_theme_stylebox_override("focused", hover)
 	btn.add_theme_color_override("font_color", accent)
 	btn.add_theme_color_override("font_hover_color", Color("#ffffff"))
+	btn.add_theme_color_override("font_focus_color", Color("#ffffff"))
 
 
 func _apply_team_button(btn: Button, team_color: Color) -> void:
@@ -160,8 +180,10 @@ func _apply_team_button(btn: Button, team_color: Color) -> void:
 	btn.add_theme_stylebox_override("normal", normal)
 	btn.add_theme_stylebox_override("hover", hover)
 	btn.add_theme_stylebox_override("pressed", hover)
+	btn.add_theme_stylebox_override("focused", hover)
 	btn.add_theme_color_override("font_color", team_color)
 	btn.add_theme_color_override("font_hover_color", Color("#ffffff"))
+	btn.add_theme_color_override("font_focus_color", Color("#ffffff"))
 
 
 # ═══════════════════════════════════════════════════════════════════
