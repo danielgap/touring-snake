@@ -40,7 +40,6 @@ const MG_IMPORT_DEST: String = "user://minijuegos_imported.json"
 @onready var logo_path_browse_btn: Button = %LogoPathBrowseBtn
 @onready var logo_file_dialog: FileDialog = %LogoFileDialog
 @onready var buzzer_check: CheckBox = %BuzzerCheck
-@onready var mg_details_check: CheckBox = %MgDetailsCheck
 
 
 func _ready() -> void:
@@ -91,8 +90,6 @@ func _load_config_to_ui() -> void:
 
 	buzzer_check.button_pressed = ShowConfig.get_buzzer_mode_enabled()
 
-	mg_details_check.button_pressed = ShowConfig.get_minigame_show_details()
-
 	team_count_spin.set_block_signals(false)
 	_rebuild_teams_ui()
 
@@ -119,7 +116,6 @@ func _save_and_close() -> void:
 	ShowConfig.set_images_folder(images_folder_edit.text)
 	ShowConfig.set_logo_path(logo_path_edit.text)
 	ShowConfig.set_buzzer_mode_enabled(buzzer_check.button_pressed)
-	ShowConfig.set_minigame_show_details(mg_details_check.button_pressed)
 	ShowConfig.save_config()
 	hide_settings()
 

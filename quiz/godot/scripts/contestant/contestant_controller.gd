@@ -319,11 +319,6 @@ func _on_config_changed() -> void:
 	if AppState.current_state.phase == Enums.GamePhase.IDLE:
 		_render_idle_scoreboard(AppState.current_state)
 		_render_buzzer(AppState.current_state)
-	# Re-render minigame card and images when config changes during MINIGAME phase
-	if AppState.current_state.phase == Enums.GamePhase.MINIGAME:
-		_render_minigame_card(AppState.current_state)
-		_prev_minigame_images = PackedStringArray()
-		_render_minigame_images(AppState.current_state)
 
 
 func _render_state(state: GameState) -> void:
@@ -699,6 +694,10 @@ func _render_minigame_card(state: GameState) -> void:
 		_mg_card.visible = false
 		return
 	_mg_card.visible = true
+	var mg: MiniGame = state.current_minigame
+	_mg_title.text = "🎮 %s" % mg.nombre
+	_mg_desc.text = mg.descripcion
+	_mg_meta.text = "⏱ %ds" % mg.tiempo
 
 	# Re-style with current team colors
 	var style := StyleBoxFlat.new()
@@ -711,25 +710,6 @@ func _render_minigame_card(state: GameState) -> void:
 	_mg_card.add_theme_stylebox_override("panel", style)
 	_mg_title.add_theme_color_override("font_color", _team_color)
 
-	if not ShowConfig.get_minigame_show_details():
-		# Simple mode — just big "MINIJUEGO" text, hide all details
-		_mg_title.text = "🎮 MINIJUEGO"
-		_mg_title.add_theme_font_size_override("font_size", 52)
-		_mg_desc.text = ""
-		_mg_meta.text = ""
-		if _minigame_images_container != null:
-			_minigame_images_container.visible = false
-		return
-
-	# Full details mode
-	if _minigame_images_container != null:
-		_minigame_images_container.visible = true
-	var mg: MiniGame = state.current_minigame
-	_mg_title.text = "🎮 %s" % mg.nombre
-	_mg_title.add_theme_font_size_override("font_size", 32)
-	_mg_desc.text = mg.descripcion
-	_mg_meta.text = "⏱ %ds" % mg.tiempo
-
 
 # ═══════════════════════════════════════════════════════════════════
 #  Tween animations (tablet 10" — polished but not overpowering)
@@ -740,23 +720,28 @@ func _make_tween() -> Tween:
 	return tw
 
 
-## Question card — fade in (no scale to avoid layout shift)
+## Question card — fade + scale in
 func _animate_question_in() -> void:
 	%QuestionCard.modulate.a = 0.0
+	%QuestionCard.scale = Vector2(0.96, 0.96)
 	var tw := _make_tween()
+	tw.set_parallel(true)
 	tw.tween_property(%QuestionCard, "modulate:a", 1.0, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(%QuestionCard, "scale", Vector2(1.0, 1.0), 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
-## Answer buttons — staggered fade-in when enabled (no scale to avoid layout shift)
+## Answer buttons — staggered scale-in when enabled
 func _animate_buttons_enabled() -> void:
 	var buttons: Array[Button] = [answer_a, answer_b, answer_c, answer_d]
 	for btn: Button in buttons:
+		btn.scale = Vector2(0.85, 0.85)
 		btn.modulate.a = 0.3
 	var tw := _make_tween()
 	for i in range(4):
 		tw.set_parallel(false)
 		tw.tween_interval(0.05)
 		tw.set_parallel(true)
+		tw.tween_property(buttons[i], "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tw.tween_property(buttons[i], "modulate:a", 1.0, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.set_parallel(false)
 
@@ -775,24 +760,33 @@ func _animate_buttons_disabled() -> void:
 	tw.set_parallel(false)
 
 
-## Status badge flash when answer is locked (no scale to avoid layout shift)
+## Status badge pulse when answer is locked
 func _animate_answer_locked() -> void:
-	%StatusBadge.modulate.a = 0.3
+	%StatusBadge.scale = Vector2(1.15, 1.15)
 	var tw := _make_tween()
-	tw.tween_property(%StatusBadge, "modulate.a", 1.0, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(%StatusBadge, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
 
-## Feedback card — dramatic reveal on correct/incorrect (no scale to avoid layout shift)
+## Feedback card — dramatic reveal on correct/incorrect
 func _animate_reveal_feedback(state: GameState) -> void:
 	var team_id: int = AppState.selected_team_id
 	var is_correct: bool = state.locked_team_id == team_id and state.answer_feedback_status == Enums.AnswerFeedbackStatus.CORRECT
 	var is_incorrect: bool = state.locked_team_id == team_id and state.answer_feedback_status == Enums.AnswerFeedbackStatus.INCORRECT
 
 	if is_correct or is_incorrect:
-		# Dramatic flash (modulate only, no scale = no layout shift)
+		# Dramatic scale bounce + flash
 		feedback_card.modulate.a = 0.0
+		feedback_card.scale = Vector2(0.8, 0.8)
+		var flash_color: Color = STATUS_ACTIVE if is_correct else STATUS_LOCKED
 		var tw := _make_tween()
-		tw.tween_property(feedback_card, "modulate.a", 1.0, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.set_parallel(true)
+		tw.tween_property(feedback_card, "modulate:a", 1.0, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(feedback_card, "scale", Vector2(1.08, 1.08), 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		# Then settle to 1.0
+		var tw2 := _make_tween()
+		tw2.tween_interval(0.35)
+		tw2.set_parallel(false)
+		tw2.tween_property(feedback_card, "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 
 		# Flash the answer buttons too — but keep correct button at full alpha
 		var correct_letter: String = state.revealed_correct_option.to_upper()
@@ -805,18 +799,21 @@ func _animate_reveal_feedback(state: GameState) -> void:
 				btn.modulate.a = 1.0
 			else:
 				btn.modulate.a = 0.3
-				tw3.tween_property(btn, "modulate.a", 0.6, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+				tw3.tween_property(btn, "modulate:a", 0.6, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	else:
-		# Standard reveal — gentler animation (modulate only)
+		# Standard reveal — gentler animation
 		feedback_card.modulate.a = 0.0
+		feedback_card.scale = Vector2(0.95, 0.95)
 		var tw := _make_tween()
-		tw.tween_property(feedback_card, "modulate.a", 1.0, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.set_parallel(true)
+		tw.tween_property(feedback_card, "modulate:a", 1.0, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(feedback_card, "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
-	# If this team answered, flash team badge (no scale)
+	# If this team answered, pulse team badge
 	if state.locked_team_id == team_id:
-		team_badge.modulate.a = 0.3
+		team_badge.scale = Vector2(1.15, 1.15)
 		var tw2 := _make_tween()
-		tw2.tween_property(team_badge, "modulate.a", 1.0, 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw2.tween_property(team_badge, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -859,7 +856,7 @@ func _render_question_images(state: GameState) -> void:
 func _render_minigame_images(state: GameState) -> void:
 	if _minigame_images_container == null:
 		return
-	var should_hide: bool = state.phase != Enums.GamePhase.MINIGAME or state.current_minigame.id <= 0 or not ShowConfig.get_minigame_show_details()
+	var should_hide: bool = state.phase != Enums.GamePhase.MINIGAME or state.current_minigame.id <= 0
 	var images: PackedStringArray = state.current_minigame.images if not should_hide else PackedStringArray()
 	if not should_hide and images.is_empty():
 		should_hide = true
